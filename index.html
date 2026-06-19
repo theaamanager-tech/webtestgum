@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Novaciy° — Dashboard Produk Digital</title>
+  <meta name="description" content="Dashboard penjualan produk digital premium: CapCut Pro, ChatGPT Plus, Canva Pro, dan lainnya." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="brand-name">nova<em>ciy</em><sup>°</sup></span>
+      </div>
+
+      <nav class="nav">
+        <span class="nav-label">Menu</span>
+        <a class="nav-item active" href="#"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+        <a class="nav-item" href="#products"><i data-lucide="shopping-bag"></i> Produk</a>
+        <a class="nav-item" href="#"><i data-lucide="receipt-text"></i> Pesanan</a>
+        <a class="nav-item" href="#"><i data-lucide="wallet"></i> Saldo</a>
+        <a class="nav-item" href="#"><i data-lucide="bar-chart-3"></i> Laporan</a>
+
+        <span class="nav-label">Akun</span>
+        <a class="nav-item" href="#"><i data-lucide="settings"></i> Pengaturan</a>
+        <a class="nav-item" href="#"><i data-lucide="life-buoy"></i> Bantuan</a>
+        <a class="nav-item" href="admin.html"><i data-lucide="shield"></i> Admin Panel</a>
+      </nav>
+
+      <div class="upgrade-card">
+        <p>Jadi <em>Reseller</em> &amp; dapatkan harga modal terbaik.</p>
+        <button class="btn btn-light btn-sm">Daftar Reseller</button>
+      </div>
+    </aside>
+
+    <!-- ============ MAIN ============ -->
+    <main class="main">
+      <!-- topbar -->
+      <header class="topbar">
+        <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Menu"><i data-lucide="menu"></i></button>
+        <div class="search">
+          <i data-lucide="search"></i>
+          <input type="text" id="searchInput" placeholder="Cari produk… (CapCut, ChatGPT, Canva)" />
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" aria-label="Notifikasi"><i data-lucide="bell"></i><span class="dot"></span></button>
+          <button class="cart-btn" id="cartBtn">
+            <i data-lucide="shopping-cart"></i>
+            <span class="cart-count" id="cartCount">0</span>
+          </button>
+          <div class="user">
+            <img src="https://i.pravatar.cc/80?img=12" alt="User" />
+            <div class="user-meta">
+              <strong>Jodi</strong>
+              <span>Admin</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- hero / greeting -->
+      <section class="hero">
+        <span class="eyebrow">© Toko Produk Digital — garansi &amp; terpercaya</span>
+        <h1>Halo,<br><em>Jodi.</em></h1>
+        <p>Kelola &amp; jual produk digital premium dengan harga terbaik. Pilih variasi, masukkan keranjang, selesai.</p>
+      </section>
+
+      <!-- stats -->
+      <section class="stats">
+        <article class="stat-card">
+          <span class="stat-value">06</span><span class="stat-label">Produk Aktif</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-value">1.248</span><span class="stat-label">Terjual</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-value">920</span><span class="stat-label">Pelanggan</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-value">4.9</span><span class="stat-label">Rating Toko</span>
+        </article>
+      </section>
+
+      <!-- products -->
+      <section id="products" class="section-head">
+        <h2>Katalog <em>Produk</em></h2>
+        <div class="filters" id="filters">
+          <button class="chip active" data-filter="all">Semua</button>
+          <button class="chip" data-filter="editing">Editing</button>
+          <button class="chip" data-filter="ai">AI Tools</button>
+          <button class="chip" data-filter="account">Akun</button>
+        </div>
+      </section>
+
+      <div class="grid" id="productGrid"><!-- injected by app.js --></div>
+    </main>
+  </div>
+
+  <!-- ============ CART DRAWER ============ -->
+  <div class="overlay" id="overlay"></div>
+  <aside class="cart-drawer" id="cartDrawer">
+    <div class="cart-head">
+      <h3><i data-lucide="shopping-cart"></i> Keranjang</h3>
+      <button class="icon-btn" id="cartClose" aria-label="Tutup"><i data-lucide="x"></i></button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-foot">
+      <div class="cart-total">
+        <span>Total</span>
+        <strong id="cartTotal">Rp 0</strong>
+      </div>
+      <button class="btn btn-light btn-block" id="checkoutBtn"><i data-lucide="arrow-right"></i> Checkout</button>
+    </div>
+  </aside>
+
+  <!-- toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
