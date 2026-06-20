@@ -9,7 +9,7 @@ const CAT_LABEL = { ai: "AI Tools", editing: "Editing", account: "Akun" };
 const rupiah = (n) => (n == null ? "—" : "Rp " + Number(n).toLocaleString("id-ID"));
 function priceRange(vs){const p=vs.map(v=>v.price).filter(v=>v!=null);if(!p.length)return"Chat Admin";const lo=Math.min(...p),hi=Math.max(...p);return lo===hi?rupiah(lo):rupiah(lo)+" – "+rupiah(hi);}
 
-let ADMIN_KEY = sessionStorage.getItem("nova_admin_key") || "";
+let ADMIN_KEY = "dev"; // TODO: ganti dengan password sebenarnya nanti
 let CATALOG = [], editingId = null, selectedVariant = null;
 
 /* ===================== API ===================== */

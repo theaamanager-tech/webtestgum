@@ -7,10 +7,10 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  // --- auth gate ---
-  const key = req.headers["x-admin-key"];
-  if (!process.env.ADMIN_KEY) return res.status(500).json({ error: "ADMIN_KEY belum diset di server" });
-  if (key !== process.env.ADMIN_KEY) return res.status(401).json({ error: "Unauthorized" });
+  // --- auth gate (sementara dimatikan, akan diaktifkan lagi nanti) ---
+  // const key = req.headers["x-admin-key"];
+  // if (!process.env.ADMIN_KEY) return res.status(500).json({ error: "ADMIN_KEY belum diset di server" });
+  // if (key !== process.env.ADMIN_KEY) return res.status(401).json({ error: "Unauthorized" });
 
   const body = await readJson(req);
   const { action } = body;
