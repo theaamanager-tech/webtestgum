@@ -221,11 +221,19 @@
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-3 z-[70] glass border border-mint/10 rounded-full px-5 py-3 text-sm font-medium flex items-center gap-2 opacity-0 pointer-events-none transition"></div>
 
   <!-- ============ FLOATING SOCIAL BUTTON ============ -->
-  <div id="socFloat" class="fixed bottom-6 right-6 z-[65] hidden flex-col items-end gap-3">
-    <div id="socFloatPopout" class="hidden flex-col gap-2 mb-2">
-      <!-- injected by JS -->
+  <div id="socFloat" class="fixed bottom-6 right-6 z-[65] hidden flex-col items-end">
+    <div id="socFloatPopout" class="flex flex-col gap-2 mb-3 pointer-events-none" style="opacity:0;transform:translateY(8px) scale(0.95);transition:opacity .2s ease,transform .2s ease">
+      <a id="socWa" target="_blank" rel="noopener" class="soc-item hidden items-center gap-3 px-4 py-3 rounded-2xl glass border border-mint/10 bg-green-500/15 text-green-400 hover:bg-green-500/25 text-sm font-medium whitespace-nowrap transition-all duration-200 hover:scale-105 translate-y-2 opacity-0" style="transition-delay:0ms"><i data-lucide="message-circle" class="w-[18px] shrink-0"></i><span>WhatsApp</span></a>
+
+      <a id="socTeleChannel" target="_blank" rel="noopener" class="soc-item hidden items-center gap-3 px-4 py-3 rounded-2xl glass border border-mint/10 bg-sky-500/15 text-sky-400 hover:bg-sky-500/25 text-sm font-medium whitespace-nowrap transition-all duration-200 hover:scale-105 translate-y-2 opacity-0" style="transition-delay:60ms"><i data-lucide="send" class="w-[18px] shrink-0"></i><span>Telegram Channel</span></a>
+
+      <a id="socTeleBot" target="_blank" rel="noopener" class="soc-item hidden items-center gap-3 px-4 py-3 rounded-2xl glass border border-mint/10 bg-sky-500/15 text-sky-400 hover:bg-sky-500/25 text-sm font-medium whitespace-nowrap transition-all duration-200 hover:scale-105 translate-y-2 opacity-0" style="transition-delay:120ms"><i data-lucide="message-square" class="w-[18px] shrink-0"></i><span>Telegram Bot</span></a>
+
+      <a id="socX" target="_blank" rel="noopener" class="soc-item hidden items-center gap-3 px-4 py-3 rounded-2xl glass border border-mint/10 bg-zinc-500/15 text-zinc-300 hover:bg-zinc-500/25 text-sm font-medium whitespace-nowrap transition-all duration-200 hover:scale-105 translate-y-2 opacity-0" style="transition-delay:180ms"><i data-lucide="twitter" class="w-[18px] shrink-0"></i><span>X (Twitter)</span></a>
+
+      <a id="socIg" target="_blank" rel="noopener" class="soc-item hidden items-center gap-3 px-4 py-3 rounded-2xl glass border border-mint/10 bg-pink-500/15 text-pink-400 hover:bg-pink-500/25 text-sm font-medium whitespace-nowrap transition-all duration-200 hover:scale-105 translate-y-2 opacity-0" style="transition-delay:240ms"><i data-lucide="camera" class="w-[18px] shrink-0"></i><span>Instagram</span></a>
     </div>
-    <button id="socFloatBtn" class="w-14 h-14 rounded-full bg-jadebright text-ink shadow-lg shadow-jade/30 grid place-items-center hover:brightness-110 transition active:scale-90 relative">
+    <button id="socFloatBtn" class="soc-trigger w-14 h-14 rounded-full bg-jadebright text-ink shadow-lg shadow-jade/30 grid place-items-center hover:brightness-110 transition active:scale-90 relative">
       <i data-lucide="message-circle" class="w-7" id="socFloatIcon"></i>
     </button>
   </div>

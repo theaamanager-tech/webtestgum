@@ -256,12 +256,10 @@
           </div>
 
           <div class="flex flex-col gap-4">
+            <!-- SOCIAL MEDIA CARD -->
             <div class="glass border border-mint/10 rounded-2xl p-6">
-              <h3 class="text-white font-semibold mb-4"><i data-lucide="life-buoy" class="w-5 text-jadebright inline"></i> Pengaturan Bantuan</h3>
-
-              <!-- Sosial Media -->
-              <h4 class="text-white text-sm font-medium flex items-center gap-2 mb-3 mt-2"><i data-lucide="share-2" class="w-4 text-jadebright"></i> Sosial Media &amp; Kontak</h4>
-              <p class="text-xs text-mint/50 mb-3">Tombol sosial media akan muncul di halaman toko bagian Bantuan dan floating di pojok kanan bawah.</p>
+              <h3 class="text-white font-semibold mb-4"><i data-lucide="share-2" class="w-5 text-jadebright inline"></i> Sosial Media &amp; Kontak</h3>
+              <p class="text-xs text-mint/50 mb-4">Tombol sosial media akan muncul di halaman toko (floating pojok kanan bawah & drawer Bantuan).</p>
 
               <div class="glass border border-mint/10 rounded-xl p-3 mb-3">
                 <label class="flex items-center gap-2 text-sm mb-2"><input id="sWaActive" type="checkbox" class="accent-jadebright" /> <i data-lucide="message-circle" class="w-4 text-jadebright"></i> Tampilkan WhatsApp</label>
@@ -293,12 +291,12 @@
                 <label class="block text-xs text-mint/60">Link Profile Instagram<input id="sIgLink" type="text" placeholder="https://instagram.com/username" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2 outline-none focus:border-jadebright text-sm" /></label>
               </div>
 
-              <button id="saveSocBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition mb-5"><i data-lucide="save" class="w-4 inline"></i> Simpan Sosial Media</button>
+              <button id="saveSocBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan Sosial Media</button>
+            </div>
 
-              <hr class="border-mint/10 mb-4" />
-
-              <!-- Kontak Admin & FAQ -->
-              <h4 class="text-white text-sm font-medium flex items-center gap-2 mb-3"><i data-lucide="message-circle" class="w-4 text-jadebright"></i> Kontak Admin &amp; FAQ</h4>
+            <!-- KONTAK ADMIN & FAQ CARD -->
+            <div class="glass border border-mint/10 rounded-2xl p-6">
+              <h3 class="text-white font-semibold mb-4"><i data-lucide="life-buoy" class="w-5 text-jadebright inline"></i> Kontak Admin &amp; FAQ</h3>
               <label class="block text-sm mb-3">Kontak Admin (boleh pakai link WhatsApp)<textarea id="sBantuanContact" rows="3" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Contoh:&#10;WhatsApp: 0812xxxx&#10;Email: support@novaciy.com"></textarea></label>
               <label class="block text-sm mb-3">Pertanyaan Umum (FAQ)<span class="block text-[11px] text-mint/40">Tiap baris: Judul | Jawaban. Pakai tanda pipa (|) sebagai pemisah.</span><textarea id="sBantuanFaq" rows="5" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Cara pakai akun? | Login dengan email & password yang dikirim.&#10;Kenapa akun error? | Hubungi admin melalui kontak yang tersedia."></textarea></label>
               <button id="saveBantuanBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan Bantuan</button>

@@ -50,6 +50,7 @@ function applyStoreConfig() {
   renderAnnouncement();
   // floating social media
   renderSocFloat();
+  startSocAutoLoop();
 }
 
 /* ===================== ANNOUNCEMENT BAR ===================== */
@@ -435,91 +436,128 @@ $("#bantuanOverlay").addEventListener("click", closeBantuan);
 function renderSocFloat() {
   const soc = STORE.soc || {};
   const container = $("#socFloat");
-  const popout = $("#socFloatPopout");
   if (!container) return;
 
-  const activePlatforms = [];
+  // Set links and show/hide each platform element
+  const wa = $("#socWa");
   if (soc.wa_active && soc.wa_number) {
-    activePlatforms.push({
-      icon: "message-circle",
-      label: "WhatsApp",
-      link: `https://wa.me/${soc.wa_number.replace(/[^0-9]/g, '')}`,
-      color: "bg-green-500/15 text-green-400 hover:bg-green-500/25",
-    });
-  }
-  if (soc.tele_active) {
-    if (soc.tele_channel_active && soc.tele_channel) {
-      const chLink = soc.tele_channel.startsWith("http") ? soc.tele_channel : `https://t.me/${soc.tele_channel.replace(/^@/, '')}`;
-      activePlatforms.push({
-        icon: "send",
-        label: "Telegram Channel",
-        link: chLink,
-        color: "bg-sky-500/15 text-sky-400 hover:bg-sky-500/25",
-      });
-    }
-    if (soc.tele_bot_active && soc.tele_bot) {
-      const botLink = soc.tele_bot.startsWith("http") ? soc.tele_bot : `https://t.me/${soc.tele_bot.replace(/^@/, '')}`;
-      activePlatforms.push({
-        icon: "message-square",
-        label: "Telegram Bot",
-        link: botLink,
-        color: "bg-sky-500/15 text-sky-400 hover:bg-sky-500/25",
-      });
-    }
-  }
+    wa.href = `https://wa.me/${soc.wa_number.replace(/[^0-9]/g, '')}`;
+    wa.classList.remove("hidden");
+  } else { wa.classList.add("hidden"); }
+
+  const teleCh = $("#socTeleChannel");
+  if (soc.tele_active && soc.tele_channel_active && soc.tele_channel) {
+    teleCh.href = soc.tele_channel.startsWith("http") ? soc.tele_channel : `https://t.me/${soc.tele_channel.replace(/^@/, '')}`;
+    teleCh.classList.remove("hidden");
+  } else { teleCh.classList.add("hidden"); }
+
+  const teleBot = $("#socTeleBot");
+  if (soc.tele_active && soc.tele_bot_active && soc.tele_bot) {
+    teleBot.href = soc.tele_bot.startsWith("http") ? soc.tele_bot : `https://t.me/${soc.tele_bot.replace(/^@/, '')}`;
+    teleBot.classList.remove("hidden");
+  } else { teleBot.classList.add("hidden"); }
+
+  const x = $("#socX");
   if (soc.x_active && soc.x_link) {
-    activePlatforms.push({
-      icon: "twitter",
-      label: "X (Twitter)",
-      link: soc.x_link,
-      color: "bg-zinc-500/15 text-zinc-300 hover:bg-zinc-500/25",
-    });
-  }
+    x.href = soc.x_link;
+    x.classList.remove("hidden");
+  } else { x.classList.add("hidden"); }
+
+  const ig = $("#socIg");
   if (soc.ig_active && soc.ig_link) {
-    activePlatforms.push({
-      icon: "camera",
-      label: "Instagram",
-      link: soc.ig_link,
-      color: "bg-pink-500/15 text-pink-400 hover:bg-pink-500/25",
-    });
-  }
+    ig.href = soc.ig_link;
+    ig.classList.remove("hidden");
+  } else { ig.classList.add("hidden"); }
 
-  if (!activePlatforms.length) {
-    container.classList.add("hidden");
-    return;
-  }
+  // Count visible items
+  const count = $$(".soc-item:not(.hidden)").length;
+  if (count === 0) { container.classList.add("hidden"); return; }
   container.classList.remove("hidden");
-
-  popout.innerHTML = activePlatforms.map(p => `
-    <a href="${p.link}" target="_blank" class="flex items-center gap-3 px-4 py-3 rounded-2xl glass border border-mint/10 ${p.color} text-sm font-medium whitespace-nowrap hover:scale-105 transition">
-      <i data-lucide="${p.icon}" class="w-[18px]"></i> ${p.label}
-    </a>
-  `).join("");
   lucide.createIcons();
 }
 
-// Floating button toggle
-$("#socFloatBtn")?.addEventListener("click", () => {
+// Smooth open/close with stagger
+let socOpen = false;
+function openSoc() {
   const popout = $("#socFloatPopout");
   const icon = $("#socFloatIcon");
-  const isHidden = popout.classList.contains("hidden");
-  popout.classList.toggle("hidden");
-  if (icon) icon.setAttribute("data-lucide", isHidden ? "x" : "message-circle");
-  lucide.createIcons();
+  if (socOpen) return;
+  socOpen = true;
+  popout.style.pointerEvents = "auto";
+  popout.style.opacity = "1";
+  popout.style.transform = "translateY(0) scale(1)";
+  // stagger items
+  const items = $$(".soc-item:not(.hidden)");
+  items.forEach((el, i) => {
+    const delay = parseInt(el.style.transitionDelay) || (i * 60);
+    setTimeout(() => {
+      el.style.transform = "translateY(0)";
+      el.style.opacity = "1";
+    }, delay);
+  });
+  if (icon) { icon.setAttribute("data-lucide", "x"); lucide.createIcons(); }
+}
+function closeSoc() {
+  const popout = $("#socFloatPopout");
+  const icon = $("#socFloatIcon");
+  if (!socOpen) return;
+  const items = $$(".soc-item:not(.hidden)");
+  items.forEach((el) => {
+    el.style.transform = "";
+    el.style.opacity = "";
+  });
+  popout.style.pointerEvents = "none";
+  popout.style.opacity = "0";
+  popout.style.transform = "translateY(8px) scale(0.95)";
+  socOpen = false;
+  if (icon) { icon.setAttribute("data-lucide", "message-circle"); lucide.createIcons(); }
+}
+function toggleSoc() {
+  if (socOpen) closeSoc(); else openSoc();
+}
+
+// Click trigger
+$("#socFloatBtn")?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  toggleSoc();
 });
 
-// Auto-close floating popout when clicking outside
-document.addEventListener("click", (e) => {
+// Click outside closes (use mousedown for speed)
+document.addEventListener("mousedown", (e) => {
   const float = $("#socFloat");
-  const popout = $("#socFloatPopout");
-  if (!float || !popout || popout.classList.contains("hidden")) return;
-  if (!float.contains(e.target)) {
-    popout.classList.add("hidden");
-    const icon = $("#socFloatIcon");
-    if (icon) icon.setAttribute("data-lucide", "message-circle");
-    lucide.createIcons();
-  }
+  if (!float || !socOpen) return;
+  if (!float.contains(e.target)) closeSoc();
 });
+
+// Auto open/close loop
+let socAutoTimer = null;
+function startSocAutoLoop() {
+  stopSocAutoLoop();
+  // First open after 3 minutes
+  socAutoTimer = setTimeout(() => {
+    if (!$("#socFloat") || $("#socFloat").classList.contains("hidden")) return;
+    openSoc();
+    // Close after 5 seconds
+    setTimeout(() => {
+      closeSoc();
+      // Loop: wait 3 minutes again
+      socAutoTimer = setTimeout(() => {
+        if (!$("#socFloat") || $("#socFloat").classList.contains("hidden")) return;
+        openSoc();
+        setTimeout(() => { closeSoc(); }, 5000);
+        // Keep going every 3 minutes
+        socAutoTimer = setInterval(() => {
+          if (!$("#socFloat") || $("#socFloat").classList.contains("hidden")) return;
+          openSoc();
+          setTimeout(() => { closeSoc(); }, 5000);
+        }, 180000);
+      }, 180000);
+    }, 5000);
+  }, 180000);
+}
+function stopSocAutoLoop() {
+  if (socAutoTimer) { clearTimeout(socAutoTimer); clearInterval(socAutoTimer); socAutoTimer = null; }
+}
 
 /* ===================== INIT ===================== */
 showSkeleton();
