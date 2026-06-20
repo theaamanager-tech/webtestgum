@@ -303,6 +303,46 @@ function deliver(text, orderId) {
 const openTutorial = () => { $("#tutorialDrawer").classList.remove("translate-x-full"); $("#tutorialOverlay").classList.remove("hidden"); };
 const closeTutorial = () => { $("#tutorialDrawer").classList.add("translate-x-full"); $("#tutorialOverlay").classList.add("hidden"); };
 
+/* ===================== BANTUAN DRAWER ===================== */
+function renderBantuan() {
+  const contact = STORE.bantuan_contact || "Belum ada kontak bantuan.";
+  const faq = STORE.bantuan_faq ? STORE.bantuan_faq.split("\n").filter(Boolean) : [];
+  $("#bantuanBody").innerHTML = `
+    <div class="glass border border-mint/10 rounded-2xl p-5">
+      <h4 class="text-white font-semibold flex items-center gap-2 mb-3"><i data-lucide="message-circle" class="w-4 text-jadebright"></i> Kontak Admin</h4>
+      <div class="text-sm text-mint/70 whitespace-pre-wrap">${contact.replace(/</g, "&lt;")}</div>
+    </div>
+    ${faq.length ? `
+    <div class="glass border border-mint/10 rounded-2xl p-5">
+      <h4 class="text-white font-semibold flex items-center gap-2 mb-3"><i data-lucide="help-circle" class="w-4 text-jadebright"></i> Pertanyaan Umum</h4>
+      <div class="space-y-3">
+        ${faq.map((q, i) => {
+          const [judul, ...jawab] = q.split("|");
+          return `<div class="glass border border-mint/10 rounded-xl p-3">
+            <button class="faq-q w-full text-left text-sm text-white font-medium flex items-center justify-between" data-idx="${i}">
+              ${(judul || q).trim()}<i data-lucide="chevron-down" class="w-4 text-mint/40 shrink-0"></i>
+            </button>
+            <div class="faq-a text-xs text-mint/60 mt-2 hidden">${(jawab.join("|") || "—").trim().replace(/</g, "&lt;")}</div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>` : ""}
+    <div class="glass border border-amber-400/20 bg-amber-400/5 rounded-2xl p-4 text-sm text-mint/70">
+      <span class="flex items-center gap-2 text-amber-300 font-medium mb-1"><i data-lucide="clock" class="w-4"></i> Jam Operasional</span>
+      24 jam — pesanan diproses otomatis oleh sistem.
+    </div>`;
+  lucide.createIcons();
+  $$(".faq-q").forEach(btn => btn.addEventListener("click", () => {
+    const body = btn.nextElementSibling;
+    const icon = btn.querySelector("[data-lucide]");
+    body.classList.toggle("hidden");
+    if (icon) icon.setAttribute("data-lucide", body.classList.contains("hidden") ? "chevron-down" : "chevron-up");
+    lucide.createIcons();
+  }));
+}
+const openBantuan = () => { renderBantuan(); $("#bantuanDrawer").classList.remove("translate-x-full"); $("#bantuanOverlay").classList.remove("hidden"); };
+const closeBantuan = () => { $("#bantuanDrawer").classList.add("translate-x-full"); $("#bantuanOverlay").classList.add("hidden"); };
+
 /* ===================== EVENTS ===================== */
 document.addEventListener("click", (e) => {
   const buy = e.target.closest(".buy-btn");
@@ -314,6 +354,9 @@ document.addEventListener("click", (e) => {
   // tutorial
   const tut = e.target.closest("a[href='#tutorial'], a[href='#']");
   if (tut && tut.textContent.trim().includes("Cara Order")) { e.preventDefault(); openTutorial(); closeSidebar(); return; }
+  // bantuan
+  const ban = e.target.closest("a[href='#bantuan'], a[href='#']");
+  if (ban && ban.textContent.trim().includes("Bantuan")) { e.preventDefault(); openBantuan(); closeSidebar(); return; }
 });
 document.addEventListener("change", (e) => {
   if (e.target.classList.contains("variant-select")) {
@@ -328,6 +371,8 @@ $("#overlay").addEventListener("click", closeOverlays);
 $("#tutorialClose").addEventListener("click", closeTutorial);
 $("#tutorialOverlay").addEventListener("click", closeTutorial);
 $("#tutorialDone").addEventListener("click", closeTutorial);
+$("#bantuanClose").addEventListener("click", closeBantuan);
+$("#bantuanOverlay").addEventListener("click", closeBantuan);
 
 /* ===================== INIT ===================== */
 showSkeleton();

@@ -342,6 +342,8 @@ async function loadStoreConfig() {
     $("#sHeroTitle").value = d.hero_title || "";
     $("#sHeroSub").value = d.hero_subtitle || "";
     $("#sFooter").value = d.footer_text || "";
+    $("#sBantuanContact").value = d.bantuan_contact || "";
+    $("#sBantuanFaq").value = d.bantuan_faq || "";
   } catch(e) { toast(e.message, false); }
 }
 $("#saveStoreBtn").addEventListener("click", async () => {
@@ -351,6 +353,8 @@ $("#saveStoreBtn").addEventListener("click", async () => {
     store_hero_title: $("#sHeroTitle").value.trim(),
     store_hero_subtitle: $("#sHeroSub").value.trim(),
     store_footer_text: $("#sFooter").value.trim(),
+    bantuan_contact: $("#sBantuanContact").value.trim(),
+    bantuan_faq: $("#sBantuanFaq").value.trim(),
   };
   try {
     const r = await fetch("/api/store-save", {

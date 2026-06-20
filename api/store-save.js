@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   if (key !== process.env.ADMIN_KEY) return res.status(401).json({ error: "Unauthorized" });
 
   const body = await readJson(req);
-  const allowed = ["store_name", "store_tagline", "store_hero_title", "store_hero_subtitle", "store_footer_text"];
+  const allowed = ["store_name", "store_tagline", "store_hero_title", "store_hero_subtitle", "store_footer_text", "bantuan_contact", "bantuan_faq"];
   const patch = { updated_at: new Date().toISOString() };
 
   for (const field of allowed) {

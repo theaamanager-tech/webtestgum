@@ -95,8 +95,10 @@ create table public.app_config (
   store_name      text default 'Novaciy°',
   store_tagline   text default 'Produk Digital Premium',
   store_hero_title text default 'Beli sekali klik, akun langsung jadi.',
-  store_hero_subtitle text default 'Pilih variasi, klik <strong class="text-white">Beli</strong>, scan QRIS, dan akun otomatis terkirim sebagai file begitu pembayaran sukses.',
+  store_hero_subtitle text default 'Pilih produk, bayar via QRIS, akun langsung terkirim otomatis.',
   store_footer_text text default '© Novaciy° · Semua transaksi via QRIS aman.',
+  bantuan_contact  text default '',
+  bantuan_faq      text default '',
   updated_at      timestamptz not null default now()
 );
 insert into public.app_config (id) values (1) on conflict do nothing;
@@ -154,8 +156,10 @@ insert into public.products (id, name, cat, initials, tag, sort_order) values
 -- alter table public.app_config add column if not exists store_name text default 'Novaciy°';
 -- alter table public.app_config add column if not exists store_tagline text default 'Produk Digital Premium';
 -- alter table public.app_config add column if not exists store_hero_title text default 'Beli sekali klik, akun langsung jadi.';
--- alter table public.app_config add column if not exists store_hero_subtitle text default 'Pilih variasi, klik <strong class="text-white">Beli</strong>, scan QRIS, dan akun otomatis terkirim sebagai file begitu pembayaran sukses.';
+-- alter table public.app_config add column if not exists store_hero_subtitle text default 'Pilih produk, bayar via QRIS, akun langsung terkirim otomatis.';
 -- alter table public.app_config add column if not exists store_footer_text text default '© Novaciy° · Semua transaksi via QRIS aman.';
+-- alter table public.app_config add column if not exists bantuan_contact text default '';
+-- alter table public.app_config add column if not exists bantuan_faq text default '';
  ('capcut','CapCut Pro','editing','CC','Best Seller',1),
  ('paypal','PayPal Fresh','account','PP','Ready',2),
  ('chatgpt','ChatGPT Plus','ai','GP','Hot',3),

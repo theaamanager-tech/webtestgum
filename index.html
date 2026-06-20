@@ -40,7 +40,7 @@
         <a class="nav-cat flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-mint/5 transition" href="#products" data-filter="account"><i data-lucide="user-round" class="w-[18px]"></i> Akun</a>
         <span class="text-[11px] uppercase tracking-widest text-mint/40 mt-3 mb-1">Info</span>
         <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-mint/5 transition" href="#tutorial"><i data-lucide="badge-check" class="w-[18px]"></i> Cara Order</a>
-        <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-mint/5 transition" href="#"><i data-lucide="life-buoy" class="w-[18px]"></i> Bantuan</a>
+        <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-mint/5 transition" href="#bantuan"><i data-lucide="life-buoy" class="w-[18px]"></i> Bantuan</a>
       </nav>
       <div class="mt-auto glass border border-mint/10 rounded-2xl p-4 text-sm">
         <div class="flex items-center gap-2 text-jadebright mb-2"><i data-lucide="qr-code" class="w-[18px]"></i><span class="font-semibold">Bayar QRIS</span></div>
@@ -65,7 +65,7 @@
       <section class="mb-8">
         <span class="text-xs text-mint/50">© Toko Produk Digital — garansi &amp; terpercaya · Pembayaran QRIS</span>
         <h1 id="heroTitle" class="font-serif text-4xl sm:text-5xl font-medium leading-[1.05] mt-2 text-white">Beli sekali klik, <em class="italic text-jadebright">akun langsung jadi.</em></h1>
-        <p id="heroSub" class="text-mint/60 mt-3 max-w-lg">Pilih variasi, klik <strong class="text-white">Beli</strong>, scan QRIS, dan akun otomatis terkirim sebagai file begitu pembayaran sukses.</p>
+        <p id="heroSub" class="text-mint/60 mt-3 max-w-lg">Pilih produk, bayar via QRIS, akun langsung terkirim otomatis.</p>
       </section>
 
       <!-- stats -->
@@ -165,6 +165,16 @@
     <div class="p-5 border-t border-mint/10">
       <button id="tutorialDone" class="w-full bg-jadebright text-ink font-semibold rounded-xl py-2.5 text-sm hover:brightness-110 transition">Mengerti, mulai belanja!</button>
     </div>
+  </aside>
+
+  <!-- ============ BANTUAN DRAWER ============ -->
+  <div id="bantuanOverlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-60 hidden"></div>
+  <aside id="bantuanDrawer" class="drawer fixed top-0 right-0 z-70 h-screen w-[min(520px,100%)] glass border-l border-mint/10 translate-x-full flex flex-col">
+    <div class="flex items-center justify-between p-5 border-b border-mint/10">
+      <h3 class="font-serif text-xl text-white flex items-center gap-2"><i data-lucide="life-buoy" class="w-5 text-jadebright"></i> Bantuan</h3>
+      <button id="bantuanClose" class="grid place-items-center w-9 h-9 rounded-lg hover:bg-mint/5"><i data-lucide="x" class="w-5"></i></button>
+    </div>
+    <div id="bantuanBody" class="flex-1 overflow-y-auto p-5 space-y-6"><!-- isi dari JS --></div>
   </aside>
 
   <!-- ============ BILLING / QRIS DRAWER ============ -->
