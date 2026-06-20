@@ -174,5 +174,5 @@ end;
 $$;
 -- Only service role calls this (no grant to anon).
 
--- ========================== SEED DATA ===========================
--- Kosong — tidak ada default. Admin akan tambah produk via panel.
+-- ========================== SELESAI ===========================
+-- Tidak ada seed data — admin tambah produk via panel.
