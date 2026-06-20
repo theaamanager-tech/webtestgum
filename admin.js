@@ -9,19 +9,36 @@ const CAT_LABEL = { ai: "AI Tools", editing: "Editing", account: "Akun" };
 const rupiah = (n) => (n == null ? "—" : "Rp " + Number(n).toLocaleString("id-ID"));
 function priceRange(vs){const p=vs.map(v=>v.price).filter(v=>v!=null);if(!p.length)return"Chat Admin";const lo=Math.min(...p),hi=Math.max(...p);return lo===hi?rupiah(lo):rupiah(lo)+" – "+rupiah(hi);}
 
-let ADMIN_KEY = "dev"; // TODO: ganti dengan password sebenarnya nanti
+let TOKEN = sessionStorage.getItem("nova_admin_token") || "";
 let CATALOG = [], editingId = null, selectedVariant = null;
 
 /* ===================== API ===================== */
 async function api(action, payload = {}) {
+  const headers = { "Content-Type": "application/json" };
+  // Login: kirim password di body. Yg lain: kirim token di header.
+  if (action !== "login" && TOKEN) headers["x-admin-token"] = TOKEN;
+
   const r = await fetch("/api/admin", {
     method: "POST",
-    headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+    headers,
     body: JSON.stringify({ action, ...payload }),
   });
   const data = await r.json();
-  if (!r.ok) throw new Error(data.error || "Gagal");
+  if (!r.ok) {
+    // Kalau session expired, arahin ke login
+    if (r.status === 401) { sessionStorage.removeItem("nova_admin_token"); TOKEN = ""; showLoginGate(); }
+    throw new Error(data.error || "Gagal");
+  }
   return data;
+}
+
+function showLoginGate() {
+  const gate = document.getElementById("loginGate");
+  if (gate) gate.classList.remove("hidden");
+}
+function hideLoginGate() {
+  const gate = document.getElementById("loginGate");
+  if (gate) gate.classList.add("hidden");
 }
 
 function toast(msg, ok = true) {
@@ -32,20 +49,29 @@ function toast(msg, ok = true) {
 }
 
 async function tryLogin() {
-  ADMIN_KEY = $("#adminKey").value.trim();
-  if (!ADMIN_KEY) return toast("Masukkan admin key", false);
+  const password = $("#adminKey").value.trim();
+  if (!password) return toast("Masukkan password admin", false);
   try {
-    await api("login");
-    sessionStorage.setItem("nova_admin_key", ADMIN_KEY);
-    $("#loginGate").classList.add("hidden");
+    const data = await api("login", { password });
+    TOKEN = data.token;
+    sessionStorage.setItem("nova_admin_token", TOKEN);
+    hideLoginGate();
     boot();
   } catch (e) { toast(e.message, false); }
 }
 $("#loginBtn")?.addEventListener("click", tryLogin);
 $("#adminKey")?.addEventListener("keydown", (e)=>{ if(e.key==="Enter") tryLogin(); });
-$("#logoutBtn")?.addEventListener("click", () => { sessionStorage.removeItem("nova_admin_key"); location.reload(); });
-if (ADMIN_KEY) { boot(); }
-else { document.getElementById("loginGate")?.classList.remove("hidden"); }
+$("#logoutBtn")?.addEventListener("click", () => { sessionStorage.removeItem("nova_admin_token"); location.reload(); });
+
+// Startup: kalau ada token, coba akses. Kalau gagal (expired), tampilkan login.
+function startup() {
+  if (TOKEN) {
+    boot()["catch"](function(){ showLoginGate(); });
+  } else {
+    showLoginGate();
+  }
+}
+startup();
 
 /* ===================== NAV ===================== */
 const TITLES = { insights: "Insights & Finansial", rekap: "Rekap Penjualan", products: "Produk", stock: "Stok & SNK", coupons: "Kupon", settings: "Pakasir API", store: "Pengaturan Toko", tampilan: "Tampilan" };
@@ -511,7 +537,7 @@ $("#saveStoreBtn").addEventListener("click", async () => {
   try {
     const r = await fetch("/api/store-save", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+      headers: { "Content-Type": "application/json", "x-admin-token": TOKEN },
       body: JSON.stringify(body),
     });
     const d = await r.json();
@@ -527,7 +553,7 @@ $("#saveBantuanBtn").addEventListener("click", async () => {
   try {
     const r = await fetch("/api/store-save", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+      headers: { "Content-Type": "application/json", "x-admin-token": TOKEN },
       body: JSON.stringify(body),
     });
     const d = await r.json();
@@ -545,7 +571,7 @@ $("#saveAnnonBtn").addEventListener("click", async () => {
   try {
     const r = await fetch("/api/store-save", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+      headers: { "Content-Type": "application/json", "x-admin-token": TOKEN },
       body: JSON.stringify(body),
     });
     const d = await r.json();
@@ -592,7 +618,7 @@ $("#saveSocBtn").addEventListener("click", async () => {
   try {
     const r = await fetch("/api/store-save", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+      headers: { "Content-Type": "application/json", "x-admin-token": TOKEN },
       body: JSON.stringify(body),
     });
     const d = await r.json();
@@ -679,7 +705,7 @@ function applyAdminBrand() {
       ? prefix + '<em class="italic">' + suffix + '</em><sup class="text-jadebright">' + dot + '</sup>'
       : c.name;
     document.title = c.name + " — Admin";
-    var els = document.querySelectorAll('#sidebar .font-serif, #loginGate .font-serif');
+    var els = document.querySelectorAll('#sidebar .font-serif, #gateBrand');
     for (var i = 0; i < els.length; i++) els[i].innerHTML = html;
   } catch(e){}
 }

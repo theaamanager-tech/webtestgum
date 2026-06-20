@@ -1,26 +1,90 @@
-// POST /api/admin   { action, ...payload }   header: x-admin-key
+// POST /api/admin   { action, ...payload }   header: x-admin-token
 // One key-gated endpoint for ALL admin operations (service role).
+// Security:
+//   - Login: verifikasi password, return HMAC session token (24h)
+//   - Semua action lain: validasi token, bukan password mentah
+//   - Rate limit: 5 gagal → block 15 menit per IP
+import crypto from "crypto";
 import { admin, getConfig, readJson, cors } from "../lib/supabaseAdmin.js";
+
+const ADMIN_KEY = process.env.ADMIN_KEY || "";
+const PEPPER = process.env.ADMIN_PEPPER || "verdent-admin-secret-2024";
+
+// Rate limiter in-memory
+const failMap = {};
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const entry = failMap[ip];
+  if (entry) {
+    if (entry.count >= 5 && now - entry.last < 15 * 60 * 1000) return false;
+    if (now - entry.last > 15 * 60 * 1000) delete failMap[ip];
+  }
+  return true;
+}
+function recordFail(ip) {
+  if (!failMap[ip]) failMap[ip] = { count: 0, last: Date.now() };
+  failMap[ip].count += 1;
+  failMap[ip].last = Date.now();
+}
+
+// Session token: base64url(JSON{key,exp,nonce}.HMAC)
+function signToken(key) {
+  const payload = { key, exp: Date.now() + 24 * 60 * 60 * 1000, nonce: crypto.randomUUID() };
+  const data = JSON.stringify(payload);
+  const sig = crypto.createHmac("sha256", PEPPER).update(data).digest("hex");
+  return Buffer.from(data + "." + sig).toString("base64url");
+}
+function verifyToken(token) {
+  try {
+    const raw = Buffer.from(token, "base64url").toString();
+    const dot = raw.lastIndexOf(".");
+    if (dot === -1) return null;
+    const data = raw.slice(0, dot), sig = raw.slice(dot + 1);
+    const exp = crypto.createHmac("sha256", PEPPER).update(data).digest("hex");
+    if (sig !== exp) return null;
+    const p = JSON.parse(data);
+    if (p.exp < Date.now() || !p.key) return null;
+    return p;
+  } catch { return null; }
+}
 
 export default async function handler(req, res) {
   cors(res);
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  // --- auth gate (sementara dimatikan, akan diaktifkan lagi nanti) ---
-  // const key = req.headers["x-admin-key"];
-  // if (!process.env.ADMIN_KEY) return res.status(500).json({ error: "ADMIN_KEY belum diset di server" });
-  // if (key !== process.env.ADMIN_KEY) return res.status(401).json({ error: "Unauthorized" });
-
   const body = await readJson(req);
   const { action } = body;
+  const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
 
   try {
-    switch (action) {
-      case "login":
-        return res.json({ ok: true });
+    // === LOGIN (tanpa token) ===
+    if (action === "login") {
+      if (!ADMIN_KEY) return res.status(500).json({ error: "ADMIN_KEY belum diset di Vercel" });
+      if (!checkRateLimit(ip)) return res.status(429).json({ error: "Terlalu banyak percobaan. Coba 15 menit lagi." });
 
-      /* ---------- catalog (with stock counts) ---------- */
+      const { password } = body;
+      if (!password) return res.status(400).json({ error: "Password wajib" });
+
+      // Timing-safe compare
+      const pk = String(password);
+      if (pk.length === ADMIN_KEY.length && crypto.timingSafeEqual(Buffer.from(pk), Buffer.from(ADMIN_KEY))) {
+        delete failMap[ip];
+        return res.json({ ok: true, token: signToken(ADMIN_KEY) });
+      }
+
+      recordFail(ip);
+      return res.status(401).json({ error: "Password salah" });
+    }
+
+    // === SEMUA ACTION LAIN: validasi session token ===
+    const token = req.headers["x-admin-token"];
+    if (!token) return res.status(401).json({ error: "Belum login. Kirim x-admin-token." });
+
+    const session = verifyToken(token);
+    if (!session || session.key !== ADMIN_KEY) return res.status(401).json({ error: "Session tidak valid. Login ulang." });
+
+    switch (action) {
       case "catalog": {
         const [productsRes, variantsRes, stockRes] = await Promise.all([
           admin.from("products").select("*").order("sort_order", { ascending: true }),
@@ -117,7 +181,6 @@ export default async function handler(req, res) {
       /* ---------- pakasir config ---------- */
       case "get_config": {
         const cfg = await getConfig();
-        // never expose full api key to the browser
         return res.json({ config: {
           pakasir_project: cfg.pakasir_project, pakasir_mode: cfg.pakasir_mode,
           webhook_url: cfg.webhook_url,
@@ -132,14 +195,14 @@ export default async function handler(req, res) {
         if (body.pakasir_project !== undefined) patch.pakasir_project = body.pakasir_project;
         if (body.pakasir_mode !== undefined) patch.pakasir_mode = body.pakasir_mode;
         if (body.webhook_url !== undefined) patch.webhook_url = body.webhook_url;
-        if (body.pakasir_api_key) patch.pakasir_api_key = body.pakasir_api_key; // only overwrite if provided
+        if (body.pakasir_api_key) patch.pakasir_api_key = body.pakasir_api_key;
         if (body.telegram_bot_token !== undefined) patch.telegram_bot_token = body.telegram_bot_token;
         if (body.telegram_chat_id !== undefined) patch.telegram_chat_id = body.telegram_chat_id;
         const { error } = await admin.from("app_config").update(patch).eq("id", 1);
         if (error) throw error; return res.json({ ok: true });
       }
 
-      /* ---------- financial insights / reports ---------- */
+      /* ---------- insights ---------- */
       case "insights": {
         const { data: orders } = await admin.from("orders").select("*").eq("status", "paid");
         const paid = orders || [];
@@ -153,13 +216,10 @@ export default async function handler(req, res) {
         const top = Object.values(byProduct).sort((a, b) => b.qty - a.qty).slice(0, 5);
         const { count: prodCount } = await admin.from("products").select("*", { count: "exact", head: true });
         const { count: availableCount, error: stockError } = await admin
-          .from("stock_items")
-          .select("id", { count: "exact", head: true })
-          .neq("status", "sold");
+          .from("stock_items").select("id", { count: "exact", head: true }).neq("status", "sold");
         if (stockError) throw stockError;
-        const available = availableCount ?? 0;
         return res.json({ insights: {
-          revenue, orders: paid.length, prodCount: prodCount ?? 0, available, top,
+          revenue, orders: paid.length, prodCount: prodCount ?? 0, available: availableCount ?? 0, top,
         }});
       }
 
@@ -171,21 +231,12 @@ export default async function handler(req, res) {
         if (end_date) query = query.lte("created_at", end_date + "T23:59:59Z");
         const { data, error } = await query;
         if (error) throw error;
-
-        const orders = (data || []).map((o) => ({
-          ...o,
-          total_price: o.amount || 0,
-          status_badge: o.status === "paid" ? "Lunas" : o.status === "pending" ? "Pending" : o.status === "failed" ? "Gagal" : o.status,
-        }));
+        const orders = (data || []).map((o) => ({ ...o }));
         const lunas = orders.filter((o) => o.status === "paid");
         const revenue = lunas.reduce((a, o) => a + (o.amount || 0), 0);
-        const avgOrder = lunas.length ? Math.round(revenue / lunas.length) : 0;
-
         return res.json({ orders, summary: {
-          total_orders: orders.length,
-          paid_orders: lunas.length,
-          revenue,
-          avg_order: avgOrder,
+          total_orders: orders.length, paid_orders: lunas.length,
+          revenue, avg_order: lunas.length ? Math.round(revenue / lunas.length) : 0,
         }});
       }
 
@@ -197,7 +248,6 @@ export default async function handler(req, res) {
         let buffer, contentType, ext;
 
         if (url) {
-          // Mode URL — download dari URL eksternal
           try { new URL(url); } catch { return res.status(400).json({ error: "URL tidak valid" }); }
           const imgRes = await fetch(url);
           if (!imgRes.ok) return res.status(400).json({ error: "Gagal download gambar dari URL" });
@@ -205,41 +255,25 @@ export default async function handler(req, res) {
           contentType = imgRes.headers.get("content-type") || "image/jpeg";
           ext = url.split(".").pop()?.split("?")[0]?.toLowerCase() || "jpg";
         } else if (file_data) {
-          // Mode base64
           const raw = file_data.replace(/^data:image\/\w+;base64,/, "");
           buffer = Buffer.from(raw, "base64");
           contentType = file_data.startsWith("data:") ? file_data.split(";")[0].split(":")[1] : "image/jpeg";
           ext = (filename || "image.jpg").split(".").pop()?.toLowerCase() || "jpg";
-          if (buffer.length > 3 * 1024 * 1024) {
-            return res.status(400).json({ error: "Ukuran gambar maksimal 3MB" });
-          }
+          if (buffer.length > 3 * 1024 * 1024) return res.status(400).json({ error: "Maks 3MB" });
         } else {
           return res.status(400).json({ error: "Kirim file_data (base64) atau url" });
         }
 
         const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
-        if (!allowed.includes(contentType)) {
-          return res.status(400).json({ error: "Tipe file harus JPG/PNG/WEBP/GIF/AVIF" });
-        }
-        if (buffer.length > 5 * 1024 * 1024) {
-          return res.status(400).json({ error: "Ukuran gambar maksimal 5MB" });
-        }
+        if (!allowed.includes(contentType)) return res.status(400).json({ error: "Tipe harus JPG/PNG/WEBP/GIF/AVIF" });
+        if (buffer.length > 5 * 1024 * 1024) return res.status(400).json({ error: "Maks 5MB" });
 
         const fileName = `${product_id}-${Date.now()}.${ext}`;
-
-        const { error: uploadErr } = await admin.storage
-          .from("product-images")
-          .upload(fileName, buffer, { contentType, upsert: true });
+        const { error: uploadErr } = await admin.storage.from("product-images").upload(fileName, buffer, { contentType, upsert: true });
         if (uploadErr) throw uploadErr;
-
         const { data: { publicUrl } } = admin.storage.from("product-images").getPublicUrl(fileName);
-
-        const { error: updateErr } = await admin
-          .from("products")
-          .update({ image_url: publicUrl, updated_at: new Date().toISOString() })
-          .eq("id", product_id);
+        const { error: updateErr } = await admin.from("products").update({ image_url: publicUrl, updated_at: new Date().toISOString() }).eq("id", product_id);
         if (updateErr) throw updateErr;
-
         return res.json({ image_url: publicUrl, ok: true });
       }
 
