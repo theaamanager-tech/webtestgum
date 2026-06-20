@@ -26,7 +26,18 @@ function applyStoreConfig() {
   if (!STORE.name) return;
   document.title = STORE.name + " — " + (STORE.tagline || "Produk Digital Premium");
   const heroTitle = $("#heroTitle");
-  if (heroTitle) heroTitle.innerHTML = (STORE.hero_title || "").replace(/<br\s*\/?>/gi, " ") || heroTitle.innerHTML;
+  if (heroTitle && STORE.hero_title) {
+    let t = STORE.hero_title.replace(/<br\s*\/?>/gi, " ");
+    // auto-wrap agar kata setelah koma dapat style italic hijau
+    if (!t.includes("<em")) {
+      const parts = t.split(/,\s*/);
+      if (parts.length > 1) {
+        const last = parts.pop();
+        t = parts.join(", ") + ', <em class="italic text-jadebright">' + last + "</em>";
+      }
+    }
+    heroTitle.innerHTML = t;
+  }
   const heroSub = $("#heroSub");
   if (heroSub) heroSub.innerHTML = STORE.hero_subtitle || heroSub.innerHTML;
   const footerEl = document.querySelector("footer p, footer");
