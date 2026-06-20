@@ -174,5 +174,43 @@ end;
 $$;
 -- Only service role calls this (no grant to anon).
 
+-- ========================== SEED DATA ===========================
+
+insert into public.products (id, name, cat, initials, tag, subtitle, sort_order) values
+ ('capcut','CapCut Pro','editing','CC','Best Seller','Edit video profesional dengan fitur eksklusif CapCut Pro.',1),
+ ('paypal','PayPal Fresh','account','PP','Ready','Akun PayPal domain/Gmail siap pakai. Verifikasi penuh.',2),
+ ('chatgpt','ChatGPT Plus','ai','GP','Hot','Akses penuh ke GPT-4o, DALL·E, dan fitur Plus lainnya.',3),
+ ('grok','Super Grok','ai','GK','New','AI cerdas dari xAI — akses real-time ke X (Twitter).',4),
+ ('gemini','Gemini AI Pro','ai','GM','Promo','AI canggih dari Google dengan kapasitas konteks besar.',5),
+ ('canva','Canva Pro','editing','CV','Populer','Desain grafis premium tanpa batas. Akses semua template Pro.',6);
+
+insert into public.variants (product_id, name, price, snk, sort_order) values
+ ('capcut','7 Hari',15000,'Garansi 7 hari. Jangan ganti password & email.',1),
+ ('capcut','30 Hari',35000,'Garansi 30 hari penuh. Login max 1 device.',2),
+ ('paypal','Domain',3000,'Akun fresh. Wajib ganti password setelah terima.',1),
+ ('paypal','Gmail',5000,'Akun fresh + Gmail. Simpan recovery info.',2),
+ ('chatgpt','No Garansi',35000,'Tanpa garansi. Jangan ubah data akun.',1),
+ ('chatgpt','Full Garansi',60000,'Garansi penuh 30 hari. Login via link kami.',2),
+ ('grok','3 Hari',5000,'Trial 3 hari. Tidak bisa diperpanjang.',1),
+ ('grok','30 Hari',160000,'Garansi 30 hari. 1 akun 1 user.',2),
+ ('gemini','3 Bulan',40000,'Aktif 3 bulan. Jangan logout dari semua device.',1),
+ ('gemini','12 Bulan',75000,'Aktif 12 bulan. Garansi replace bila bermasalah.',2),
+ ('canva','1 Bulan Invite',3000,'Via invite link. Jangan keluar dari tim.',1),
+ ('canva','1 Bulan Individual',10000,'Akun individual 1 bulan.',2),
+ ('canva','1 Bulan Owner',null,'Harga custom, chat admin dulu.',3);
+
+-- demo stock
+insert into public.stock_items (variant_id, payload)
+select v.id, 'capcut7-demo-'||g||' | user'||g||'@mail.com | passW0rd'||g
+from public.variants v cross join generate_series(1,8) g
+where v.product_id='capcut' and v.name='7 Hari';
+
+insert into public.stock_items (variant_id, payload)
+select v.id, 'chatgpt-full-'||g||' | login: cg'||g||'@mail.com | pass: cgPass'||g
+from public.variants v cross join generate_series(1,5) g
+where v.product_id='chatgpt' and v.name='Full Garansi';
+
+-- sample coupon
+insert into public.coupons (code, type, value, max_uses) values ('HEMAT10','percent',10,0);
+
 -- ========================== SELESAI ===========================
--- Tidak ada seed data — admin tambah produk via panel.
