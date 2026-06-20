@@ -1,49 +1,63 @@
 /* =====================================================================
  *  NOVACIY° — Public client config (anon key only).
- *  The anon key can read ONLY the catalog + stock counts (RLS enforced).
+ *  Wrapped in an IIFE so internal identifiers (sb, rupiah, ...) stay local
+ *  and never collide with the storefront's own globals in app.js.
  *  All money/secret operations go through /api/* serverless functions.
  * ===================================================================== */
-const SUPABASE_URL = "https://wfaeesuxuqftmlyeizan.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6IndmYWVlc3V4dXFmdG1seWVpemFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5MDk5ODksImV4cCI6MjA5NzQ4NTk4OX0.O-PSeIzbUrz7aWe8G0NSq45CIVDeXzdBzScsk64pfMM";
+(function () {
+  const SUPABASE_URL = "https://wfaeesuxuqftmlyeizan.supabase.co";
+  const SUPABASE_ANON_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmYWVlc3V4dXFmdG1seWVpemFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5MDk5ODksImV4cCI6MjA5NzQ4NTk4OX0.O-PSeIzbUrz7aWe8G0NSq45CIVDeXzdBzScsk64pfMM";
 
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const CAT_LABEL = { ai: "AI Tools", editing: "Editing", account: "Akun" };
-
-const rupiah = (n) => (n == null ? "—" : "Rp " + Number(n).toLocaleString("id-ID"));
-function priceRange(variants) {
-  const prices = variants.map((v) => v.price).filter((v) => v != null);
-  if (!prices.length) return "Chat Admin";
-  const lo = Math.min(...prices), hi = Math.max(...prices);
-  return lo === hi ? rupiah(lo) : rupiah(lo) + " – " + rupiah(hi);
-}
-
-// Public catalog loader.
-// Prefer the serverless endpoint so storefront data is identical to admin data.
-// Fallback keeps the catalog usable if /api/catalog is temporarily unavailable.
-async function loadPublicCatalog() {
+  let sb = null;
   try {
-    const response = await fetch(`/api/catalog?t=${Date.now()}`, { cache: "no-store" });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || "Gagal memuat katalog dari server");
-    return Array.isArray(data.products) ? data.products : [];
-  } catch (apiError) {
-    console.warn("[catalog] API fallback:", apiError);
-    const { data: products, error: pErr } = await sb
-      .from("products").select("*").eq("active", true).order("sort_order");
-    if (pErr) throw pErr;
-    const { data: variants, error: vErr } = await sb
-      .from("variants").select("*").eq("active", true).order("sort_order");
-    if (vErr) throw vErr;
-    const { data: stock, error: sErr } = await sb.from("variant_stock").select("*");
-    if (sErr) throw sErr;
-    const map = {}; (stock || []).forEach((s) => (map[s.variant_id] = s.available));
-    return (products || []).map((p) => ({
-      ...p,
-      variants: (variants || []).filter((v) => v.product_id === p.id)
-        .map((v) => ({ ...v, available: map[v.id] ?? 0 })),
-    }));
+    if (window.supabase && typeof window.supabase.createClient === "function") {
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } else {
+      console.warn("[config] supabase library not loaded; using /api/catalog only");
+    }
+  } catch (e) {
+    console.warn("[config] supabase init failed:", e);
   }
-}
 
-window.NOVA = { sb, CAT_LABEL, rupiah, priceRange, loadPublicCatalog };
+  const CAT_LABEL = { ai: "AI Tools", editing: "Editing", account: "Akun" };
+
+  const rupiah = (n) => (n == null ? "—" : "Rp " + Number(n).toLocaleString("id-ID"));
+  function priceRange(variants) {
+    const prices = variants.map((v) => v.price).filter((v) => v != null);
+    if (!prices.length) return "Chat Admin";
+    const lo = Math.min(...prices), hi = Math.max(...prices);
+    return lo === hi ? rupiah(lo) : rupiah(lo) + " – " + rupiah(hi);
+  }
+
+  // Public catalog loader.
+  // Prefer the serverless endpoint so storefront data is identical to admin data.
+  // Fallback to direct anon reads if /api/catalog is temporarily unavailable.
+  async function loadPublicCatalog() {
+    try {
+      const response = await fetch(`/api/catalog?t=${Date.now()}`, { cache: "no-store" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Gagal memuat katalog dari server");
+      return Array.isArray(data.products) ? data.products : [];
+    } catch (apiError) {
+      console.warn("[catalog] API fallback:", apiError);
+      if (!sb) throw apiError;
+      const { data: products, error: pErr } = await sb
+        .from("products").select("*").eq("active", true).order("sort_order");
+      if (pErr) throw pErr;
+      const { data: variants, error: vErr } = await sb
+        .from("variants").select("*").eq("active", true).order("sort_order");
+      if (vErr) throw vErr;
+      const { data: stock, error: sErr } = await sb.from("variant_stock").select("*");
+      if (sErr) throw sErr;
+      const map = {}; (stock || []).forEach((s) => (map[s.variant_id] = s.available));
+      return (products || []).map((p) => ({
+        ...p,
+        variants: (variants || []).filter((v) => v.product_id === p.id)
+          .map((v) => ({ ...v, available: map[v.id] ?? 0 })),
+      }));
+    }
+  }
+
+  window.NOVA = { sb, CAT_LABEL, rupiah, priceRange, loadPublicCatalog };
+})();
