@@ -150,7 +150,9 @@ function renderTable(filter = "") {
   filter = filter.trim().toLowerCase();
   $("#productTable").innerHTML = CATALOG.filter((p) => p.name.toLowerCase().includes(filter)).map((p) => `
     <tr class="border-b border-mint/5 hover:bg-mint/[.03]">
-      <td class="p-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-jadebright/15 grid place-items-center text-xs font-bold text-jadebright">${p.initials}</div><span class="text-white">${p.name}</span></div></td>
+      <td class="p-4"><div class="flex items-center gap-3">${p.image_url
+  ? `<img src="${p.image_url}" class="w-9 h-9 rounded-lg object-cover" onerror="this.outerHTML='<div class=\'w-9 h-9 rounded-lg bg-jadebright/15 grid place-items-center text-xs font-bold text-jadebright\'>${p.initials}</div>'" />`
+  : `<div class="w-9 h-9 rounded-lg bg-jadebright/15 grid place-items-center text-xs font-bold text-jadebright">${p.initials}</div>`}<span class="text-white">${p.name}</span></div></td>
       <td class="p-4 text-mint/60">${CAT_LABEL[p.cat] || p.cat}</td>
       <td class="p-4 text-mint/60">${p.variants.length} variasi</td>
       <td class="p-4 text-jadebright">${priceRange(p.variants)}</td>
@@ -167,6 +169,47 @@ $("#prodSearch").addEventListener("input", (e) => renderTable(e.target.value));
 
 /* ===================== PRODUCT MODAL ===================== */
 function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "p" + Date.now(); }
+
+/* ---------- Image upload helpers ---------- */
+function previewImage(url) {
+  const box = $("#fImagePreview");
+  if (url && url.trim()) {
+    box.innerHTML = `<img src="${url}" class="w-full h-full object-contain" onerror="this.parentElement.innerHTML='<span class=\'text-red-300\'><i data-lucide=\'image-off\' class=\'w-5 inline\'></i> Gagal muat</span>'" />`;
+  } else {
+    box.innerHTML = `<span>Belum ada gambar</span>`;
+  }
+  lucide.createIcons();
+}
+
+async function uploadImageFile(productId, file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = e.target.result;
+      try {
+        const data = await api("upload_image", {
+          product_id: productId,
+          file_data: base64,
+          filename: file.name,
+        });
+        resolve(data.image_url);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = () => reject(new Error("Gagal baca file"));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadImageUrl(productId, url) {
+  const data = await api("upload_image", {
+    product_id: productId,
+    url: url,
+  });
+  return data.image_url;
+}
+
 function variantRow(v = {}) {
   return `<div class="grid grid-cols-12 gap-2 variant-row" data-id="${v.id || ""}">
     <input class="v-name col-span-4 bg-ink/60 border border-mint/10 rounded-xl px-3 py-2 text-sm" placeholder="Nama" value="${v.name || ""}" />
@@ -186,14 +229,66 @@ function openModal(p = null) {
   $("#fSubtitle").value = p?.subtitle || ""; $("#fInitials").value = p?.initials || "";
   $("#fActive").checked = p?.active ?? true; $("#variantRows").innerHTML = "";
   (p?.variants?.length ? p.variants : [{}]).forEach(addVariantRow);
+  // Image
+  const img = p?.image_url || "";
+  $("#fImageUrl").value = img;
+  $("#fImageUrlHidden").value = img;
+  previewImage(img);
   $("#modal").classList.remove("hidden");
 }
 function closeModal() { $("#modal").classList.add("hidden"); editingId = null; }
 $("#addProductBtn").addEventListener("click", () => openModal());
 $("#modalCancel").addEventListener("click", closeModal);
+
+// Image preview on URL type/change
+$("#fImageUrl").addEventListener("input", (e) => {
+  const val = e.target.value.trim();
+  previewImage(val);
+  if (val) $("#fImageUrlHidden").value = val;
+});
+
+// Upload from file
+$("#fImageUpload").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  // Preview dulu
+  const localUrl = URL.createObjectURL(file);
+  previewImage(localUrl);
+  toast("Gambar dipilih, simpan produk untuk upload...");
+});
+
+// Download from URL button
+$("#fImageUrlBtn").addEventListener("click", () => {
+  const url = $("#fImageUrl").value.trim();
+  if (!url) return toast("Masukkan URL gambar dulu", false);
+  previewImage(url);
+  $("#fImageUrlHidden").value = url;
+  toast("URL gambar diset");
+});
+
 $("#modalSave").addEventListener("click", async () => {
   const name = $("#fName").value.trim(); if (!name) return toast("Nama wajib", false);
-  const product = { id: editingId || slugify(name), name, cat: $("#fCat").value, subtitle: $("#fSubtitle").value.trim(), initials: $("#fInitials").value.trim() || name.slice(0,2).toUpperCase(), active: $("#fActive").checked };
+  const productId = editingId || slugify(name);
+  const product = { id: productId, name, cat: $("#fCat").value, subtitle: $("#fSubtitle").value.trim(), initials: $("#fInitials").value.trim() || name.slice(0,2).toUpperCase(), active: $("#fActive").checked };
+
+  // Prioritas: file upload > URL manual
+  const fileInput = $("#fImageUpload");
+  const imageUrlManual = $("#fImageUrl").value.trim();
+
+  if (fileInput.files && fileInput.files[0]) {
+    // Upload file ke Supabase Storage
+    try {
+      const imgUrl = await uploadImageFile(productId, fileInput.files[0]);
+      product.image_url = imgUrl;
+    } catch (e) {
+      toast("Gagal upload gambar: " + e.message, false);
+      return;
+    }
+  } else if (imageUrlManual) {
+    // Simpan URL langsung apa adanya (bisa external link)
+    product.image_url = imageUrlManual;
+  }
+
   try {
     await api("save_product", { product });
     for (const row of $$(".variant-row")) {
@@ -339,12 +434,49 @@ async function loadConfig() {
     $("#pkProject").value = config.pakasir_project || ""; $("#pkMode").value = config.pakasir_mode || "sandbox";
     $("#pkWebhook").value = config.webhook_url || (location.origin + "/api/pakasir-webhook");
     $("#keyStatus").textContent = config.api_key_set ? `API key tersimpan (${config.api_key_preview})` : "API key belum diset";
+    // Telegram config
+    $("#pkTelegramToken").value = config.telegram_bot_token || "";
+    $("#pkTelegramChatId").value = config.telegram_chat_id || "";
   } catch(e){ toast(e.message, false); }
 }
 $("#saveConfigBtn").addEventListener("click", async () => {
-  try { await api("save_config", { pakasir_project: $("#pkProject").value.trim(), pakasir_mode: $("#pkMode").value, webhook_url: $("#pkWebhook").value.trim(), pakasir_api_key: $("#pkApiKey").value.trim() });
+  try { await api("save_config", {
+    pakasir_project: $("#pkProject").value.trim(),
+    pakasir_mode: $("#pkMode").value,
+    webhook_url: $("#pkWebhook").value.trim(),
+    pakasir_api_key: $("#pkApiKey").value.trim(),
+    telegram_bot_token: $("#pkTelegramToken").value.trim(),
+    telegram_chat_id: $("#pkTelegramChatId").value.trim(),
+  });
     $("#pkApiKey").value = ""; toast("Konfigurasi disimpan"); loadConfig();
   } catch(e){ toast(e.message, false); }
+});
+// Test Telegram notification
+$("#testTelegramBtn").addEventListener("click", async () => {
+  const token = $("#pkTelegramToken").value.trim();
+  const chatId = $("#pkTelegramChatId").value.trim();
+  if (!token || !chatId) return toast("Isi Bot Token & Chat ID dulu", false);
+  const btn = $("#testTelegramBtn");
+  btn.disabled = true; btn.innerHTML = `<i data-lucide="loader" class="w-4 animate-spin"></i> Mengirim...`; lucide.createIcons();
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: "✅ <b>Novaciy° — Test Notifikasi</b>\nBot Telegram berfungsi dengan baik!",
+        parse_mode: "HTML",
+      }),
+    });
+    const d = await r.json();
+    if (!r.ok || !d.ok) throw new Error(d.description || "Gagal kirim");
+    toast("Notifikasi test terkirim! Cek Telegram kamu.");
+  } catch (e) {
+    toast("Gagal: " + (e.message || "Unknown"), false);
+  } finally {
+    btn.disabled = false; btn.innerHTML = `<i data-lucide="send" class="w-4"></i> Test Notifikasi`; lucide.createIcons();
+  }
+});
 });
 
 /* ===================== STORE SETTINGS ===================== */

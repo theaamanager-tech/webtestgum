@@ -17,8 +17,9 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
-    const { variant_id, coupon, contact } = await readJson(req);
+    const { variant_id, quantity, coupon, contact } = await readJson(req);
     if (!variant_id) return res.status(400).json({ error: "variant_id wajib" });
+    const qty = Math.max(1, Math.min(Number(quantity) || 1, 999)); // max 999
 
     // price + product info (service role)
     const { data: variant, error: vErr } = await admin
@@ -30,20 +31,21 @@ export default async function handler(req, res) {
     const { count } = await admin.from("stock_items")
       .select("*", { count: "exact", head: true })
       .eq("variant_id", variant_id).eq("status", "available");
-    if (!count || count < 1) return res.status(409).json({ error: "Stok habis" });
+    if (!count || count < qty) return res.status(409).json({ error: `Stok tersedia ${count||0}, tidak cukup untuk ${qty}` });
 
     // coupon validation
     let discount = 0, couponCode = null;
+    const baseAmount = variant.price * qty;
     if (coupon) {
       const { data: c } = await admin.from("coupons")
         .select("*").eq("code", coupon.toUpperCase()).eq("active", true).single();
       if (!c) return res.status(400).json({ error: "Kupon tidak valid" });
       if (c.max_uses > 0 && c.used_count >= c.max_uses) return res.status(400).json({ error: "Kupon sudah habis" });
-      discount = c.type === "percent" ? Math.round((variant.price * c.value) / 100) : c.value;
-      discount = Math.min(discount, variant.price);
+      discount = c.type === "percent" ? Math.round((baseAmount * c.value) / 100) : c.value;
+      discount = Math.min(discount, baseAmount);
       couponCode = c.code;
     }
-    const amount = Math.max(variant.price - discount, 1);
+    const amount = Math.max(baseAmount - discount, 1);
 
     // Pakasir config
     const cfg = await getConfig();
@@ -64,7 +66,7 @@ export default async function handler(req, res) {
     await admin.from("orders").insert({
       order_id: orderId, variant_id, product_name: variant.products?.name || "",
       variant_name: variant.name, unit_price: variant.price, discount, amount,
-      coupon_code: couponCode, status: "pending", payment_method: "qris",
+      quantity: qty, coupon_code: couponCode, status: "pending", payment_method: "qris",
       qr_string: payment.payment_number, buyer_contact: contact || "",
     });
 

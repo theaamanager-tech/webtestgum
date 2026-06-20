@@ -21,6 +21,7 @@ create table public.products (
   cat         text not null default 'ai',         -- ai | editing | account
   initials    text not null default '',
   tag         text not null default '',
+  image_url   text not null default '',           -- gambar produk (URL)
   sort_order  int  not null default 0,
   active      boolean not null default true,
   created_at  timestamptz not null default now(),
@@ -72,6 +73,7 @@ create table public.orders (
   product_name  text,
   variant_name  text,
   unit_price    int not null default 0,
+  quantity      int not null default 1,
   discount      int not null default 0,
   amount        int not null default 0,            -- final charged amount
   coupon_code   text,
@@ -107,6 +109,8 @@ create table public.app_config (
   annon_bg         text default 'rgba(40,195,157,0.12)',
   annon_text_color text default '#CFEEE6',
   -- Social Media
+  telegram_bot_token           text default '',
+  telegram_chat_id             text default '',
   soc_wa_active               boolean default false,
   soc_wa_number               text default '',
   soc_tele_active             boolean default false,
@@ -173,6 +177,11 @@ insert into public.products (id, name, cat, initials, tag, sort_order) values
 
 -- ========== UPGRADE NOTE — if you already ran schema.sql before, run these ALTER statements in Supabase SQL Editor:
 -- alter table public.app_config add column if not exists store_name text default 'Novaciy°';
+-- alter table public.products add column if not exists image_url text default '';
+
+-- Note: Juga buat bucket "product-images" di Supabase Storage (Public bucket) untuk upload gambar produk.
+-- RLS policy untuk anon: boleh upload ke bucket product-images (untuk client-side upload).
+-- Atau pakai service-role key via serverless function /api/admin (rekomendasi).
 -- alter table public.app_config add column if not exists store_tagline text default 'Produk Digital Premium';
 -- alter table public.app_config add column if not exists store_hero_title text default 'Beli sekali klik, akun langsung jadi.';
 -- alter table public.app_config add column if not exists store_hero_subtitle text default 'Pilih produk, bayar via QRIS, akun langsung terkirim otomatis.';
@@ -180,6 +189,9 @@ insert into public.products (id, name, cat, initials, tag, sort_order) values
 -- alter table public.app_config add column if not exists bantuan_contact text default '';
 -- alter table public.app_config add column if not exists bantuan_faq text default '';
 -- alter table public.app_config add column if not exists annon_active boolean default false;
+-- alter table public.app_config add column if not exists telegram_bot_token text default '';
+-- alter table public.app_config add column if not exists telegram_chat_id text default '';
+-- alter table public.orders add column if not exists quantity int not null default 1;
 -- alter table public.app_config add column if not exists annon_text text default 'New feature is ready to use, let''s try';
 -- alter table public.app_config add column if not exists annon_badge_text text default 'Version 7.8';
 -- alter table public.app_config add column if not exists annon_badge_bg text default '#28C39D';

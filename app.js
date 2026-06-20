@@ -94,7 +94,8 @@ function toast(msg, ok = true) {
 /* ===================== LOAD CATALOG ===================== */
 function showSkeleton() {
   $("#productGrid").innerHTML = Array.from({ length: 8 }).map(() => `
-    <div class="glass border border-mint/10 rounded-2xl p-4 animate-pulse">
+    <div class="glass border border-mint/10 rounded-2xl p-4 animate-pulse overflow-hidden">
+      <div class="w-full h-32 bg-mint/10 -mx-4 -mt-4 mb-3"></div>
       <div class="flex items-center justify-between mb-4"><div class="w-12 h-12 rounded-xl bg-mint/10"></div><div class="w-16 h-5 rounded-full bg-mint/10"></div></div>
       <div class="h-5 w-2/3 bg-mint/10 rounded mb-2"></div>
       <div class="h-4 w-1/3 bg-mint/10 rounded mb-4"></div>
@@ -151,18 +152,32 @@ function productCard(p) {
       : `${v.name} — ${rupiah(v.price)}${v.available > 0 ? "" : " ⛔ Stok Habis"}`;
     return `<option value="${v.id}">${label}</option>`;
   }).join("");
+
+  // Dengan gambar: tampilkan sebagai banner di atas, initials overlay di pojok
+  // Tanpa gambar: layout klasik (initials + tag sejajar)
+  const hasImg = !!p.image_url;
+  const topSection = hasImg
+    ? `<img src="${p.image_url}" alt="${p.name}" class="w-full h-36 object-cover" onerror="this.style.display='none'" />
+<div class="flex items-center justify-between px-4 -mt-5">
+  <div class="w-10 h-10 rounded-xl grid place-items-center font-bold text-white text-sm border-2 border-ink shadow-lg" style="background:${logoGradient(p.cat)}">${p.initials}</div>
+  ${p.tag ? `<span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-jadebright/10 text-jadebright border border-jadebright/30">${p.tag}</span>` : ""}
+</div>`
+    : `<div class="flex items-center justify-between px-4 pt-4">
+  <div class="w-12 h-12 rounded-xl grid place-items-center font-bold text-white text-sm" style="background:${logoGradient(p.cat)}">${p.initials}</div>
+  ${p.tag ? `<span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-jadebright/10 text-jadebright border border-jadebright/30">${p.tag}</span>` : ""}
+</div>`;
+
   return `
-  <article class="card-in glass border border-mint/10 rounded-2xl p-4 flex flex-col gap-3 hover:border-jadebright/30 transition" data-cat="${p.cat}" data-name="${p.name.toLowerCase()}" data-id="${p.id}">
-    <div class="flex items-center justify-between">
-      <div class="w-12 h-12 rounded-xl grid place-items-center font-bold text-white text-sm" style="background:${logoGradient(p.cat)}">${p.initials}</div>
-      ${p.tag ? `<span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-jadebright/10 text-jadebright border border-jadebright/30">${p.tag}</span>` : ""}
+  <article class="card-in glass border border-mint/10 rounded-2xl flex flex-col gap-3 hover:border-jadebright/30 transition overflow-hidden" data-cat="${p.cat}" data-name="${p.name.toLowerCase()}" data-id="${p.id}">
+    ${topSection}
+    <div class="px-4 ${hasImg ? '' : ''}"><h3 class="font-serif text-lg text-white leading-tight">${p.name}</h3><span class="text-xs text-mint/40">${CAT_LABEL[p.cat] || p.cat}</span></div>
+    <div class="font-serif text-xl text-jadebright px-4">${priceRange(p.variants)}</div>
+    <div class="px-4 pb-4">
+      <select class="variant-select bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright w-full mb-3">${opts}</select>
+      <button class="buy-btn w-full bg-jadebright text-ink font-semibold rounded-xl py-2.5 text-sm flex items-center justify-center gap-2 hover:brightness-110 transition disabled:opacity-40">
+        <i data-lucide="zap" class="w-[16px]"></i> Stok Habis
+      </button>
     </div>
-    <div><h3 class="font-serif text-lg text-white leading-tight">${p.name}</h3><span class="text-xs text-mint/40">${CAT_LABEL[p.cat] || p.cat}</span></div>
-    <div class="font-serif text-xl text-jadebright">${priceRange(p.variants)}</div>
-    <select class="variant-select bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright w-full">${opts}</select>
-    <button class="buy-btn w-full bg-jadebright text-ink font-semibold rounded-xl py-2.5 text-sm flex items-center justify-center gap-2 hover:brightness-110 transition disabled:opacity-40">
-      <i data-lucide="zap" class="w-[16px]"></i> Stok Habis
-    </button>
   </article>`;
 }
 function renderProducts() {
@@ -209,13 +224,44 @@ function startBuy(productId, variantId) {
   if (!p || !v) return;
   if (v.price == null) { toast("Variasi ini chat admin dulu", false); return; }
   if (v.available <= 0) { toast("Stok habis", false); return; }
-  currentSelection = { product: p, variant: v };
+  currentSelection = { product: p, variant: v, qty: 1 };
   renderBillSummary();
   openBill();
 }
 
+function updateTotalPrice() {
+  const { variant } = currentSelection;
+  const qty = currentSelection.qty;
+  const totalPrice = variant.price * qty;
+  const el = $("#totalPriceDisplay");
+  const qtyDisplay = $("#qtyDisplay");
+  if (el) el.textContent = rupiah(totalPrice);
+  if (qtyDisplay) qtyDisplay.value = String(qty);
+  // Also update the price per unit line
+  const priceLine = $("#pricePerUnit");
+  if (priceLine) {
+    priceLine.textContent = `${rupiah(variant.price)} × ${qty}`;
+  }
+}
+
+function changeQty(delta) {
+  const { variant } = currentSelection;
+  let qty = currentSelection.qty;
+  if (delta === 0) {
+    // manual input
+    const input = $("#qtyDisplay");
+    qty = parseInt(input.value) || 1;
+  } else {
+    qty += delta;
+  }
+  qty = Math.max(1, Math.min(qty, variant.available));
+  currentSelection.qty = qty;
+  updateTotalPrice();
+}
+
 function renderBillSummary() {
-  const { product, variant } = currentSelection;
+  const { product, variant, qty } = currentSelection;
+  const totalPrice = variant.price * qty;
   $("#billBody").innerHTML = `
     <div class="glass border border-mint/10 rounded-2xl p-4 mb-4">
       <div class="flex items-center gap-3 mb-3">
@@ -223,31 +269,50 @@ function renderBillSummary() {
         <div><strong class="block text-white">${product.name}</strong><span class="text-xs text-mint/50">${variant.name}</span></div>
         <span class="ml-auto font-serif text-lg text-jadebright">${rupiah(variant.price)}</span>
       </div>
-      <div class="text-xs text-mint/50 border-t border-mint/10 pt-2">${variant.available} stok tersedia</div>
+      <div class="text-xs text-mint/50 border-t border-mint/10 pt-2">${variant.available} stok tersedia <span class="text-jadebright">· max ${variant.available}</span></div>
+    </div>
+
+    <!-- QUANTITY SELECTOR -->
+    <div class="glass border border-mint/10 rounded-xl p-4 mb-4">
+      <label class="block text-sm text-mint/60 mb-2">Jumlah</label>
+      <div class="flex items-center gap-3">
+        <button id="qtyMinus" class="w-10 h-10 rounded-xl glass border border-mint/10 grid place-items-center hover:bg-jadebright/10 hover:border-jadebright/40 transition text-white text-lg font-semibold">&minus;</button>
+        <input id="qtyDisplay" type="number" min="1" max="${variant.available}" value="${qty}" class="flex-1 bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright text-center font-semibold text-white [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
+        <button id="qtyPlus" class="w-10 h-10 rounded-xl glass border border-mint/10 grid place-items-center hover:bg-jadebright/10 hover:border-jadebright/40 transition text-white text-lg font-semibold">+</button>
+      </div>
+      <p class="text-xs text-mint/40 mt-2">Maksimal ${variant.available} stok tersedia</p>
+    </div>
+
+    <div class="glass border border-mint/10 rounded-xl p-4 mb-4">
+      <div class="flex items-center justify-between text-sm mb-2">
+        <span class="text-mint/60" id="pricePerUnit">${rupiah(variant.price)} × ${qty}</span>
+        <span class="text-white font-semibold" id="totalPriceDisplay">${rupiah(totalPrice)}</span>
+      </div>
     </div>
 
     <label class="block text-sm mb-1">Kode Kupon (opsional)</label>
     <div class="flex gap-2 mb-4">
       <input id="couponInput" type="text" placeholder="cth: HEMAT10" class="flex-1 bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright uppercase" />
     </div>
-    <label class="block text-sm mb-1">Kontak (opsional, untuk bantuan)</label>
+    <label class="block text-sm mb-1">Kontak (opsional, untuk notifikasi)</label>
     <input id="contactInput" type="text" placeholder="WhatsApp / email" class="w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright mb-5" />
 
-    <div class="flex items-center justify-between mb-4">
-      <span class="text-mint/60">Total</span>
-      <strong class="font-serif text-2xl text-white">${rupiah(variant.price)}</strong>
-    </div>
     <button id="payBtn" class="w-full bg-jadebright text-ink font-semibold rounded-xl py-3 flex items-center justify-center gap-2 hover:brightness-110 transition">
       <i data-lucide="qr-code" class="w-[18px]"></i> Bayar dengan QRIS
     </button>
     <p class="text-[11px] text-mint/40 text-center mt-3">Kupon &amp; harga final dihitung aman di server.</p>`;
   lucide.createIcons();
   $("#payBtn").addEventListener("click", createPayment);
+  // Quantity events
+  $("#qtyMinus").addEventListener("click", () => changeQty(-1));
+  $("#qtyPlus").addEventListener("click", () => changeQty(1));
+  $("#qtyDisplay").addEventListener("change", () => changeQty(0));
+  $("#qtyDisplay").addEventListener("input", () => changeQty(0));
 }
 
 /* ===================== CREATE PAYMENT ===================== */
 async function createPayment() {
-  const { variant } = currentSelection;
+  const { variant, qty } = currentSelection;
   const coupon = $("#couponInput").value.trim();
   const contact = $("#contactInput").value.trim();
   const btn = $("#payBtn");
@@ -255,7 +320,7 @@ async function createPayment() {
   try {
     const r = await fetch("/api/create-payment", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ variant_id: variant.id, coupon, contact }),
+      body: JSON.stringify({ variant_id: variant.id, quantity: qty, coupon, contact }),
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || "Gagal membuat pembayaran");

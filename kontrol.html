@@ -227,17 +227,29 @@
 
       <!-- ===== SETTINGS ===== -->
       <section id="panel-settings" class="panel">
-        <div class="glass border border-mint/10 rounded-2xl p-6 max-w-xl">
-          <h3 class="text-white font-semibold mb-4">Konfigurasi Pakasir</h3>
-          <label class="block text-sm mb-3">Project Slug<input id="pkProject" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
-          <label class="block text-sm mb-3">Mode<select id="pkMode" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright">
-            <option value="sandbox">Sandbox</option><option value="live">Live</option>
-          </select></label>
-          <label class="block text-sm mb-3">Webhook URL<input id="pkWebhook" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
-          <label class="block text-sm mb-3">API Key Baru<input id="pkApiKey" type="password" placeholder="Kosongkan jika tidak ingin mengubah" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
-          <p id="keyStatus" class="text-xs text-mint/40 mb-4">—</p>
-          <button id="saveConfigBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan</button>
-          <p class="text-[11px] text-mint/40 mt-3">Set <code>Webhook URL</code> ini juga di dashboard Pakasir (Edit Proyek).</p>
+        <div class="grid xl:grid-cols-2 gap-4">
+          <div class="glass border border-mint/10 rounded-2xl p-6">
+            <h3 class="text-white font-semibold mb-4">Konfigurasi Pakasir</h3>
+            <label class="block text-sm mb-3">Project Slug<input id="pkProject" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
+            <label class="block text-sm mb-3">Mode<select id="pkMode" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright">
+              <option value="sandbox">Sandbox</option><option value="live">Live</option>
+            </select></label>
+            <label class="block text-sm mb-3">Webhook URL<input id="pkWebhook" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
+            <label class="block text-sm mb-3">API Key Baru<input id="pkApiKey" type="password" placeholder="Kosongkan jika tidak ingin mengubah" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
+            <p id="keyStatus" class="text-xs text-mint/40 mb-4">—</p>
+            <button id="saveConfigBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan</button>
+            <p class="text-[11px] text-mint/40 mt-3">Set <code>Webhook URL</code> ini juga di dashboard Pakasir (Edit Proyek).</p>
+          </div>
+
+          <!-- Telegram Notification Config -->
+          <div class="glass border border-mint/10 rounded-2xl p-6">
+            <h3 class="text-white font-semibold mb-4 flex items-center gap-2"><i data-lucide="send" class="w-5 text-jadebright"></i> Notifikasi Telegram</h3>
+            <p class="text-xs text-mint/50 mb-4">Dapatkan notifikasi pesanan baru otomatis ke Telegram. Buat Bot Telegram via <code class="text-jadebright">@BotFather</code>, dapatkan token dan chat ID (via <code class="text-jadebright">@userinfobot</code>).</p>
+            <label class="block text-sm mb-3">Bot Token<code class="text-[11px] text-mint/40 block">Dari @BotFather</code><input id="pkTelegramToken" type="password" placeholder="123456:ABC-DEF..." class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
+            <label class="block text-sm mb-4"><i data-lucide="message-circle" class="w-4 text-jadebright inline"></i> Chat ID Admin<code class="text-[11px] text-mint/40 block">Dari @userinfobot atau @getidsbot</code><input id="pkTelegramChatId" type="text" placeholder="123456789" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
+            <button id="testTelegramBtn" class="glass border border-jadebright/30 text-jadebright rounded-xl px-4 py-2.5 text-sm hover:bg-jadebright/10 mb-3 w-full flex items-center justify-center gap-2"><i data-lucide="send" class="w-4"></i> Test Notifikasi</button>
+            <p class="text-[11px] text-mint/40">Notifikasi dikirim otomatis setelah pembayaran sukses.</p>
+          </div>
         </div>
       </section>
 
@@ -350,6 +362,25 @@
         <label class="block text-sm">Subtitle<textarea id="fSubtitle" rows="2" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright"></textarea></label>
         <div class="grid grid-cols-2 gap-3"><label class="block text-sm">Initials<input id="fInitials" maxlength="3" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
           <label class="flex items-center gap-2 text-sm pt-7"><input id="fActive" type="checkbox" class="accent-jadebright" checked /> Aktif</label></div>
+        <!-- Image upload / URL -->
+        <div class="glass border border-mint/10 rounded-xl p-4">
+          <label class="text-sm font-semibold text-white flex items-center gap-2 mb-3"><i data-lucide="image" class="w-4 text-jadebright"></i> Gambar Produk</label>
+          <div id="fImagePreview" class="w-full h-32 rounded-xl bg-ink/60 border border-mint/10 mb-3 flex items-center justify-center text-mint/30 text-sm overflow-hidden">
+            <span>Belum ada gambar</span>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <label class="flex-1 glass border border-mint/10 rounded-lg px-3 py-2 text-sm cursor-pointer hover:border-jadebright/40 flex items-center gap-2 justify-center">
+              <i data-lucide="upload" class="w-4 text-jadebright"></i> Upload File
+              <input id="fImageUpload" type="file" accept="image/*" class="hidden" />
+            </label>
+            <span class="text-mint/40 text-xs self-center">atau</span>
+            <div class="flex-1 flex gap-2">
+              <input id="fImageUrl" type="text" placeholder="https://...gambar.jpg" class="flex-1 bg-ink/60 border border-mint/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-jadebright" />
+              <button id="fImageUrlBtn" class="bg-jadebright text-ink rounded-lg px-3 text-sm font-semibold hover:brightness-110 transition"><i data-lucide="link" class="w-4"></i></button>
+            </div>
+          </div>
+          <input id="fImageUrlHidden" type="hidden" />
+        </div>
         <div>
           <div class="flex items-center justify-between mb-2"><span class="text-sm font-semibold text-white">Variasi, Harga &amp; SNK</span>
             <button id="addVariantBtn" class="flex items-center gap-1.5 glass border border-mint/10 rounded-lg px-3 py-1.5 text-xs hover:border-jadebright/40"><i data-lucide="plus" class="w-3.5"></i> Variasi</button></div>

@@ -123,6 +123,8 @@ export default async function handler(req, res) {
           webhook_url: cfg.webhook_url,
           api_key_set: !!cfg.pakasir_api_key,
           api_key_preview: cfg.pakasir_api_key ? cfg.pakasir_api_key.slice(0, 4) + "••••" : "",
+          telegram_bot_token: cfg.telegram_bot_token || '',
+          telegram_chat_id: cfg.telegram_chat_id || '',
         }});
       }
       case "save_config": {
@@ -131,6 +133,8 @@ export default async function handler(req, res) {
         if (body.pakasir_mode !== undefined) patch.pakasir_mode = body.pakasir_mode;
         if (body.webhook_url !== undefined) patch.webhook_url = body.webhook_url;
         if (body.pakasir_api_key) patch.pakasir_api_key = body.pakasir_api_key; // only overwrite if provided
+        if (body.telegram_bot_token !== undefined) patch.telegram_bot_token = body.telegram_bot_token;
+        if (body.telegram_chat_id !== undefined) patch.telegram_chat_id = body.telegram_chat_id;
         const { error } = await admin.from("app_config").update(patch).eq("id", 1);
         if (error) throw error; return res.json({ ok: true });
       }
@@ -183,6 +187,60 @@ export default async function handler(req, res) {
           revenue,
           avg_order: avgOrder,
         }});
+      }
+
+      /* ---------- upload image ---------- */
+      case "upload_image": {
+        const { product_id, file_data, url, filename } = body;
+        if (!product_id) return res.status(400).json({ error: "product_id required" });
+
+        let buffer, contentType, ext;
+
+        if (url) {
+          // Mode URL — download dari URL eksternal
+          try { new URL(url); } catch { return res.status(400).json({ error: "URL tidak valid" }); }
+          const imgRes = await fetch(url);
+          if (!imgRes.ok) return res.status(400).json({ error: "Gagal download gambar dari URL" });
+          buffer = Buffer.from(await imgRes.arrayBuffer());
+          contentType = imgRes.headers.get("content-type") || "image/jpeg";
+          ext = url.split(".").pop()?.split("?")[0]?.toLowerCase() || "jpg";
+        } else if (file_data) {
+          // Mode base64
+          const raw = file_data.replace(/^data:image\/\w+;base64,/, "");
+          buffer = Buffer.from(raw, "base64");
+          contentType = file_data.startsWith("data:") ? file_data.split(";")[0].split(":")[1] : "image/jpeg";
+          ext = (filename || "image.jpg").split(".").pop()?.toLowerCase() || "jpg";
+          if (buffer.length > 3 * 1024 * 1024) {
+            return res.status(400).json({ error: "Ukuran gambar maksimal 3MB" });
+          }
+        } else {
+          return res.status(400).json({ error: "Kirim file_data (base64) atau url" });
+        }
+
+        const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
+        if (!allowed.includes(contentType)) {
+          return res.status(400).json({ error: "Tipe file harus JPG/PNG/WEBP/GIF/AVIF" });
+        }
+        if (buffer.length > 5 * 1024 * 1024) {
+          return res.status(400).json({ error: "Ukuran gambar maksimal 5MB" });
+        }
+
+        const fileName = `${product_id}-${Date.now()}.${ext}`;
+
+        const { error: uploadErr } = await admin.storage
+          .from("product-images")
+          .upload(fileName, buffer, { contentType, upsert: true });
+        if (uploadErr) throw uploadErr;
+
+        const { data: { publicUrl } } = admin.storage.from("product-images").getPublicUrl(fileName);
+
+        const { error: updateErr } = await admin
+          .from("products")
+          .update({ image_url: publicUrl, updated_at: new Date().toISOString() })
+          .eq("id", product_id);
+        if (updateErr) throw updateErr;
+
+        return res.json({ image_url: publicUrl, ok: true });
       }
 
       default:
