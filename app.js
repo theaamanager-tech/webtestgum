@@ -43,7 +43,19 @@ function applyStoreConfig() {
   const footerEl = document.querySelector("footer p, footer");
   if (footerEl) footerEl.innerHTML = STORE.footer_text || footerEl.innerHTML;
   const brandEl = document.querySelector(".font-serif a, .font-serif.text-2xl, #sidebar .font-serif");
-  if (brandEl && STORE.name) brandEl.innerHTML = STORE.name.replace(/[°^]/g, m => m);
+  if (brandEl && STORE.name) {
+    // keep italic + superscript formatting for brand names like "nova<em>ciy</em><sup>°</sup>"
+    const base = STORE.name.replace(/[°^]/g, '').trim();
+    const dot = STORE.name.includes('°') ? '°' : STORE.name.includes('^') ? '^' : '';
+    // split name into prefix (first 4 letters) and suffix (rest)
+    const prefix = base.slice(0, 4);
+    const suffix = base.slice(4);
+    if (suffix && dot) {
+      brandEl.innerHTML = prefix + '<em class="italic">' + suffix + '</em><sup>' + dot + '</sup>';
+    } else {
+      brandEl.textContent = STORE.name;
+    }
+  }
   const heroSection = document.querySelector("section.mb-8 span.text-xs");
   if (heroSection && STORE.tagline) heroSection.textContent = "© " + STORE.name + " — " + STORE.tagline;
   // announcement bar

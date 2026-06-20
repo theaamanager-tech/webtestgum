@@ -374,7 +374,6 @@ $("#saveStoreBtn").addEventListener("click", async () => {
     store_hero_title: $("#sHeroTitle").value.trim(),
     store_hero_subtitle: $("#sHeroSub").value.trim(),
     store_footer_text: $("#sFooter").value.trim(),
-    bantuan_contact: $("#sBantuanContact").value.trim(),
     bantuan_faq: $("#sBantuanFaq").value.trim(),
   };
   try {
