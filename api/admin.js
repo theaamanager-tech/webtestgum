@@ -25,7 +25,7 @@ export default async function handler(req, res) {
         const [productsRes, variantsRes, stockRes] = await Promise.all([
           admin.from("products").select("*").order("sort_order", { ascending: true }),
           admin.from("variants").select("*").order("sort_order", { ascending: true }),
-          admin.from("variant_stock").select("id, variant_id, status, payload, created_at"),
+          admin.from("stock_items").select("id, variant_id, status, payload, created_at"),
         ]);
         if (productsRes.error) throw productsRes.error;
         if (variantsRes.error) throw variantsRes.error;
@@ -78,16 +78,17 @@ export default async function handler(req, res) {
 
       /* ---------- stock ---------- */
       case "list_stock": {
-        const { data, error } = await admin.from("variant_stock").select("*").eq("variant_id", body.variant_id).order("created_at", { ascending: false });
+        const { data, error } = await admin.from("stock_items")
+          .select("*").eq("variant_id", body.variant_id).order("created_at");
         if (error) throw error; return res.json({ stock: data });
       }
       case "add_stock": {
         const rows = (body.payloads || []).map((payload) => ({ variant_id: body.variant_id, payload, status: "available" }));
-        const { error } = await admin.from("variant_stock").insert(rows);
+        const { error } = await admin.from("stock_items").insert(rows);
         if (error) throw error; return res.json({ added: rows.length });
       }
       case "delete_stock": {
-        const { error } = await admin.from("variant_stock").delete().eq("id", body.id).neq("status", "sold");
+        const { error } = await admin.from("stock_items").delete().eq("id", body.id).neq("status", "sold");
         if (error) throw error; return res.json({ ok: true });
       }
 
@@ -141,7 +142,7 @@ export default async function handler(req, res) {
         const top = Object.values(byProduct).sort((a, b) => b.qty - a.qty).slice(0, 5);
         const { count: prodCount } = await admin.from("products").select("*", { count: "exact", head: true });
         const { count: availableCount, error: stockError } = await admin
-          .from("variant_stock")
+          .from("stock_items")
           .select("id", { count: "exact", head: true })
           .neq("status", "sold");
         if (stockError) throw stockError;
