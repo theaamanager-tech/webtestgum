@@ -39,7 +39,7 @@
         <a class="nav-cat flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-mint/5 transition" href="#products" data-filter="ai"><i data-lucide="sparkles" class="w-[18px]"></i> AI Tools</a>
         <a class="nav-cat flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-mint/5 transition" href="#products" data-filter="account"><i data-lucide="user-round" class="w-[18px]"></i> Akun</a>
         <span class="text-[11px] uppercase tracking-widest text-mint/40 mt-3 mb-1">Info</span>
-        <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-mint/5 transition" href="#"><i data-lucide="badge-check" class="w-[18px]"></i> Cara Order</a>
+        <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-mint/5 transition" href="#tutorial"><i data-lucide="badge-check" class="w-[18px]"></i> Cara Order</a>
         <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-mint/5 transition" href="#"><i data-lucide="life-buoy" class="w-[18px]"></i> Bantuan</a>
       </nav>
       <div class="mt-auto glass border border-mint/10 rounded-2xl p-4 text-sm">
@@ -93,6 +93,79 @@
      </div>
     </main>
   </div>
+
+  <!-- ============ TUTORIAL MODAL ============ -->
+  <div id="tutorialOverlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-60 hidden"></div>
+  <aside id="tutorialDrawer" class="drawer fixed top-0 right-0 z-70 h-screen w-[min(520px,100%)] glass border-l border-mint/10 translate-x-full flex flex-col">
+    <div class="flex items-center justify-between p-5 border-b border-mint/10">
+      <h3 class="font-serif text-xl text-white flex items-center gap-2"><i data-lucide="badge-check" class="w-5 text-jadebright"></i> Cara Order</h3>
+      <button id="tutorialClose" class="grid place-items-center w-9 h-9 rounded-lg hover:bg-mint/5"><i data-lucide="x" class="w-5"></i></button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-5 space-y-6">
+      <div class="glass border border-mint/10 rounded-2xl p-5">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="w-8 h-8 rounded-full bg-jadebright text-ink font-bold grid place-items-center text-sm">1</span>
+          <div><h4 class="text-white font-semibold">Pilih Produk &amp; Variasi</h4><p class="text-xs text-mint/50">Temukan produk yang kamu butuhkan dari katalog.</p></div>
+        </div>
+        <ul class="text-sm text-mint/70 space-y-2 ml-11 list-disc marker:text-jadebright">
+          <li>Gunakan filter kategori atau kolom pencarian untuk menemukan produk.</li>
+          <li>Klik dropdown <strong class="text-white">pilih variasi</strong> untuk memilih masa berlaku atau tipe produk yang diinginkan.</li>
+          <li>Cek harga dan ketersediaan stok — jika ada label <span class="text-amber-400">⛔ Stok Habis</span>, stok sedang kosong.</li>
+        </ul>
+      </div>
+
+      <div class="glass border border-mint/10 rounded-2xl p-5">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="w-8 h-8 rounded-full bg-jadebright text-ink font-bold grid place-items-center text-sm">2</span>
+          <div><h4 class="text-white font-semibold">Klik Beli</h4><p class="text-xs text-mint/50">Setelah yakin dengan pilihanmu, klik tombol Beli.</p></div>
+        </div>
+        <ul class="text-sm text-mint/70 space-y-2 ml-11 list-disc marker:text-jadebright">
+          <li>Panel pembayaran akan terbuka dari sisi kanan layar.</li>
+          <li>Periksa kembali nama produk, varian, dan total harga.</li>
+          <li>Jika ada kode kupon, masukkan pada kolom <strong class="text-white">Kode Kupon</strong> (opsional).</li>
+          <li>Kontak WhatsApp/email bisa diisi jika ingin menerima notifikasi bantuan (opsional).</li>
+        </ul>
+      </div>
+
+      <div class="glass border border-mint/10 rounded-2xl p-5">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="w-8 h-8 rounded-full bg-jadebright text-ink font-bold grid place-items-center text-sm">3</span>
+          <div><h4 class="text-white font-semibold">Bayar dengan QRIS</h4><p class="text-xs text-mint/50">Scan kode QR menggunakan aplikasi e-wallet atau m-banking.</p></div>
+        </div>
+        <ul class="text-sm text-mint/70 space-y-2 ml-11 list-disc marker:text-jadebright">
+          <li>Klik tombol <strong class="text-white">Bayar dengan QRIS</strong> — sistem akan membuat kode QR khusus untuk pesananmu.</li>
+          <li>Buka aplikasi <strong class="text-white">GoPay, OVO, DANA, ShopeePay, LinkAja,</strong> atau <strong class="text-white">m-banking</strong> (BCA, Mandiri, BRI, dll).</li>
+          <li>Pilih menu <strong class="text-white">Scan QR / QRIS</strong> dan scan kode QR yang tampil di layar.</li>
+          <li>Konfirmasi pembayaran di aplikasi kamu.</li>
+        </ul>
+      </div>
+
+      <div class="glass border border-mint/10 rounded-2xl p-5">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="w-8 h-8 rounded-full bg-jadebright text-ink font-bold grid place-items-center text-sm">4</span>
+          <div><h4 class="text-white font-semibold">Akun Langsung Terkirim!</h4><p class="text-xs text-mint/50">Setelah pembayaran sukses, file akun otomatis terunduh.</p></div>
+        </div>
+        <ul class="text-sm text-mint/70 space-y-2 ml-11 list-disc marker:text-jadebright">
+          <li>Begitu pembayaran terkonfirmasi, file <strong class="text-white">.txt</strong> berisi akun akan otomatis terunduh.</li>
+          <li>File berisi: <strong class="text-white">email/username | password | catatan</strong> dan <strong class="text-white">SNK</strong> (Syarat &amp; Ketentuan).</li>
+          <li>Jika unduhan tidak otomatis, klik tombol <strong class="text-white">Unduh Lagi</strong> yang tersedia di layar.</li>
+          <li>Simpan file tersebut dan gunakan akun sesuai petunjuk yang diberikan.</li>
+        </ul>
+      </div>
+
+      <div class="glass border border-amber-400/20 bg-amber-400/5 rounded-2xl p-5">
+        <h4 class="text-white font-semibold flex items-center gap-2 mb-2"><i data-lucide="info" class="w-4 text-amber-400"></i> Penting!</h4>
+        <ul class="text-sm text-mint/70 space-y-1.5 ml-6 list-disc marker:text-amber-400">
+          <li>Jangan mengubah email atau password akun sebelum masa garansi habis (jika ada garansi).</li>
+          <li>Jika mengalami kendala, hubungi admin melalui kontak yang tertera di halaman Bantuan.</li>
+          <li>Semua transaksi diproses secara otomatis — 100% aman &amp; instan.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="p-5 border-t border-mint/10">
+      <button id="tutorialDone" class="w-full bg-jadebright text-ink font-semibold rounded-xl py-2.5 text-sm hover:brightness-110 transition">Mengerti, mulai belanja!</button>
+    </div>
+  </aside>
 
   <!-- ============ BILLING / QRIS DRAWER ============ -->
   <div id="overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden"></div>

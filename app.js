@@ -299,6 +299,10 @@ function deliver(text, orderId) {
   toast("Pembayaran sukses — akun terkirim!");
 }
 
+/* ===================== TUTORIAL DRAWER ===================== */
+const openTutorial = () => { $("#tutorialDrawer").classList.remove("translate-x-full"); $("#tutorialOverlay").classList.remove("hidden"); };
+const closeTutorial = () => { $("#tutorialDrawer").classList.add("translate-x-full"); $("#tutorialOverlay").classList.add("hidden"); };
+
 /* ===================== EVENTS ===================== */
 document.addEventListener("click", (e) => {
   const buy = e.target.closest(".buy-btn");
@@ -307,6 +311,9 @@ document.addEventListener("click", (e) => {
   if (chip) { applyFilter(chip.dataset.filter); return; }
   const cat = e.target.closest(".nav-cat");
   if (cat) { applyFilter(cat.dataset.filter); closeSidebar(); $("#overlay").classList.add("hidden"); }
+  // tutorial
+  const tut = e.target.closest("a[href='#tutorial'], a[href='#']");
+  if (tut && tut.textContent.trim().includes("Cara Order")) { e.preventDefault(); openTutorial(); closeSidebar(); return; }
 });
 document.addEventListener("change", (e) => {
   if (e.target.classList.contains("variant-select")) {
@@ -318,6 +325,9 @@ $("#searchInput").addEventListener("input", (e) => { searchTerm = e.target.value
 $("#menuToggle").addEventListener("click", openSidebar);
 $("#billClose").addEventListener("click", closeOverlays);
 $("#overlay").addEventListener("click", closeOverlays);
+$("#tutorialClose").addEventListener("click", closeTutorial);
+$("#tutorialOverlay").addEventListener("click", closeTutorial);
+$("#tutorialDone").addEventListener("click", closeTutorial);
 
 /* ===================== INIT ===================== */
 showSkeleton();
