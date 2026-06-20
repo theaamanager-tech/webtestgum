@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>·</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { ink:"#0D0E10", surface:"#121614", jade:"#0F7A62", jadebright:"#28C39D", deep:"#0C3B2E", mint:"#CFEEE6" },
+      fontFamily: { serif:['"Playfair Display"',"serif"], sans:["Inter","system-ui","sans-serif"] },
+    }}};
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body{background:radial-gradient(1100px 640px at 82% -10%,rgba(40,195,157,.16) 0%,transparent 56%),linear-gradient(180deg,#0D0E10 0%,#080a09 100%);background-attachment:fixed}
+    .glass{background:rgba(207,238,230,.04);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+    .panel{display:none} .panel.active{display:block;animation:fade .35s ease}
+    @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    .drawer{transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+  </style>
+</head>
+<body class="font-sans text-mint/90 antialiased overflow-x-hidden min-h-screen">
+
+  <!-- ============ LOGIN GATE (renders nothing else until unlocked) ============ -->
+  <div id="loginGate" class="fixed inset-0 z-[80] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-ink"></div>
+    <div class="relative glass border border-mint/10 rounded-2xl w-full max-w-sm p-7 text-center">
+      <div class="w-14 h-14 rounded-full bg-jadebright/15 grid place-items-center mx-auto mb-4"><i data-lucide="lock-keyhole" class="w-7 text-jadebright"></i></div>
+      <h2 class="font-serif text-2xl text-white">Restricted</h2>
+      <p class="text-mint/50 text-sm mt-1 mb-5">Masukkan admin key untuk lanjut.</p>
+      <input id="keyInput" type="password" placeholder="Admin key" class="w-full bg-ink/60 border border-mint/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-jadebright mb-3" />
+      <button id="loginBtn" class="w-full bg-jadebright text-ink font-semibold rounded-xl py-3 hover:brightness-110 transition">Buka</button>
+      <p id="loginErr" class="text-xs text-amber-400 mt-3 h-4"></p>
+    </div>
+  </div>
+
+  <!-- ============ APP (hidden until unlocked) ============ -->
+  <div id="appRoot" class="hidden grid grid-cols-1 md:grid-cols-[240px_1fr] min-h-screen">
+    <aside id="sidebar" class="drawer fixed md:sticky top-0 z-40 h-screen w-[240px] -translate-x-full md:translate-x-0 glass border-r border-mint/10 px-5 py-7 flex flex-col gap-7">
+      <div class="flex items-center gap-2">
+        <span class="font-serif text-2xl font-semibold tracking-tight">nova<em class="italic">ciy</em><sup class="text-jadebright">°</sup></span>
+        <span class="text-[10px] font-semibold uppercase tracking-widest text-jadebright bg-jadebright/10 border border-jadebright/30 px-2 py-0.5 rounded-full">Admin</span>
+      </div>
+      <nav class="flex flex-col gap-1 text-sm">
+        <span class="text-[11px] uppercase tracking-widest text-mint/40 mb-1">Kelola</span>
+        <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left bg-jadebright/10 text-white" data-panel="insights"><i data-lucide="trending-up" class="w-[18px]"></i> Insights &amp; Finansial</button>
+        <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5 transition" data-panel="products"><i data-lucide="package" class="w-[18px]"></i> Produk</button>
+        <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5 transition" data-panel="stock"><i data-lucide="layers" class="w-[18px]"></i> Stok &amp; SNK</button>
+        <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5 transition" data-panel="coupons"><i data-lucide="ticket-percent" class="w-[18px]"></i> Kupon</button>
+        <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5 transition" data-panel="settings"><i data-lucide="plug" class="w-[18px]"></i> Pakasir API</button>
+      </nav>
+      <div class="mt-auto flex flex-col gap-2">
+        <a href="index.html" class="flex items-center gap-3 px-4 py-3 rounded-xl glass border border-mint/10 text-sm hover:border-jadebright/40 transition"><i data-lucide="external-link" class="w-[18px] text-jadebright"></i> Lihat Store</a>
+        <button id="logoutBtn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-mint/50 hover:text-amber-400"><i data-lucide="log-out" class="w-[18px]"></i> Keluar</button>
+      </div>
+    </aside>
+
+    <main class="px-4 sm:px-7 py-5 max-w-[1180px] w-full">
+      <header class="flex items-center gap-3 mb-7">
+        <button id="menuToggle" class="md:hidden grid place-items-center w-10 h-10 rounded-xl glass border border-mint/10"><i data-lucide="menu" class="w-5"></i></button>
+        <h1 id="panelTitle" class="font-serif text-2xl sm:text-3xl text-white">Insights &amp; Finansial</h1>
+        <button id="refreshBtn" class="ml-auto flex items-center gap-2 glass border border-mint/10 rounded-xl px-4 py-2 text-sm hover:border-jadebright/40 transition"><i data-lucide="refresh-cw" class="w-4"></i> Refresh</button>
+      </header>
+
+      <!-- ===== INSIGHTS / FINANCIAL ===== -->
+      <section id="panel-insights" class="panel active">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          <article class="glass border border-jadebright/20 rounded-2xl p-5"><i data-lucide="wallet" class="w-5 text-jadebright mb-3"></i><span id="ovRevenue" class="block font-serif text-2xl text-white">—</span><span class="text-xs text-mint/50">Pendapatan (lunas)</span></article>
+          <article class="glass border border-mint/10 rounded-2xl p-5"><i data-lucide="receipt-text" class="w-5 text-jadebright mb-3"></i><span id="ovOrders" class="block font-serif text-2xl text-white">—</span><span class="text-xs text-mint/50">Transaksi Sukses</span></article>
+          <article class="glass border border-mint/10 rounded-2xl p-5"><i data-lucide="package" class="w-5 text-jadebright mb-3"></i><span id="ovProducts" class="block font-serif text-2xl text-white">—</span><span class="text-xs text-mint/50">Produk</span></article>
+          <article class="glass border border-mint/10 rounded-2xl p-5"><i data-lucide="layers" class="w-5 text-jadebright mb-3"></i><span id="ovStock" class="block font-serif text-2xl text-white">—</span><span class="text-xs text-mint/50">Stok Tersedia</span></article>
+        </div>
+        <div class="glass border border-mint/10 rounded-2xl p-6">
+          <h3 class="font-serif text-xl text-white mb-4 flex items-center gap-2"><i data-lucide="award" class="w-5 text-jadebright"></i> Produk Terlaris</h3>
+          <div id="topSellers" class="flex flex-col gap-3"></div>
+        </div>
+      </section>
+
+      <!-- ===== PRODUCTS ===== -->
+      <section id="panel-products" class="panel">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="flex-1 flex items-center gap-2 glass border border-mint/10 rounded-xl px-3 h-11 max-w-md">
+            <i data-lucide="search" class="w-[18px] text-mint/40"></i>
+            <input id="prodSearch" type="text" placeholder="Cari produk…" class="bg-transparent outline-none w-full text-sm placeholder:text-mint/30" />
+          </div>
+          <button id="addProductBtn" class="flex items-center gap-2 bg-jadebright text-ink font-semibold rounded-xl px-4 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="plus" class="w-4"></i> Produk</button>
+        </div>
+        <div class="glass border border-mint/10 rounded-2xl overflow-hidden"><div class="overflow-x-auto">
+          <table class="w-full text-sm"><thead class="text-mint/40 text-xs uppercase tracking-wider">
+            <tr class="border-b border-mint/10"><th class="text-left p-4">Produk</th><th class="text-left p-4">Kategori</th><th class="text-left p-4">Variasi</th><th class="text-left p-4">Harga</th><th class="text-right p-4">Aksi</th></tr>
+          </thead><tbody id="productTable"></tbody></table>
+        </div></div>
+      </section>
+
+      <!-- ===== STOCK & SNK ===== -->
+      <section id="panel-stock" class="panel">
+        <div class="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
+          <div class="glass border border-mint/10 rounded-2xl p-4">
+            <h3 class="font-serif text-lg text-white mb-3">Pilih Variasi</h3>
+            <div id="variantPicker" class="flex flex-col gap-1 max-h-[60vh] overflow-y-auto"></div>
+          </div>
+          <div id="stockManager" class="glass border border-mint/10 rounded-2xl p-5">
+            <div class="text-center text-mint/40 py-16"><i data-lucide="layers" class="w-10 mx-auto mb-2 opacity-40"></i><p>Pilih variasi untuk kelola stok &amp; SNK.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== COUPONS ===== -->
+      <section id="panel-coupons" class="panel">
+        <div class="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-4">
+          <div class="glass border border-mint/10 rounded-2xl p-5">
+            <h3 class="font-serif text-lg text-white mb-4">Buat Kupon</h3>
+            <label class="block text-sm mb-1">Kode</label>
+            <input id="cCode" type="text" placeholder="HEMAT10" class="w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright uppercase mb-3" />
+            <div class="grid grid-cols-2 gap-3 mb-3">
+              <div><label class="block text-sm mb-1">Tipe</label>
+                <select id="cType" class="w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright">
+                  <option value="percent">Persen (%)</option><option value="fixed">Potongan (Rp)</option>
+                </select></div>
+              <div><label class="block text-sm mb-1">Nilai</label>
+                <input id="cValue" type="number" placeholder="10" class="w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright" /></div>
+            </div>
+            <label class="block text-sm mb-1">Maks. pemakaian (0 = tak terbatas)</label>
+            <input id="cMax" type="number" value="0" class="w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright mb-4" />
+            <button id="addCouponBtn" class="w-full bg-jadebright text-ink font-semibold rounded-xl py-2.5 text-sm hover:brightness-110 transition flex items-center justify-center gap-2"><i data-lucide="plus" class="w-4"></i> Simpan Kupon</button>
+          </div>
+          <div class="glass border border-mint/10 rounded-2xl p-5">
+            <h3 class="font-serif text-lg text-white mb-4">Daftar Kupon</h3>
+            <div id="couponList" class="flex flex-col gap-2"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== PAKASIR CONFIG ===== -->
+      <section id="panel-settings" class="panel">
+        <div class="glass border border-mint/10 rounded-2xl p-6 max-w-xl">
+          <h3 class="font-serif text-xl text-white mb-1 flex items-center gap-2"><i data-lucide="plug" class="w-5 text-jadebright"></i> Konfigurasi Pakasir</h3>
+          <p class="text-mint/50 text-sm mb-5">Tersimpan aman di Supabase (hanya server yang bisa baca API key).</p>
+          <label class="block text-sm mb-1">Project Slug</label>
+          <input id="pkProject" type="text" placeholder="depodomain" class="w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright mb-3" />
+          <label class="block text-sm mb-1">API Key <span id="keyHint" class="text-mint/40 text-xs"></span></label>
+          <input id="pkApiKey" type="password" placeholder="••••• (kosongkan jika tak ingin ubah)" class="w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright mb-3" />
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div><label class="block text-sm mb-1">Mode</label>
+              <select id="pkMode" class="w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright">
+                <option value="sandbox">Sandbox</option><option value="live">Live</option>
+              </select></div>
+            <div><label class="block text-sm mb-1">Webhook URL</label>
+              <input id="pkWebhook" type="text" placeholder="https://situs.com/api/pakasir-webhook" class="w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright" /></div>
+          </div>
+          <button id="saveCfgBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition flex items-center gap-2"><i data-lucide="save" class="w-4"></i> Simpan Konfigurasi</button>
+          <p class="text-[11px] text-mint/40 mt-3">Set <code>Webhook URL</code> ini juga di dashboard Pakasir (Edit Proyek).</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ============ PRODUCT MODAL ============ -->
+  <div id="overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden"></div>
+  <aside id="productModal" class="drawer fixed top-0 right-0 z-50 h-screen w-[min(460px,100%)] glass border-l border-mint/10 translate-x-full flex flex-col">
+    <div class="flex items-center justify-between p-5 border-b border-mint/10">
+      <h3 id="modalTitle" class="font-serif text-xl text-white">Tambah Produk</h3>
+      <button id="modalClose" class="grid place-items-center w-9 h-9 rounded-lg hover:bg-mint/5"><i data-lucide="x" class="w-5"></i></button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-5 flex flex-col gap-4">
+      <label class="block text-sm">Nama Produk<input id="fName" type="text" placeholder="cth: Spotify Premium" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
+      <div class="grid grid-cols-2 gap-3">
+        <label class="block text-sm">Kategori<select id="fCat" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright"><option value="ai">AI Tools</option><option value="editing">Editing</option><option value="account">Akun</option></select></label>
+        <label class="block text-sm">Inisial<input id="fInitials" type="text" maxlength="2" placeholder="SP" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
+      </div>
+      <label class="block text-sm">Tag<input id="fTag" type="text" placeholder="New / Hot / Promo" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
+      <div class="border-t border-mint/10 pt-4">
+        <div class="flex items-center justify-between mb-2"><span class="text-sm font-semibold text-white">Variasi, Harga &amp; SNK</span>
+          <button id="addVariantBtn" class="flex items-center gap-1.5 glass border border-mint/10 rounded-lg px-3 py-1.5 text-xs hover:border-jadebright/40"><i data-lucide="plus" class="w-3.5"></i> Variasi</button></div>
+        <div id="variantRows" class="flex flex-col gap-3"></div>
+      </div>
+    </div>
+    <div class="p-5 border-t border-mint/10 flex gap-3">
+      <button id="modalCancel" class="flex-1 glass border border-mint/10 rounded-xl py-2.5 text-sm hover:bg-mint/5">Batal</button>
+      <button id="modalSave" class="flex-1 bg-jadebright text-ink font-semibold rounded-xl py-2.5 text-sm flex items-center justify-center gap-2 hover:brightness-110 transition"><i data-lucide="check" class="w-4"></i> Simpan</button>
+    </div>
+  </aside>
+
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-3 z-[70] glass border border-mint/10 rounded-full px-5 py-3 text-sm font-medium flex items-center gap-2 opacity-0 pointer-events-none transition"></div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

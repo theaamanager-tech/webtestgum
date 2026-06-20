@@ -1,127 +1,87 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Novaciy° — Dashboard Produk Digital</title>
-  <meta name="description" content="Dashboard penjualan produk digital premium: CapCut Pro, ChatGPT Plus, Canva Pro, dan lainnya." />
+  <title>Novaciy° — Produk Digital Premium</title>
+  <meta name="description" content="Beli produk digital premium dengan QRIS. Pengiriman akun otomatis & instan." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { ink:"#0D0E10", surface:"#121614", jade:"#0F7A62", jadebright:"#28C39D", deep:"#0C3B2E", mint:"#CFEEE6" },
+      fontFamily: { serif:['"Playfair Display"',"serif"], sans:["Inter","system-ui","sans-serif"] },
+    }}};
+  </script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    body{background:radial-gradient(1100px 640px at 82% -10%,rgba(40,195,157,.16) 0%,transparent 56%),radial-gradient(900px 620px at -6% 4%,rgba(12,59,46,.42) 0%,transparent 55%),linear-gradient(180deg,#0D0E10 0%,#080a09 100%);background-attachment:fixed}
+    .glass{background:rgba(207,238,230,.04);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+    .card-in{opacity:0;transform:translateY(14px);transition:.5s cubic-bezier(.2,.7,.2,1)} .card-in.in{opacity:1;transform:none}
+    .drawer{transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+  </style>
 </head>
-<body>
-  <div class="app">
-    <!-- ============ SIDEBAR ============ -->
-    <aside class="sidebar" id="sidebar">
-      <div class="brand">
-        <span class="brand-name">nova<em>ciy</em><sup>°</sup></span>
+<body class="font-sans text-mint/90 antialiased overflow-x-hidden min-h-screen">
+  <div class="max-w-[1180px] mx-auto px-4 sm:px-7 py-5">
+
+    <!-- topbar -->
+    <header class="flex items-center gap-3 mb-8">
+      <span class="font-serif text-2xl font-semibold tracking-tight">nova<em class="italic">ciy</em><sup class="text-jadebright">°</sup></span>
+      <div class="flex-1 flex items-center gap-2 glass border border-mint/10 rounded-xl px-3 h-11 max-w-md ml-2">
+        <i data-lucide="search" class="w-[18px] text-mint/40"></i>
+        <input id="searchInput" type="text" placeholder="Cari produk…" class="bg-transparent outline-none w-full text-sm placeholder:text-mint/30" />
       </div>
+      <span class="ml-auto hidden sm:flex items-center gap-1.5 text-xs text-mint/50"><i data-lucide="badge-check" class="w-4 text-jadebright"></i> Pengiriman Otomatis</span>
+    </header>
 
-      <nav class="nav">
-        <span class="nav-label">Menu</span>
-        <a class="nav-item active" href="#"><i data-lucide="layout-dashboard"></i> Dashboard</a>
-        <a class="nav-item" href="#products"><i data-lucide="shopping-bag"></i> Produk</a>
-        <a class="nav-item" href="#"><i data-lucide="receipt-text"></i> Pesanan</a>
-        <a class="nav-item" href="#"><i data-lucide="wallet"></i> Saldo</a>
-        <a class="nav-item" href="#"><i data-lucide="bar-chart-3"></i> Laporan</a>
+    <!-- hero -->
+    <section class="mb-8">
+      <span class="text-xs text-mint/50">© Toko Produk Digital — garansi &amp; terpercaya · Pembayaran QRIS</span>
+      <h1 class="font-serif text-4xl sm:text-5xl font-medium leading-[1.05] mt-2 text-white">Beli sekali klik,<br><em class="italic text-jadebright">akun langsung jadi.</em></h1>
+      <p class="text-mint/60 mt-3 max-w-lg">Pilih variasi, klik <strong class="text-white">Beli</strong>, scan QRIS, dan akun otomatis terkirim sebagai file begitu pembayaran sukses.</p>
+    </section>
 
-        <span class="nav-label">Akun</span>
-        <a class="nav-item" href="#"><i data-lucide="settings"></i> Pengaturan</a>
-        <a class="nav-item" href="#"><i data-lucide="life-buoy"></i> Bantuan</a>
-        <a class="nav-item" href="admin.html"><i data-lucide="shield"></i> Admin Panel</a>
-      </nav>
+    <!-- stats -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+      <article class="glass border border-mint/10 rounded-2xl p-4"><span id="stProducts" class="font-serif text-3xl text-white">—</span><span class="block text-xs text-mint/50 mt-1">Produk</span></article>
+      <article class="glass border border-mint/10 rounded-2xl p-4"><span id="stStock" class="font-serif text-3xl text-white">—</span><span class="block text-xs text-mint/50 mt-1">Stok Siap</span></article>
+      <article class="glass border border-mint/10 rounded-2xl p-4"><span class="font-serif text-3xl text-white">QRIS</span><span class="block text-xs text-mint/50 mt-1">Pembayaran</span></article>
+      <article class="glass border border-mint/10 rounded-2xl p-4"><span class="font-serif text-3xl text-white">4.9</span><span class="block text-xs text-mint/50 mt-1">Rating</span></article>
+    </section>
 
-      <div class="upgrade-card">
-        <p>Jadi <em>Reseller</em> &amp; dapatkan harga modal terbaik.</p>
-        <button class="btn btn-light btn-sm">Daftar Reseller</button>
+    <!-- filters -->
+    <section class="flex flex-wrap items-center justify-between gap-3 mb-5">
+      <h2 class="font-serif text-2xl text-white">Katalog <em class="italic text-jadebright">Produk</em></h2>
+      <div id="filters" class="flex flex-wrap gap-2">
+        <button class="chip px-4 py-1.5 rounded-full text-sm bg-jadebright text-ink font-semibold" data-filter="all">Semua</button>
+        <button class="chip px-4 py-1.5 rounded-full text-sm glass border border-mint/10" data-filter="editing">Editing</button>
+        <button class="chip px-4 py-1.5 rounded-full text-sm glass border border-mint/10" data-filter="ai">AI Tools</button>
+        <button class="chip px-4 py-1.5 rounded-full text-sm glass border border-mint/10" data-filter="account">Akun</button>
       </div>
-    </aside>
+    </section>
 
-    <!-- ============ MAIN ============ -->
-    <main class="main">
-      <!-- topbar -->
-      <header class="topbar">
-        <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Menu"><i data-lucide="menu"></i></button>
-        <div class="search">
-          <i data-lucide="search"></i>
-          <input type="text" id="searchInput" placeholder="Cari produk… (CapCut, ChatGPT, Canva)" />
-        </div>
-        <div class="topbar-actions">
-          <button class="icon-btn" aria-label="Notifikasi"><i data-lucide="bell"></i><span class="dot"></span></button>
-          <button class="cart-btn" id="cartBtn">
-            <i data-lucide="shopping-cart"></i>
-            <span class="cart-count" id="cartCount">0</span>
-          </button>
-          <div class="user">
-            <img src="https://i.pravatar.cc/80?img=12" alt="User" />
-            <div class="user-meta">
-              <strong>Jodi</strong>
-              <span>Admin</span>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
-      <!-- hero / greeting -->
-      <section class="hero">
-        <span class="eyebrow">© Toko Produk Digital — garansi &amp; terpercaya</span>
-        <h1>Halo,<br><em>Jodi.</em></h1>
-        <p>Kelola &amp; jual produk digital premium dengan harga terbaik. Pilih variasi, masukkan keranjang, selesai.</p>
-      </section>
-
-      <!-- stats -->
-      <section class="stats">
-        <article class="stat-card">
-          <span class="stat-value">06</span><span class="stat-label">Produk Aktif</span>
-        </article>
-        <article class="stat-card">
-          <span class="stat-value">1.248</span><span class="stat-label">Terjual</span>
-        </article>
-        <article class="stat-card">
-          <span class="stat-value">920</span><span class="stat-label">Pelanggan</span>
-        </article>
-        <article class="stat-card">
-          <span class="stat-value">4.9</span><span class="stat-label">Rating Toko</span>
-        </article>
-      </section>
-
-      <!-- products -->
-      <section id="products" class="section-head">
-        <h2>Katalog <em>Produk</em></h2>
-        <div class="filters" id="filters">
-          <button class="chip active" data-filter="all">Semua</button>
-          <button class="chip" data-filter="editing">Editing</button>
-          <button class="chip" data-filter="ai">AI Tools</button>
-          <button class="chip" data-filter="account">Akun</button>
-        </div>
-      </section>
-
-      <div class="grid" id="productGrid"><!-- injected by app.js --></div>
-    </main>
+    <footer class="mt-12 py-6 border-t border-mint/10 text-center text-xs text-mint/30">© Novaciy° · Semua transaksi via QRIS aman.</footer>
   </div>
 
-  <!-- ============ CART DRAWER ============ -->
-  <div class="overlay" id="overlay"></div>
-  <aside class="cart-drawer" id="cartDrawer">
-    <div class="cart-head">
-      <h3><i data-lucide="shopping-cart"></i> Keranjang</h3>
-      <button class="icon-btn" id="cartClose" aria-label="Tutup"><i data-lucide="x"></i></button>
+  <!-- ============ BILLING / QRIS DRAWER ============ -->
+  <div id="overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden"></div>
+  <aside id="billDrawer" class="drawer fixed top-0 right-0 z-50 h-screen w-[min(440px,100%)] glass border-l border-mint/10 translate-x-full flex flex-col">
+    <div class="flex items-center justify-between p-5 border-b border-mint/10">
+      <h3 class="font-serif text-xl text-white flex items-center gap-2"><i data-lucide="receipt-text" class="w-5 text-jadebright"></i> Pembayaran</h3>
+      <button id="billClose" class="grid place-items-center w-9 h-9 rounded-lg hover:bg-mint/5"><i data-lucide="x" class="w-5"></i></button>
     </div>
-    <div class="cart-items" id="cartItems"></div>
-    <div class="cart-foot">
-      <div class="cart-total">
-        <span>Total</span>
-        <strong id="cartTotal">Rp 0</strong>
-      </div>
-      <button class="btn btn-light btn-block" id="checkoutBtn"><i data-lucide="arrow-right"></i> Checkout</button>
-    </div>
+    <div id="billBody" class="flex-1 overflow-y-auto p-5"></div>
   </aside>
 
-  <!-- toast -->
-  <div class="toast" id="toast"></div>
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-3 z-[70] glass border border-mint/10 rounded-full px-5 py-3 text-sm font-medium flex items-center gap-2 opacity-0 pointer-events-none transition"></div>
 
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
