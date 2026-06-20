@@ -50,20 +50,24 @@ else { document.getElementById("loginGate")?.classList.remove("hidden"); }
 /* ===================== NAV ===================== */
 const TITLES = { insights: "Insights & Finansial", rekap: "Rekap Penjualan", products: "Produk", stock: "Stok & SNK", coupons: "Kupon", settings: "Pakasir API", store: "Pengaturan Toko", tampilan: "Tampilan" };
 $$(".nav-item").forEach((b) => b.addEventListener("click", () => {
-  $$(".nav-item").forEach(x => x.classList.remove("bg-jadebright/10","text-white"));
-  b.classList.add("bg-jadebright/10","text-white");
-  $$(".panel").forEach(p => p.classList.remove("active"));
-  const panel = b.dataset.panel;
-  $("#panel-" + panel).classList.add("active"); $("#panelTitle").textContent = TITLES[panel];
-  if (panel === "insights") loadInsights();
-  if (panel === "rekap") { setDefaultDates(); loadRekap($("#rekapStart").value, $("#rekapEnd").value); }
-  if (panel === "coupons") loadCoupons();
-  if (panel === "settings") loadConfig();
-  if (panel === "store") { loadStoreConfig(); loadSocConfig(); }
-  if (panel === "tampilan") loadTampilan();
-  $("#sidebar").classList.add("-translate-x-full");
+  try {
+    $$(".nav-item").forEach(x => x.classList.remove("bg-jadebright/10","text-white"));
+    b.classList.add("bg-jadebright/10","text-white");
+    $$(".panel").forEach(p => p.classList.remove("active"));
+    const panel = b.dataset.panel;
+    const panelEl = $("#panel-" + panel);
+    if (panelEl) panelEl.classList.add("active");
+    $("#panelTitle").textContent = TITLES[panel] || panel;
+    if (panel === "insights") loadInsights();
+    if (panel === "rekap") { setDefaultDates(); loadRekap($("#rekapStart")?.value, $("#rekapEnd")?.value); }
+    if (panel === "coupons") loadCoupons();
+    if (panel === "settings") loadConfig();
+    if (panel === "store") { loadStoreConfig(); loadSocConfig(); }
+    if (panel === "tampilan") loadTampilan();
+    $("#sidebar")?.classList.add("-translate-x-full");
+  } catch (e) { console.error("nav error:", e); toast(e.message, false); }
 }));
-$("#menuToggle").addEventListener("click", () => $("#sidebar").classList.toggle("-translate-x-full"));
+$("#menuToggle")?.addEventListener("click", () => $("#sidebar")?.classList.toggle("-translate-x-full"));
 
 /* ===================== ACCORDION ===================== */
 document.addEventListener("click", (e) => {
