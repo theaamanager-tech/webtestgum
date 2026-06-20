@@ -47,7 +47,7 @@ $("#logoutBtn").addEventListener("click", () => { sessionStorage.removeItem("nov
 if (ADMIN_KEY) { $("#loginGate").classList.add("hidden"); boot(); }
 
 /* ===================== NAV ===================== */
-const TITLES = { insights: "Insights & Finansial", products: "Produk", stock: "Stok & SNK", coupons: "Kupon", settings: "Pakasir API" };
+const TITLES = { insights: "Insights & Finansial", products: "Produk", stock: "Stok & SNK", coupons: "Kupon", settings: "Pakasir API", store: "Pengaturan Toko" };
 $$(".nav-item").forEach((b) => b.addEventListener("click", () => {
   $$(".nav-item").forEach(x => x.classList.remove("bg-jadebright/10","text-white"));
   b.classList.add("bg-jadebright/10","text-white");
@@ -57,6 +57,7 @@ $$(".nav-item").forEach((b) => b.addEventListener("click", () => {
   if (panel === "insights") loadInsights();
   if (panel === "coupons") loadCoupons();
   if (panel === "settings") loadConfig();
+  if (panel === "store") loadStoreConfig();
   $("#sidebar").classList.add("-translate-x-full");
 }));
 $("#menuToggle").addEventListener("click", () => $("#sidebar").classList.toggle("-translate-x-full"));
@@ -151,11 +152,51 @@ $("#modalSave").addEventListener("click", async () => {
 
 /* ===================== STOCK / SNK ===================== */
 function renderVariantPicker() {
-  const all = CATALOG.flatMap(p => p.variants.map(v => ({...v, product_name:p.name})));
-  if (!selectedVariant && all.length) selectedVariant = all[0].id;
-  $("#variantPicker").innerHTML = all.map(v => `<button class="vpick text-left rounded-xl px-3 py-2 border ${selectedVariant===v.id?'border-jadebright bg-jadebright/10 text-white':'border-mint/10 glass text-mint/70'}" data-vid="${v.id}"><b class="block text-sm">${v.product_name}</b><span class="text-xs opacity-70">${v.name} · stok ${v.available}</span></button>`).join("") || `<p class="text-sm text-mint/40">Belum ada variasi.</p>`;
+  const groups = {};
+  CATALOG.forEach(p => {
+    p.variants.forEach(v => {
+      if (!groups[p.id]) groups[p.id] = { product: p, variants: [] };
+      groups[p.id].variants.push({...v, product_name: p.name});
+    });
+  });
+  const ids = Object.keys(groups);
+  if (!selectedVariant && ids.length) {
+    const first = groups[ids[0]];
+    selectedVariant = first.variants[0]?.id;
+  }
+  const isSelectedGroup = (pid) => groups[pid]?.variants.some(v => v.id === selectedVariant);
+
+  $("#variantPicker").innerHTML = ids.length
+    ? ids.map(pid => {
+        const g = groups[pid];
+        const open = isSelectedGroup(pid);
+        return `<div class="variant-group glass border ${open ? 'border-jadebright/30' : 'border-mint/10'} rounded-xl overflow-hidden">
+          <button class="vg-head w-full flex items-center justify-between px-3 py-2.5 text-sm text-left hover:bg-mint/5 transition" data-pid="${pid}">
+            <span class="flex items-center gap-2"><span class="w-7 h-7 rounded-lg bg-jadebright/15 grid place-items-center text-xs font-bold text-jadebright">${g.product.initials}</span><b class="text-white">${g.product.name}</b></span>
+            <i data-lucide="${open ? 'chevron-down' : 'chevron-right'}" class="w-4 text-mint/40 transition"></i>
+          </button>
+          <div class="flex flex-col gap-1 px-2 pb-2 ${open ? '' : 'hidden'}">
+            ${g.variants.map(v => `<button class="vpick text-left rounded-xl px-3 py-2 border ${selectedVariant===v.id?'border-jadebright bg-jadebright/10 text-white':'border-transparent text-mint/70 hover:bg-mint/5'}" data-vid="${v.id}"><span class="text-sm">${v.name}</span> <span class="text-xs opacity-70">· stok ${v.available}</span></button>`).join('')}
+          </div>
+        </div>`;
+      }).join('')
+    : `<p class="text-sm text-mint/40">Belum ada variasi.</p>`;
+  lucide.createIcons();
 }
-$("#variantPicker").addEventListener("click", (e) => { const b = e.target.closest(".vpick"); if (b) { selectedVariant = b.dataset.vid; renderVariantPicker(); renderStockManager(); } });
+$("#variantPicker").addEventListener("click", (e) => {
+  const pick = e.target.closest(".vpick");
+  if (pick) { selectedVariant = pick.dataset.vid; renderVariantPicker(); renderStockManager(); return; }
+  const head = e.target.closest(".vg-head");
+  if (head) {
+    const group = head.closest(".variant-group");
+    const body = group.querySelector("div:last-child");
+    const icon = head.querySelector("[data-lucide]");
+    const isOpen = !body.classList.contains("hidden");
+    body.classList.toggle("hidden");
+    if (icon) { icon.setAttribute("data-lucide", isOpen ? "chevron-right" : "chevron-down"); }
+    lucide.createIcons();
+  }
+});
 
 async function renderStockManager() {
   const box = $("#stockManager");
@@ -167,7 +208,7 @@ async function renderStockManager() {
     box.innerHTML = `
       <div class="glass border border-mint/10 rounded-2xl p-5 mb-4">
         <div class="flex items-center justify-between gap-3 mb-4">
-          <div><h3 class="text-white font-semibold">${variant.product_name} — ${variant.name}</h3><p class="text-sm text-mint/45">${variant.snk || 'Tidak ada SNK khusus.'}</p></div>
+          <div><h3 class="text-white font-semibold">${variant.product_name} — ${variant.name}</h3></div>
           <span class="text-xs bg-jadebright/10 text-jadebright border border-jadebright/30 rounded-full px-3 py-1">${variant.available} tersedia</span>
         </div>
         <label class="text-sm font-semibold text-white flex items-center gap-2 mb-2"><i data-lucide="upload" class="w-4 text-jadebright"></i> Tambah Stok (1 baris = 1 unit)</label>
@@ -175,6 +216,12 @@ async function renderStockManager() {
         <div class="flex flex-wrap gap-2 mt-3 items-center">
           <button id="addStockBtn" disabled class="bg-jadebright disabled:opacity-40 text-ink font-semibold rounded-xl px-4 py-2 text-sm"><i data-lucide="plus" class="w-4 inline"></i> Tambah 0</button>
           <label class="glass border border-mint/10 rounded-lg px-4 py-2 text-sm cursor-pointer hover:border-jadebright/40 flex items-center gap-2"><i data-lucide="file-up" class="w-4"></i> Upload .txt<input id="fileUp" type="file" accept=".txt,.csv" class="hidden" /></label>
+          <button id="snkEditBtn" class="glass border border-jadebright/30 text-jadebright rounded-lg px-4 py-2 text-sm hover:bg-jadebright/10 flex items-center gap-2"><i data-lucide="file-text" class="w-4"></i> SNK</button>
+        </div>
+        <div id="snkEditor" class="hidden mt-3 p-3 glass border border-jadebright/20 rounded-xl">
+          <label class="text-sm font-semibold text-white flex items-center gap-2 mb-2"><i data-lucide="file-text" class="w-4 text-jadebright"></i> Edit SNK (Syarat & Ketentuan)</label>
+          <textarea id="snkInput" rows="3" class="w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright">${(variant.snk || '').replace(/</g,'&lt;')}</textarea>
+          <button id="snkSaveBtn" class="mt-2 bg-jadebright text-ink font-semibold rounded-xl px-4 py-2 text-sm hover:brightness-110 transition"><i data-lucide="check" class="w-4 inline"></i> Simpan SNK</button>
         </div>
       </div>
       <div class="glass border border-mint/10 rounded-2xl overflow-hidden">
@@ -196,6 +243,16 @@ async function renderStockManager() {
       const payloads = bulk.value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
       try { const { added } = await api("add_stock", { variant_id: selectedVariant, payloads });
       toast(`${added} stok ditambahkan`); bulk.value = ""; await loadCatalog({ refreshInsights: true }); renderStockManager(); } catch (e) { toast(e.message, false); }
+    });
+    $("#snkEditBtn", box).addEventListener("click", () => {
+      const editor = $("#snkEditor", box);
+      editor.classList.toggle("hidden");
+      lucide.createIcons();
+    });
+    $("#snkSaveBtn", box).addEventListener("click", async () => {
+      const snk = $("#snkInput", box).value.trim();
+      try { await api("save_snk", { variant_id: selectedVariant, snk });
+        toast("SNK disimpan"); $("#snkEditor", box).classList.add("hidden"); await loadCatalog(); } catch (e) { toast(e.message, false); }
     });
     $$(".del-stock", box).forEach(b=>b.addEventListener("click", async()=>{
     try { await api("delete_stock", { id: b.dataset.id }); toast("Stok dihapus"); await loadCatalog({ refreshInsights: true }); renderStockManager(); } catch (e) { toast(e.message, false); }
@@ -234,6 +291,39 @@ $("#saveConfigBtn").addEventListener("click", async () => {
   try { await api("save_config", { pakasir_project: $("#pkProject").value.trim(), pakasir_mode: $("#pkMode").value, webhook_url: $("#pkWebhook").value.trim(), pakasir_api_key: $("#pkApiKey").value.trim() });
     $("#pkApiKey").value = ""; toast("Konfigurasi disimpan"); loadConfig();
   } catch(e){ toast(e.message, false); }
+});
+
+/* ===================== STORE SETTINGS ===================== */
+async function loadStoreConfig() {
+  try {
+    const r = await fetch("/api/store-config");
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    $("#sName").value = d.name || "";
+    $("#sTagline").value = d.tagline || "";
+    $("#sHeroTitle").value = d.hero_title || "";
+    $("#sHeroSub").value = d.hero_subtitle || "";
+    $("#sFooter").value = d.footer_text || "";
+  } catch(e) { toast(e.message, false); }
+}
+$("#saveStoreBtn").addEventListener("click", async () => {
+  const body = {
+    store_name: $("#sName").value.trim(),
+    store_tagline: $("#sTagline").value.trim(),
+    store_hero_title: $("#sHeroTitle").value.trim(),
+    store_hero_subtitle: $("#sHeroSub").value.trim(),
+    store_footer_text: $("#sFooter").value.trim(),
+  };
+  try {
+    const r = await fetch("/api/store-save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+      body: JSON.stringify(body),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    toast("Pengaturan toko disimpan");
+  } catch(e) { toast(e.message, false); }
 });
 
 /* ===================== INIT ===================== */

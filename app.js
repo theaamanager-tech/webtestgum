@@ -12,6 +12,31 @@ let searchTerm = "";
 let pollTimer = null;
 let currentSelection = null; // { product, variant }
 
+/* ===================== STORE CONFIG ===================== */
+let STORE = {};
+async function loadStoreConfig() {
+  try {
+    const r = await fetch(`/api/store-config?t=${Date.now()}`);
+    const d = await r.json();
+    if (r.ok) STORE = d;
+  } catch (e) { /* use defaults */ }
+  applyStoreConfig();
+}
+function applyStoreConfig() {
+  if (!STORE.name) return;
+  document.title = STORE.name + " — " + (STORE.tagline || "Produk Digital Premium");
+  const heroTitle = $("#heroTitle");
+  if (heroTitle) heroTitle.innerHTML = STORE.hero_title || heroTitle.innerHTML;
+  const heroSub = $("#heroSub");
+  if (heroSub) heroSub.innerHTML = STORE.hero_subtitle || heroSub.innerHTML;
+  const footerEl = document.querySelector("footer p, footer");
+  if (footerEl) footerEl.innerHTML = STORE.footer_text || footerEl.innerHTML;
+  const brandEl = document.querySelector(".font-serif a, .font-serif.text-2xl, #sidebar .font-serif");
+  if (brandEl && STORE.name) brandEl.innerHTML = STORE.name.replace(/[°^]/g, m => m);
+  const heroSection = document.querySelector("section.mb-8 span.text-xs");
+  if (heroSection && STORE.tagline) heroSection.textContent = "© " + STORE.name + " — " + STORE.tagline;
+}
+
 /* ===================== TOAST ===================== */
 let toastT;
 function toast(msg, ok = true) {
@@ -53,13 +78,30 @@ function renderStats() {
 function logoGradient(cat) {
   return { ai:"linear-gradient(135deg,#10a37f,#1a7f64)", editing:"linear-gradient(135deg,#7d2ae8,#00c4cc)", account:"linear-gradient(135deg,#0070ba,#1546a0)" }[cat] || "linear-gradient(135deg,#28C39D,#0F7A62)";
 }
+function getSelectedVariant(card) {
+  const sel = card.querySelector(".variant-select");
+  const pid = card.dataset.id;
+  const product = CATALOG.find(x => x.id === pid);
+  if (!product) return null;
+  return product.variants.find(v => v.id === sel.value) || null;
+}
+function updateBuyButton(card) {
+  const v = getSelectedVariant(card);
+  const btn = card.querySelector(".buy-btn");
+  if (!v || v.price == null) {
+    btn.disabled = true; btn.innerHTML = `<i data-lucide="zap" class="w-[16px]"></i> Stok Habis`;
+  } else if (v.available <= 0) {
+    btn.disabled = true; btn.innerHTML = `<i data-lucide="zap" class="w-[16px]"></i> Stok Habis`;
+  } else {
+    btn.disabled = false; btn.innerHTML = `<i data-lucide="zap" class="w-[16px]"></i> Beli`;
+  }
+  lucide.createIcons();
+}
 function productCard(p) {
-  const buyable = p.variants.some((v) => v.price != null && (v.available || 0) > 0);
   const opts = p.variants.map((v) => {
     const label = v.price == null ? `${v.name} — Chat Admin`
-      : `${v.name} — ${rupiah(v.price)}${v.available > 0 ? "" : " (habis)"}`;
-    const dis = v.price != null && v.available <= 0 ? "disabled" : "";
-    return `<option value="${v.id}" ${dis}>${label}</option>`;
+      : `${v.name} — ${rupiah(v.price)}${v.available > 0 ? "" : " ⛔ Stok Habis"}`;
+    return `<option value="${v.id}">${label}</option>`;
   }).join("");
   return `
   <article class="card-in glass border border-mint/10 rounded-2xl p-4 flex flex-col gap-3 hover:border-jadebright/30 transition" data-cat="${p.cat}" data-name="${p.name.toLowerCase()}" data-id="${p.id}">
@@ -70,8 +112,8 @@ function productCard(p) {
     <div><h3 class="font-serif text-lg text-white leading-tight">${p.name}</h3><span class="text-xs text-mint/40">${CAT_LABEL[p.cat] || p.cat}</span></div>
     <div class="font-serif text-xl text-jadebright">${priceRange(p.variants)}</div>
     <select class="variant-select bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright w-full">${opts}</select>
-    <button class="buy-btn w-full bg-jadebright text-ink font-semibold rounded-xl py-2.5 text-sm flex items-center justify-center gap-2 hover:brightness-110 transition disabled:opacity-40" ${buyable ? "" : "disabled"}>
-      <i data-lucide="zap" class="w-[16px]"></i> ${buyable ? "Beli" : "Stok Habis"}
+    <button class="buy-btn w-full bg-jadebright text-ink font-semibold rounded-xl py-2.5 text-sm flex items-center justify-center gap-2 hover:brightness-110 transition disabled:opacity-40">
+      <i data-lucide="zap" class="w-[16px]"></i> Stok Habis
     </button>
   </article>`;
 }
@@ -80,6 +122,11 @@ function renderProducts() {
   const list = CATALOG.filter((p) => (activeFilter === "all" || p.cat === activeFilter) && p.name.toLowerCase().includes(searchTerm));
   grid.innerHTML = list.length ? list.map(productCard).join("") : `<div class="col-span-full text-center text-mint/40 py-12">Tidak ada produk.</div>`;
   lucide.createIcons(); revealCards();
+  // sync each card's buy button with current variant selection
+  list.forEach(p => {
+    const card = grid.querySelector(`article[data-id="${p.id}"]`);
+    if (card) updateBuyButton(card);
+  });
 }
 function revealCards() {
   const io = new IntersectionObserver((es) => es.forEach((en) => { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } }), { threshold: 0.1 });
@@ -250,11 +297,17 @@ function deliver(text, orderId) {
 /* ===================== EVENTS ===================== */
 document.addEventListener("click", (e) => {
   const buy = e.target.closest(".buy-btn");
-  if (buy) { const card = buy.closest("article"); const sel = $(".variant-select", card); startBuy(card.dataset.id, sel.value); return; }
+  if (buy) { if (buy.disabled) return; const card = buy.closest("article"); const sel = $(".variant-select", card); startBuy(card.dataset.id, sel.value); return; }
   const chip = e.target.closest(".chip");
   if (chip) { applyFilter(chip.dataset.filter); return; }
   const cat = e.target.closest(".nav-cat");
   if (cat) { applyFilter(cat.dataset.filter); closeSidebar(); $("#overlay").classList.add("hidden"); }
+});
+document.addEventListener("change", (e) => {
+  if (e.target.classList.contains("variant-select")) {
+    const card = e.target.closest("article");
+    if (card) updateBuyButton(card);
+  }
 });
 $("#searchInput").addEventListener("input", (e) => { searchTerm = e.target.value.trim().toLowerCase(); renderProducts(); });
 $("#menuToggle").addEventListener("click", openSidebar);
@@ -264,4 +317,5 @@ $("#overlay").addEventListener("click", closeOverlays);
 /* ===================== INIT ===================== */
 showSkeleton();
 loadCatalog();
+loadStoreConfig();
 lucide.createIcons();

@@ -92,6 +92,13 @@ export default async function handler(req, res) {
         if (error) throw error; return res.json({ ok: true });
       }
 
+      /* ---------- variant SNK ---------- */
+      case "save_snk": {
+        const { error } = await admin.from("variants").update({ snk: body.snk }).eq("id", body.variant_id);
+        if (error) throw error;
+        return res.json({ ok: true });
+      }
+
       /* ---------- coupons ---------- */
       case "list_coupons": {
         const { data, error } = await admin.from("coupons").select("*").order("created_at", { ascending: false });

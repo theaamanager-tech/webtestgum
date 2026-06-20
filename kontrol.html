@@ -43,15 +43,20 @@
         <span class="font-serif text-2xl font-semibold tracking-tight">nova<em class="italic">ciy</em><sup class="text-jadebright">°</sup></span>
         <span class="text-[10px] font-semibold uppercase tracking-widest text-jadebright bg-jadebright/10 border border-jadebright/30 px-2 py-0.5 rounded-full">Admin</span>
       </div>
-      <nav class="flex flex-col gap-1 text-sm">
+      <nav class="flex flex-col flex-1 gap-1 text-sm">
         <span class="text-[11px] uppercase tracking-widest text-mint/40 mb-1">Kelola</span>
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left bg-jadebright/10 text-white" data-panel="insights"><i data-lucide="trending-up" class="w-[18px]"></i> Insights &amp; Finansial</button>
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="products"><i data-lucide="boxes" class="w-[18px]"></i> Produk</button>
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="stock"><i data-lucide="package-check" class="w-[18px]"></i> Stok &amp; SNK</button>
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="coupons"><i data-lucide="ticket-percent" class="w-[18px]"></i> Kupon</button>
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="settings"><i data-lucide="key-round" class="w-[18px]"></i> Pakasir API</button>
+        <span class="text-[11px] uppercase tracking-widest text-mint/40 mb-1 mt-3">Toko</span>
+        <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="store"><i data-lucide="store" class="w-[18px]"></i> Pengaturan</button>
       </nav>
-      <button id="logoutBtn" class="mt-auto text-sm text-mint/50 hover:text-white flex items-center gap-2"><i data-lucide="log-out" class="w-4"></i> Logout</button>
+      <div class="mt-auto flex flex-col gap-1">
+        <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-mint/50 hover:text-white hover:bg-mint/5 transition"><i data-lucide="external-link" class="w-[18px]"></i> Ke Toko</a>
+        <button id="logoutBtn" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-mint/50 hover:text-white hover:bg-mint/5 transition"><i data-lucide="log-out" class="w-4"></i> Logout</button>
+      </div>
     </aside>
 
     <main class="px-4 sm:px-7 py-5 w-full min-w-0 flex-1">
@@ -132,6 +137,20 @@
           <p id="keyStatus" class="text-xs text-mint/40 mb-4">—</p>
           <button id="saveConfigBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan</button>
           <p class="text-[11px] text-mint/40 mt-3">Set <code>Webhook URL</code> ini juga di dashboard Pakasir (Edit Proyek).</p>
+        </div>
+      </section>
+
+      <!-- ===== STORE SETTINGS ===== -->
+      <section id="panel-store" class="panel">
+        <div class="glass border border-mint/10 rounded-2xl p-6 max-w-xl">
+          <h3 class="text-white font-semibold mb-4"><i data-lucide="store" class="w-5 text-jadebright inline"></i> Pengaturan Toko</h3>
+          <label class="block text-sm mb-3">Nama Toko<input id="sName" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Novaciy°" /></label>
+          <label class="block text-sm mb-3">Tagline<textarea id="sTagline" rows="2" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Produk Digital Premium"></textarea></label>
+          <label class="block text-sm mb-3">Hero Title (HTML diizinkan)<textarea id="sHeroTitle" rows="3" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright"></textarea></label>
+          <label class="block text-sm mb-3">Hero Subtitle (HTML diizinkan)<textarea id="sHeroSub" rows="3" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright"></textarea></label>
+          <label class="block text-sm mb-3">Footer Text<textarea id="sFooter" rows="2" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright"></textarea></label>
+          <button id="saveStoreBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan Pengaturan</button>
+          <p class="text-xs text-mint/40 mt-3">Perubahan akan langsung terlihat di halaman toko setelah disimpan.</p>
         </div>
       </section>
     </main>
