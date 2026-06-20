@@ -41,10 +41,11 @@ async function tryLogin() {
     boot();
   } catch (e) { toast(e.message, false); }
 }
-$("#loginBtn").addEventListener("click", tryLogin);
-$("#adminKey").addEventListener("keydown", (e)=>{ if(e.key==="Enter") tryLogin(); });
-$("#logoutBtn").addEventListener("click", () => { sessionStorage.removeItem("nova_admin_key"); location.reload(); });
-if (ADMIN_KEY) { $("#loginGate").classList.add("hidden"); boot(); }
+$("#loginBtn")?.addEventListener("click", tryLogin);
+$("#adminKey")?.addEventListener("keydown", (e)=>{ if(e.key==="Enter") tryLogin(); });
+$("#logoutBtn")?.addEventListener("click", () => { sessionStorage.removeItem("nova_admin_key"); location.reload(); });
+if (ADMIN_KEY) { boot(); }
+else { document.getElementById("loginGate")?.classList.remove("hidden"); }
 
 /* ===================== NAV ===================== */
 const TITLES = { insights: "Insights & Finansial", rekap: "Rekap Penjualan", products: "Produk", stock: "Stok & SNK", coupons: "Kupon", settings: "Pakasir API", store: "Pengaturan Toko", tampilan: "Tampilan" };

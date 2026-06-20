@@ -73,16 +73,8 @@
 </head>
 <body class="font-sans text-mint/90 antialiased overflow-x-hidden min-h-screen">
 
-  <!-- ============ LOGIN GATE (renders nothing else until unlocked) ============ -->
-  <div id="loginGate" class="fixed inset-0 z-[80] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-ink"></div>
-    <div class="relative glass border border-mint/10 rounded-2xl w-full max-w-sm p-7 text-center">
-      <span class="font-serif text-3xl text-white">nova<em class="italic">ciy</em><sup class="text-jadebright">°</sup></span>
-      <p class="text-sm text-mint/50 mt-2 mb-6">Admin Control Center</p>
-      <input id="adminKey" type="password" placeholder="ADMIN_KEY" class="w-full bg-ink/60 border border-mint/10 rounded-xl px-4 py-3 outline-none focus:border-jadebright text-center" />
-      <button id="loginBtn" class="mt-3 w-full bg-jadebright text-ink font-semibold rounded-xl py-3 hover:brightness-110 transition">Masuk</button>
-    </div>
-  </div>
+  <!-- ============ LOGIN GATE (dinonaktifkan sementara) ============ -->
+  <div id="loginGate" class="hidden">
 
   <div class="flex min-h-screen w-full">
     <!-- SIDEBAR -->
