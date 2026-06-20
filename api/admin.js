@@ -225,6 +225,13 @@ export default async function handler(req, res) {
 
       /* ---------- rekap penjualan ---------- */
       case "list_orders": {
+        // Auto-expire pending orders > 5 menit
+        const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+        await admin.from("orders")
+          .update({ status: "expired" })
+          .eq("status", "pending")
+          .lt("created_at", fiveMinAgo);
+
         const { start_date, end_date } = body;
         let query = admin.from("orders").select("*").order("created_at", { ascending: false });
         if (start_date) query = query.gte("created_at", start_date);
