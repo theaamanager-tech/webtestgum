@@ -17,6 +17,15 @@ export default async function handler(req, res) {
       footer_text: data.store_footer_text || "© Novaciy° · Semua transaksi via QRIS aman.",
       bantuan_contact: data.bantuan_contact || '',
       bantuan_faq: data.bantuan_faq || '',
+      annon: {
+        active: !!data.annon_active,
+        text: data.annon_text || "New feature is ready to use, let's try",
+        badge_text: data.annon_badge_text || "Version 7.8",
+        badge_bg: data.annon_badge_bg || '#28C39D',
+        badge_text_color: data.annon_badge_text_color || '#0D0E10',
+        bg: data.annon_bg || 'rgba(40,195,157,0.12)',
+        text_color: data.annon_text_color || '#CFEEE6',
+      },
     });
   } catch (e) {
     return res.status(500).json({ error: e.message || "Gagal memuat konfigurasi toko" });

@@ -99,6 +99,13 @@ create table public.app_config (
   store_footer_text text default '© Novaciy° · Semua transaksi via QRIS aman.',
   bantuan_contact  text default '',
   bantuan_faq      text default '',
+  annon_active     boolean default false,
+  annon_text       text default 'New feature is ready to use, let\'s try',
+  annon_badge_text text default 'Version 7.8',
+  annon_badge_bg   text default '#28C39D',
+  annon_badge_text_color text default '#0D0E10',
+  annon_bg         text default 'rgba(40,195,157,0.12)',
+  annon_text_color text default '#CFEEE6',
   updated_at      timestamptz not null default now()
 );
 insert into public.app_config (id) values (1) on conflict do nothing;
@@ -160,6 +167,13 @@ insert into public.products (id, name, cat, initials, tag, sort_order) values
 -- alter table public.app_config add column if not exists store_footer_text text default '© Novaciy° · Semua transaksi via QRIS aman.';
 -- alter table public.app_config add column if not exists bantuan_contact text default '';
 -- alter table public.app_config add column if not exists bantuan_faq text default '';
+-- alter table public.app_config add column if not exists annon_active boolean default false;
+-- alter table public.app_config add column if not exists annon_text text default 'New feature is ready to use, let''s try';
+-- alter table public.app_config add column if not exists annon_badge_text text default 'Version 7.8';
+-- alter table public.app_config add column if not exists annon_badge_bg text default '#28C39D';
+-- alter table public.app_config add column if not exists annon_badge_text_color text default '#0D0E10';
+-- alter table public.app_config add column if not exists annon_bg text default 'rgba(40,195,157,0.12)';
+-- alter table public.app_config add column if not exists annon_text_color text default '#CFEEE6';
  ('capcut','CapCut Pro','editing','CC','Best Seller',1),
  ('paypal','PayPal Fresh','account','PP','Ready',2),
  ('chatgpt','ChatGPT Plus','ai','GP','Hot',3),

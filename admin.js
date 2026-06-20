@@ -344,6 +344,15 @@ async function loadStoreConfig() {
     $("#sFooter").value = d.footer_text || "";
     $("#sBantuanContact").value = d.bantuan_contact || "";
     $("#sBantuanFaq").value = d.bantuan_faq || "";
+    if (d.annon) {
+      $("#sAnnonActive").checked = d.annon.active;
+      $("#sAnnonBadge").value = d.annon.badge_text || "";
+      $("#sAnnonText").value = d.annon.text || "";
+      $("#sAnnonBadgeBg").value = d.annon.badge_bg || "#28C39D";
+      $("#sAnnonBadgeTextColor").value = d.annon.badge_text_color || "#0D0E10";
+      $("#sAnnonBg").value = d.annon.bg || "#28C39D";
+      $("#sAnnonTextColor").value = d.annon.text_color || "#CFEEE6";
+    }
   } catch(e) { toast(e.message, false); }
 }
 $("#saveStoreBtn").addEventListener("click", async () => {
@@ -381,6 +390,27 @@ $("#saveBantuanBtn").addEventListener("click", async () => {
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
     toast("Pengaturan bantuan disimpan");
+  } catch(e) { toast(e.message, false); }
+});
+$("#saveAnnonBtn").addEventListener("click", async () => {
+  const body = {
+    annon_active: $("#sAnnonActive").checked,
+    annon_badge_text: $("#sAnnonBadge").value.trim(),
+    annon_text: $("#sAnnonText").value.trim(),
+    annon_badge_bg: $("#sAnnonBadgeBg").value,
+    annon_badge_text_color: $("#sAnnonBadgeTextColor").value,
+    annon_bg: $("#sAnnonBg").value,
+    annon_text_color: $("#sAnnonTextColor").value,
+  };
+  try {
+    const r = await fetch("/api/store-save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+      body: JSON.stringify(body),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    toast("Announcement disimpan");
   } catch(e) { toast(e.message, false); }
 });
 

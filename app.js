@@ -35,6 +35,23 @@ function applyStoreConfig() {
   if (brandEl && STORE.name) brandEl.innerHTML = STORE.name.replace(/[°^]/g, m => m);
   const heroSection = document.querySelector("section.mb-8 span.text-xs");
   if (heroSection && STORE.tagline) heroSection.textContent = "© " + STORE.name + " — " + STORE.tagline;
+  // announcement bar
+  renderAnnouncement();
+}
+
+/* ===================== ANNOUNCEMENT BAR ===================== */
+function renderAnnouncement() {
+  const a = STORE.annon;
+  const container = $("#annonBar");
+  if (!container) return;
+  if (!a || !a.active) { container.innerHTML = ""; container.classList.add("hidden"); return; }
+  container.classList.remove("hidden");
+  container.innerHTML = `
+    <div class="flex items-center space-x-2.5 border rounded-full p-1 text-sm" style="border-color:${a.badge_bg}40;background:${a.bg};color:${a.text_color}">
+      <div class="rounded-2xl px-3 py-1 font-semibold" style="background:${a.badge_bg};color:${a.badge_text_color}">${a.badge_text.replace(/</g,'&lt;')}</div>
+      <span class="pr-3">${a.text.replace(/</g,'&lt;')}</span>
+    </div>`;
+  lucide.createIcons();
 }
 
 /* ===================== TOAST ===================== */
