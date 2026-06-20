@@ -364,10 +364,6 @@ async function loadStoreConfig() {
       $("#sAnnonActive").checked = d.annon.active;
       $("#sAnnonBadge").value = d.annon.badge_text || "";
       $("#sAnnonText").value = d.annon.text || "";
-      $("#sAnnonBadgeBg").value = d.annon.badge_bg || "#28C39D";
-      $("#sAnnonBadgeTextColor").value = d.annon.badge_text_color || "#0D0E10";
-      $("#sAnnonBg").value = d.annon.bg || "#28C39D";
-      $("#sAnnonTextColor").value = d.annon.text_color || "#CFEEE6";
     }
   } catch(e) { toast(e.message, false); }
 }
@@ -413,10 +409,6 @@ $("#saveAnnonBtn").addEventListener("click", async () => {
     annon_active: $("#sAnnonActive").checked,
     annon_badge_text: $("#sAnnonBadge").value.trim(),
     annon_text: $("#sAnnonText").value.trim(),
-    annon_badge_bg: $("#sAnnonBadgeBg").value,
-    annon_badge_text_color: $("#sAnnonBadgeTextColor").value,
-    annon_bg: $("#sAnnonBg").value,
-    annon_text_color: $("#sAnnonTextColor").value,
   };
   try {
     const r = await fetch("/api/store-save", {

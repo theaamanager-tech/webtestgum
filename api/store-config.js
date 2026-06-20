@@ -20,11 +20,11 @@ export default async function handler(req, res) {
       annon: {
         active: !!data.annon_active,
         text: data.annon_text || "New feature is ready to use, let's try",
-        badge_text: data.annon_badge_text || "Version 7.8",
-        badge_bg: data.annon_badge_bg || '#28C39D',
-        badge_text_color: data.annon_badge_text_color || '#0D0E10',
-        bg: data.annon_bg || 'rgba(40,195,157,0.12)',
-        text_color: data.annon_text_color || '#CFEEE6',
+        badge_text: data.annon_badge_text || "Promo",
+        badge_bg: '#28C39D',
+        badge_text_color: '#0D0E10',
+        bg: 'rgba(40,195,157,0.12)',
+        text_color: '#CFEEE6',
       },
       soc: {
         wa_active: !!data.soc_wa_active,
