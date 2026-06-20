@@ -75,12 +75,27 @@ function revealCards() {
   $$(".card-in").forEach((c, i) => { c.style.transitionDelay = (i % 3) * 60 + "ms"; io.observe(c); });
 }
 
+/* ===================== SIDEBAR (mobile) ===================== */
+const openSidebar = () => { $("#sidebar").classList.remove("-translate-x-full"); $("#overlay").classList.remove("hidden"); };
+const closeSidebar = () => $("#sidebar").classList.add("-translate-x-full");
+
 /* ===================== BILLING DRAWER ===================== */
 const openBill = () => { $("#billDrawer").classList.remove("translate-x-full"); $("#overlay").classList.remove("hidden"); };
 const closeBill = () => {
-  $("#billDrawer").classList.add("translate-x-full"); $("#overlay").classList.add("hidden");
+  $("#billDrawer").classList.add("translate-x-full");
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
 };
+const closeOverlays = () => { closeBill(); closeSidebar(); $("#overlay").classList.add("hidden"); };
+
+function applyFilter(filter) {
+  activeFilter = filter;
+  $$(".chip").forEach((c) => {
+    const on = c.dataset.filter === filter;
+    c.classList.toggle("bg-jadebright", on); c.classList.toggle("text-ink", on); c.classList.toggle("font-semibold", on);
+    c.classList.toggle("glass", !on); c.classList.toggle("border", !on); c.classList.toggle("border-mint/10", !on);
+  });
+  renderProducts();
+}
 
 function startBuy(productId, variantId) {
   const p = CATALOG.find((x) => x.id === productId);
@@ -222,16 +237,14 @@ document.addEventListener("click", (e) => {
   const buy = e.target.closest(".buy-btn");
   if (buy) { const card = buy.closest("article"); const sel = $(".variant-select", card); startBuy(card.dataset.id, sel.value); return; }
   const chip = e.target.closest(".chip");
-  if (chip) {
-    activeFilter = chip.dataset.filter;
-    $$(".chip").forEach((c) => { c.classList.remove("bg-jadebright", "text-ink", "font-semibold"); c.classList.add("glass", "border", "border-mint/10"); });
-    chip.classList.add("bg-jadebright", "text-ink", "font-semibold"); chip.classList.remove("glass", "border", "border-mint/10");
-    renderProducts();
-  }
+  if (chip) { applyFilter(chip.dataset.filter); return; }
+  const cat = e.target.closest(".nav-cat");
+  if (cat) { applyFilter(cat.dataset.filter); closeSidebar(); $("#overlay").classList.add("hidden"); }
 });
 $("#searchInput").addEventListener("input", (e) => { searchTerm = e.target.value.trim().toLowerCase(); renderProducts(); });
-$("#billClose").addEventListener("click", closeBill);
-$("#overlay").addEventListener("click", closeBill);
+$("#menuToggle").addEventListener("click", openSidebar);
+$("#billClose").addEventListener("click", closeOverlays);
+$("#overlay").addEventListener("click", closeOverlays);
 
 /* ===================== INIT ===================== */
 loadCatalog();
