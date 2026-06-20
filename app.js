@@ -177,7 +177,7 @@ function renderQris(data) {
   $("#billBody").innerHTML = `
     <div class="text-center">
       <span class="inline-flex items-center gap-1.5 text-xs text-jadebright bg-jadebright/10 border border-jadebright/30 px-3 py-1 rounded-full mb-4"><i data-lucide="loader" class="w-3.5 animate-spin"></i> Menunggu pembayaran…</span>
-      <div class="bg-white rounded-2xl p-4 inline-block mb-4"><canvas id="qrCanvas"></canvas></div>
+      <div class="bg-white rounded-2xl p-4 inline-block mb-4"><div id="qrCanvas"></div></div>
       <div class="glass border border-mint/10 rounded-xl p-4 text-left mb-4">
         <div class="flex justify-between text-sm mb-1"><span class="text-mint/50">${data.product_name} · ${data.variant_name}</span></div>
         ${discountLine}
@@ -192,7 +192,11 @@ function renderQris(data) {
     </div>`;
   lucide.createIcons();
   if (window.QRCode && data.qr_string) {
-    QRCode.toCanvas($("#qrCanvas"), data.qr_string, { width: 220, margin: 1 }, (err) => { if (err) console.error(err); });
+    const box = $("#qrCanvas");
+    box.innerHTML = "";
+    try {
+      new QRCode(box, { text: data.qr_string, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
+    } catch (err) { console.error("QR render failed:", err); }
   }
 }
 
