@@ -1,5 +1,5 @@
 -- =====================================================================
---  NOVACIY° — Supabase Schema v2  (run once in Supabase SQL Editor)
+--  VERDENT° — Full Schema  (run ONCE in Supabase SQL Editor)
 --  Direct-purchase QRIS flow (Pakasir) + serverless fulfillment.
 --  Buyers (anon) can read ONLY catalog + stock counts. Everything secret
 --  (stock payloads, orders, coupons, config) is service-role only.
@@ -21,6 +21,7 @@ create table public.products (
   cat         text not null default 'ai',         -- ai | editing | account
   initials    text not null default '',
   tag         text not null default '',
+  subtitle    text not null default '',
   image_url   text not null default '',           -- gambar produk (URL)
   sort_order  int  not null default 0,
   active      boolean not null default true,
@@ -94,16 +95,16 @@ create table public.app_config (
   pakasir_api_key text default '',
   pakasir_mode    text default 'sandbox',          -- sandbox | live
   webhook_url     text default '',
-  store_name      text default 'Novaciy°',
+  store_name      text default 'Verdent°',
   store_tagline   text default 'Produk Digital Premium',
   store_hero_title text default 'Beli sekali klik, akun langsung jadi.',
   store_hero_subtitle text default 'Pilih produk, bayar via QRIS, akun langsung terkirim otomatis.',
-  store_footer_text text default '© Novaciy° · Semua transaksi via QRIS aman.',
+  store_footer_text text default '© Verdent° · Semua transaksi via QRIS aman.',
   bantuan_contact  text default '',
   bantuan_faq      text default '',
   annon_active     boolean default false,
   annon_text       text default 'New feature is ready to use, let\'s try',
-  annon_badge_text text default 'Version 7.8',
+  annon_badge_text text default 'Version 1.0',
   annon_badge_bg   text default '#28C39D',
   annon_badge_text_color text default '#0D0E10',
   annon_bg         text default 'rgba(40,195,157,0.12)',
@@ -146,9 +147,10 @@ create view public.variant_stock as
   from public.stock_items group by variant_id;
 grant select on public.variant_stock to anon, authenticated;
 
--- ==================== ATOMIC SINGLE-UNIT CLAIM ==================
+-- ==================== ATOMIC MULTI-UNIT CLAIM ==================
 -- Locks and claims exactly ONE available unit for an order. Returns its
 -- payload, or null if sold out. Prevents the same unit selling twice.
+-- fulfillment.js calls this in a loop to claim N units.
 create or replace function public.claim_stock(p_variant uuid, p_order text)
 returns text
 language plpgsql
@@ -173,74 +175,4 @@ $$;
 -- Only service role calls this (no grant to anon).
 
 -- ========================== SEED DATA ===========================
-insert into public.products (id, name, cat, initials, tag, sort_order) values
-
--- ========== UPGRADE NOTE — if you already ran schema.sql before, run these ALTER statements in Supabase SQL Editor:
--- alter table public.app_config add column if not exists store_name text default 'Novaciy°';
--- alter table public.products add column if not exists image_url text default '';
-
--- Note: Juga buat bucket "product-images" di Supabase Storage (Public bucket) untuk upload gambar produk.
--- RLS policy untuk anon: boleh upload ke bucket product-images (untuk client-side upload).
--- Atau pakai service-role key via serverless function /api/admin (rekomendasi).
--- alter table public.app_config add column if not exists store_tagline text default 'Produk Digital Premium';
--- alter table public.app_config add column if not exists store_hero_title text default 'Beli sekali klik, akun langsung jadi.';
--- alter table public.app_config add column if not exists store_hero_subtitle text default 'Pilih produk, bayar via QRIS, akun langsung terkirim otomatis.';
--- alter table public.app_config add column if not exists store_footer_text text default '© Novaciy° · Semua transaksi via QRIS aman.';
--- alter table public.app_config add column if not exists bantuan_contact text default '';
--- alter table public.app_config add column if not exists bantuan_faq text default '';
--- alter table public.app_config add column if not exists annon_active boolean default false;
--- alter table public.app_config add column if not exists telegram_bot_token text default '';
--- alter table public.app_config add column if not exists telegram_chat_id text default '';
--- alter table public.orders add column if not exists quantity int not null default 1;
--- alter table public.app_config add column if not exists annon_text text default 'New feature is ready to use, let''s try';
--- alter table public.app_config add column if not exists annon_badge_text text default 'Version 7.8';
--- alter table public.app_config add column if not exists annon_badge_bg text default '#28C39D';
--- alter table public.app_config add column if not exists annon_badge_text_color text default '#0D0E10';
--- alter table public.app_config add column if not exists annon_bg text default 'rgba(40,195,157,0.12)';
--- alter table public.app_config add column if not exists annon_text_color text default '#CFEEE6';
--- alter table public.app_config add column if not exists soc_wa_active boolean default false;
--- alter table public.app_config add column if not exists soc_wa_number text default '';
--- alter table public.app_config add column if not exists soc_tele_active boolean default false;
--- alter table public.app_config add column if not exists soc_tele_channel text default '';
--- alter table public.app_config add column if not exists soc_tele_channel_active boolean default false;
--- alter table public.app_config add column if not exists soc_tele_bot text default '';
--- alter table public.app_config add column if not exists soc_tele_bot_active boolean default false;
--- alter table public.app_config add column if not exists soc_x_active boolean default false;
--- alter table public.app_config add column if not exists soc_x_link text default '';
--- alter table public.app_config add column if not exists soc_ig_active boolean default false;
--- alter table public.app_config add column if not exists soc_ig_link text default '';
- ('capcut','CapCut Pro','editing','CC','Best Seller',1),
- ('paypal','PayPal Fresh','account','PP','Ready',2),
- ('chatgpt','ChatGPT Plus','ai','GP','Hot',3),
- ('grok','Super Grok','ai','GK','New',4),
- ('gemini','Gemini AI Pro','ai','GM','Promo',5),
- ('canva','Canva Pro','editing','CV','Populer',6);
-
-insert into public.variants (product_id, name, price, snk, sort_order) values
- ('capcut','7 Hari',15000,'Garansi 7 hari. Jangan ganti password & email.',1),
- ('capcut','30 Hari',35000,'Garansi 30 hari penuh. Login max 1 device.',2),
- ('paypal','Domain',3000,'Akun fresh. Wajib ganti password setelah terima.',1),
- ('paypal','Gmail',5000,'Akun fresh + Gmail. Simpan recovery info.',2),
- ('chatgpt','No Garansi',35000,'Tanpa garansi. Jangan ubah data akun.',1),
- ('chatgpt','Full Garansi',60000,'Garansi penuh 30 hari. Login via link kami.',2),
- ('grok','3 Hari',5000,'Trial 3 hari. Tidak bisa diperpanjang.',1),
- ('grok','30 Hari',160000,'Garansi 30 hari. 1 akun 1 user.',2),
- ('gemini','3 Bulan',40000,'Aktif 3 bulan. Jangan logout dari semua device.',1),
- ('gemini','12 Bulan',75000,'Aktif 12 bulan. Garansi replace bila bermasalah.',2),
- ('canva','1 Bulan Invite',3000,'Via invite link. Jangan keluar dari tim.',1),
- ('canva','1 Bulan Individual',10000,'Akun individual 1 bulan.',2),
- ('canva','1 Bulan Owner',null,'Harga custom, chat admin dulu.',3);
-
--- demo stock so QRIS fulfillment can be tested end-to-end
-insert into public.stock_items (variant_id, payload)
-select v.id, 'capcut7-demo-'||g||' | user'||g||'@mail.com | passW0rd'||g
-from public.variants v cross join generate_series(1,8) g
-where v.product_id='capcut' and v.name='7 Hari';
-
-insert into public.stock_items (variant_id, payload)
-select v.id, 'chatgpt-full-'||g||' | login: cg'||g||'@mail.com | pass: cgPass'||g
-from public.variants v cross join generate_series(1,5) g
-where v.product_id='chatgpt' and v.name='Full Garansi';
-
--- sample coupon
-insert into public.coupons (code, type, value, max_uses) values ('HEMAT10','percent',10,0);
+-- Kosong — tidak ada default. Admin akan tambah produk via panel.

@@ -664,9 +664,36 @@ $("#saveTampilanBtn").addEventListener("click", () => {
 /* ===================== INIT ===================== */
 $("#refreshBtn").addEventListener("click", async () => { await loadCatalog({ refreshInsights: true }); toast("Data dashboard disinkronkan"); });
 
+function applyAdminBrand() {
+  try {
+    var c = JSON.parse(localStorage.getItem("nova_store_cache"));
+    if (!c || !c.name) return;
+    var prefix = c.name.slice(0, 4);
+    var suffix = c.name.slice(4).replace(/[°^]/g, '');
+    var dot = c.name.includes('°') ? '°' : c.name.includes('^') ? '^' : '';
+    var html = suffix && dot
+      ? prefix + '<em class="italic">' + suffix + '</em><sup class="text-jadebright">' + dot + '</sup>'
+      : c.name;
+    document.title = c.name + " — Admin";
+    var els = document.querySelectorAll('#sidebar .font-serif, #loginGate .font-serif');
+    for (var i = 0; i < els.length; i++) els[i].innerHTML = html;
+  } catch(e){}
+}
+
 function startAutoSync() {
   if (window.__novaAdminSync) clearInterval(window.__novaAdminSync);
   window.__novaAdminSync = setInterval(() => loadCatalog({ refreshInsights: true }), 30000);
 }
-function boot() { loadCatalog({ refreshInsights: true }); startAutoSync(); }
+function boot() {
+  applyAdminBrand();
+  loadCatalog({ refreshInsights: true });
+  startAutoSync();
+  // fetch store config → update cache + brand
+  fetch("/api/store-config?t=" + Date.now()).then(function(r){return r.json();}).then(function(d){
+    if (d && d.name) {
+      localStorage.setItem("nova_store_cache", JSON.stringify(d));
+      applyAdminBrand();
+    }
+  }).catch(function(){});
+}
 lucide.createIcons();
