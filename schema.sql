@@ -94,7 +94,7 @@ create table public.app_config (
   webhook_url     text default '',
   store_name      text default 'Novaciy°',
   store_tagline   text default 'Produk Digital Premium',
-  store_hero_title text default 'Beli sekali klik,<br><em class="italic text-jadebright">akun langsung jadi.</em>',
+  store_hero_title text default 'Beli sekali klik, akun langsung jadi.',
   store_hero_subtitle text default 'Pilih variasi, klik <strong class="text-white">Beli</strong>, scan QRIS, dan akun otomatis terkirim sebagai file begitu pembayaran sukses.',
   store_footer_text text default '© Novaciy° · Semua transaksi via QRIS aman.',
   updated_at      timestamptz not null default now()
@@ -153,7 +153,7 @@ insert into public.products (id, name, cat, initials, tag, sort_order) values
 -- ========== UPGRADE NOTE — if you already ran schema.sql before, run these ALTER statements in Supabase SQL Editor:
 -- alter table public.app_config add column if not exists store_name text default 'Novaciy°';
 -- alter table public.app_config add column if not exists store_tagline text default 'Produk Digital Premium';
--- alter table public.app_config add column if not exists store_hero_title text default 'Beli sekali klik,<br><em class="italic text-jadebright">akun langsung jadi.</em>';
+-- alter table public.app_config add column if not exists store_hero_title text default 'Beli sekali klik, akun langsung jadi.';
 -- alter table public.app_config add column if not exists store_hero_subtitle text default 'Pilih variasi, klik <strong class="text-white">Beli</strong>, scan QRIS, dan akun otomatis terkirim sebagai file begitu pembayaran sukses.';
 -- alter table public.app_config add column if not exists store_footer_text text default '© Novaciy° · Semua transaksi via QRIS aman.';
  ('capcut','CapCut Pro','editing','CC','Best Seller',1),

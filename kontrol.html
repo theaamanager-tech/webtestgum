@@ -46,6 +46,7 @@
       <nav class="flex flex-col flex-1 gap-1 text-sm">
         <span class="text-[11px] uppercase tracking-widest text-mint/40 mb-1">Kelola</span>
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left bg-jadebright/10 text-white" data-panel="insights"><i data-lucide="trending-up" class="w-[18px]"></i> Insights &amp; Finansial</button>
+        <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="rekap"><i data-lucide="receipt-text" class="w-[18px]"></i> Rekap Penjualan</button>
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="products"><i data-lucide="boxes" class="w-[18px]"></i> Produk</button>
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="stock"><i data-lucide="package-check" class="w-[18px]"></i> Stok &amp; SNK</button>
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="coupons"><i data-lucide="ticket-percent" class="w-[18px]"></i> Kupon</button>
@@ -77,6 +78,51 @@
         <div class="glass border border-mint/10 rounded-2xl p-5">
           <h3 class="text-white font-semibold mb-4 flex items-center gap-2"><i data-lucide="award" class="w-5 text-jadebright"></i> Produk Terlaris</h3>
           <div id="topSellers" class="flex flex-col gap-3"></div>
+        </div>
+      </section>
+
+      <!-- ===== REKAP PENJUALAN ===== -->
+      <section id="panel-rekap" class="panel">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div class="flex items-center gap-3 flex-wrap">
+            <input id="rekapStart" type="date" class="bg-ink/60 border border-mint/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-jadebright" />
+            <span class="text-mint/40 text-sm">—</span>
+            <input id="rekapEnd" type="date" class="bg-ink/60 border border-mint/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-jadebright" />
+            <button id="rekapFilterBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-4 py-2 text-sm hover:brightness-110 transition flex items-center gap-2"><i data-lucide="search" class="w-4"></i> Filter</button>
+            <button id="rekapResetBtn" class="glass border border-mint/10 rounded-xl px-4 py-2 text-sm hover:bg-mint/5">Hari Ini</button>
+          </div>
+          <span id="rekapCount" class="text-xs text-mint/50">—</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+          <div class="glass border border-jadebright/20 rounded-2xl p-4">
+            <span class="text-xs text-mint/50">Total Pesanan</span>
+            <span id="rkTotalOrders" class="block font-serif text-2xl text-white mt-1">—</span>
+          </div>
+          <div class="glass border border-jadebright/20 rounded-2xl p-4">
+            <span class="text-xs text-mint/50">Lunas</span>
+            <span id="rkPaidOrders" class="block font-serif text-2xl text-jadebright mt-1">—</span>
+          </div>
+          <div class="glass border border-jadebright/20 rounded-2xl p-4">
+            <span class="text-xs text-mint/50">Pendapatan</span>
+            <span id="rkRevenue" class="block font-serif text-2xl text-white mt-1">—</span>
+          </div>
+          <div class="glass border border-jadebright/20 rounded-2xl p-4">
+            <span class="text-xs text-mint/50">Rata-rata Pesanan</span>
+            <span id="rkAvg" class="block font-serif text-2xl text-white mt-1">—</span>
+          </div>
+        </div>
+        <div class="glass border border-mint/10 rounded-2xl overflow-x-auto">
+          <table class="w-full min-w-[700px] text-sm">
+            <thead class="text-mint/40"><tr class="border-b border-mint/10">
+              <th class="p-3 text-left">Order ID</th>
+              <th class="p-3 text-left">Produk</th>
+              <th class="p-3 text-left">Varian</th>
+              <th class="p-3 text-left">Status</th>
+              <th class="p-3 text-right">Total</th>
+              <th class="p-3 text-right">Tanggal</th>
+            </tr></thead>
+            <tbody id="rekapTable"></tbody>
+          </table>
         </div>
       </section>
 

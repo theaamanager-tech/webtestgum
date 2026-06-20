@@ -159,6 +159,32 @@ export default async function handler(req, res) {
         }});
       }
 
+      /* ---------- rekap penjualan ---------- */
+      case "list_orders": {
+        const { start_date, end_date } = body;
+        let query = admin.from("orders").select("*").order("created_at", { ascending: false });
+        if (start_date) query = query.gte("created_at", start_date);
+        if (end_date) query = query.lte("created_at", end_date + "T23:59:59Z");
+        const { data, error } = await query;
+        if (error) throw error;
+
+        const orders = (data || []).map((o) => ({
+          ...o,
+          total_price: o.amount || 0,
+          status_badge: o.status === "paid" ? "Lunas" : o.status === "pending" ? "Pending" : o.status === "failed" ? "Gagal" : o.status,
+        }));
+        const lunas = orders.filter((o) => o.status === "paid");
+        const revenue = lunas.reduce((a, o) => a + (o.amount || 0), 0);
+        const avgOrder = lunas.length ? Math.round(revenue / lunas.length) : 0;
+
+        return res.json({ orders, summary: {
+          total_orders: orders.length,
+          paid_orders: lunas.length,
+          revenue,
+          avg_order: avgOrder,
+        }});
+      }
+
       default:
         return res.status(400).json({ error: "Unknown action: " + action });
     }

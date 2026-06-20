@@ -47,7 +47,7 @@ $("#logoutBtn").addEventListener("click", () => { sessionStorage.removeItem("nov
 if (ADMIN_KEY) { $("#loginGate").classList.add("hidden"); boot(); }
 
 /* ===================== NAV ===================== */
-const TITLES = { insights: "Insights & Finansial", products: "Produk", stock: "Stok & SNK", coupons: "Kupon", settings: "Pakasir API", store: "Pengaturan Toko" };
+const TITLES = { insights: "Insights & Finansial", rekap: "Rekap Penjualan", products: "Produk", stock: "Stok & SNK", coupons: "Kupon", settings: "Pakasir API", store: "Pengaturan Toko" };
 $$(".nav-item").forEach((b) => b.addEventListener("click", () => {
   $$(".nav-item").forEach(x => x.classList.remove("bg-jadebright/10","text-white"));
   b.classList.add("bg-jadebright/10","text-white");
@@ -55,6 +55,7 @@ $$(".nav-item").forEach((b) => b.addEventListener("click", () => {
   const panel = b.dataset.panel;
   $("#panel-" + panel).classList.add("active"); $("#panelTitle").textContent = TITLES[panel];
   if (panel === "insights") loadInsights();
+  if (panel === "rekap") { setDefaultDates(); loadRekap($("#rekapStart").value, $("#rekapEnd").value); }
   if (panel === "coupons") loadCoupons();
   if (panel === "settings") loadConfig();
   if (panel === "store") loadStoreConfig();
@@ -80,6 +81,43 @@ async function loadInsights() {
       </div>`).join("") : `<p class="text-mint/40 text-sm">Belum ada penjualan.</p>`;
   } catch (e) { toast(e.message, false); }
 }
+
+/* ===================== REKAP PENJUALAN ===================== */
+async function loadRekap(startDate, endDate) {
+  try {
+    const { orders, summary } = await api("list_orders", { start_date: startDate, end_date: endDate });
+    $("#rekapCount").textContent = `${(orders || []).length} pesanan`;
+    $("#rkTotalOrders").textContent = summary.total_orders;
+    $("#rkPaidOrders").textContent = summary.paid_orders;
+    $("#rkRevenue").textContent = rupiah(summary.revenue);
+    $("#rkAvg").textContent = rupiah(summary.avg_order);
+
+    $("#rekapTable").innerHTML = (orders || []).length
+      ? orders.map(o => `
+        <tr class="border-b border-mint/5 hover:bg-mint/[.03]">
+          <td class="p-3 text-xs font-mono text-mint/60">${o.order_id ? o.order_id.slice(0, 12) : '—'}</td>
+          <td class="p-3 text-white">${o.product_name || '—'}</td>
+          <td class="p-3 text-mint/60">${o.variant_name || '—'}</td>
+          <td class="p-3">${statusBadge(o.status)}</td>
+          <td class="p-3 text-right font-mono text-white">${rupiah(o.amount)}</td>
+          <td class="p-3 text-right text-mint/40 text-xs">${o.created_at ? new Date(o.created_at).toLocaleDateString('id-ID') : '—'}</td>
+        </tr>`).join("")
+      : `<tr><td colspan="6" class="p-8 text-center text-mint/40">Belum ada pesanan.</td></tr>`;
+    lucide.createIcons();
+  } catch (e) { toast(e.message, false); }
+}
+function statusBadge(status) {
+  const m = { paid: ['Lunas', 'bg-jadebright/10 text-jadebright border-jadebright/30'], pending: ['Pending', 'bg-amber-400/10 text-amber-300 border-amber-400/30'], failed: ['Gagal', 'bg-red-400/10 text-red-300 border-red-400/30'], expired: ['Kadaluarsa', 'bg-mint/5 text-mint/50 border-mint/10'] };
+  const [label, cls] = m[status] || [status, 'bg-mint/5 text-mint/50 border-mint/10'];
+  return `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full border ${cls}">${label}</span>`;
+}
+function setDefaultDates() {
+  const today = new Date().toISOString().slice(0, 10);
+  $("#rekapStart").value = today;
+  $("#rekapEnd").value = today;
+}
+$("#rekapFilterBtn").addEventListener("click", () => loadRekap($("#rekapStart").value || undefined, $("#rekapEnd").value || undefined));
+$("#rekapResetBtn").addEventListener("click", () => { setDefaultDates(); loadRekap($("#rekapStart").value, $("#rekapEnd").value); });
 
 /* ===================== CATALOG / PRODUCTS ===================== */
 async function loadCatalog({ refreshInsights = false } = {}) {

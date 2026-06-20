@@ -26,7 +26,7 @@ function applyStoreConfig() {
   if (!STORE.name) return;
   document.title = STORE.name + " — " + (STORE.tagline || "Produk Digital Premium");
   const heroTitle = $("#heroTitle");
-  if (heroTitle) heroTitle.innerHTML = STORE.hero_title || heroTitle.innerHTML;
+  if (heroTitle) heroTitle.innerHTML = (STORE.hero_title || "").replace(/<br\s*\/?>/gi, " ") || heroTitle.innerHTML;
   const heroSub = $("#heroSub");
   if (heroSub) heroSub.innerHTML = STORE.hero_subtitle || heroSub.innerHTML;
   const footerEl = document.querySelector("footer p, footer");
@@ -98,7 +98,12 @@ function updateBuyButton(card) {
   lucide.createIcons();
 }
 function productCard(p) {
-  const opts = p.variants.map((v) => {
+  const sorted = [...p.variants].sort((a, b) => {
+    if ((a.available || 0) > 0 && (b.available || 0) <= 0) return -1;
+    if ((a.available || 0) <= 0 && (b.available || 0) > 0) return 1;
+    return a.price != null && b.price != null ? a.price - b.price : 0;
+  });
+  const opts = sorted.map((v) => {
     const label = v.price == null ? `${v.name} — Chat Admin`
       : `${v.name} — ${rupiah(v.price)}${v.available > 0 ? "" : " ⛔ Stok Habis"}`;
     return `<option value="${v.id}">${label}</option>`;
