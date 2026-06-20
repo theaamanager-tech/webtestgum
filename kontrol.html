@@ -244,8 +244,13 @@
       <!-- ===== STORE SETTINGS ===== -->
       <section id="panel-store" class="panel">
         <div class="grid xl:grid-cols-2 gap-4">
-          <div class="glass border border-mint/10 rounded-2xl p-6">
-            <h3 class="text-white font-semibold mb-4"><i data-lucide="store" class="w-5 text-jadebright inline"></i> Pengaturan Toko</h3>
+          <div class="glass border border-mint/10 rounded-xl overflow-hidden">
+            <button class="accord-btn w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-mint/5 transition" data-target="tokoBody">
+              <i data-lucide="store" class="w-5 text-jadebright shrink-0"></i>
+              <span class="font-semibold text-white text-sm">Pengaturan Toko</span>
+              <i data-lucide="chevron-down" class="w-4 text-mint/40 ml-auto accord-icon transition-transform"></i>
+            </button>
+            <div id="tokoBody" class="accord-body px-5 pb-5 hidden">
             <label class="block text-sm mb-3">Nama Toko<input id="sName" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Novaciy°" /></label>
             <label class="block text-sm mb-3">Tagline<textarea id="sTagline" rows="2" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Produk Digital Premium"></textarea></label>
             <label class="block text-sm mb-3">Hero Title (HTML diizinkan)<textarea id="sHeroTitle" rows="3" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright"></textarea></label>
@@ -253,6 +258,7 @@
             <label class="block text-sm mb-3">Footer Text<textarea id="sFooter" rows="2" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright"></textarea></label>
             <button id="saveStoreBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan Pengaturan</button>
             <p class="text-xs text-mint/40 mt-3">Perubahan akan langsung terlihat di halaman toko setelah disimpan.</p>
+            </div>
           </div>
 
           <div class="flex flex-col gap-3">
