@@ -365,11 +365,10 @@ function renderBantuan() {
     ${socHTML ? `<div class="glass border border-mint/10 rounded-2xl p-5">
       <h4 class="text-white font-semibold flex items-center gap-2 mb-3"><i data-lucide="share-2" class="w-4 text-jadebright"></i> Hubungi Kami</h4>
       <div class="flex flex-col gap-2">${socHTML}</div>
-    </div>` : ""}
-    <div class="glass border border-mint/10 rounded-2xl p-5">
-      <h4 class="text-white font-semibold flex items-center gap-2 mb-3"><i data-lucide="message-circle" class="w-4 text-jadebright"></i> Kontak Admin</h4>
+    </div>` : `<div class="glass border border-mint/10 rounded-2xl p-5">
+      <h4 class="text-white font-semibold flex items-center gap-2 mb-3"><i data-lucide="message-circle" class="w-4 text-jadebright"></i> Hubungi Kami</h4>
       <div class="text-sm text-mint/70 whitespace-pre-wrap">${contact.replace(/</g, "&lt;")}</div>
-    </div>
+    </div>`}
     ${faq.length ? `
     <div class="glass border border-mint/10 rounded-2xl p-5">
       <h4 class="text-white font-semibold flex items-center gap-2 mb-3"><i data-lucide="help-circle" class="w-4 text-jadebright"></i> Pertanyaan Umum</h4>
