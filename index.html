@@ -16,7 +16,7 @@
     }}};
   </script>
   <script>
-    // Background rotator — ganti gambar tiap 2 jam
+    // Background rotator
     (function(){
       var bgList = [
         "bg/moon-sky-night-background-asset-game-2d-futuristic-generative-ai.jpg",
@@ -25,15 +25,22 @@
         "bg/mythical-dragon-beast-anime-style.jpg",
         "bg/illustration-anime-character-rain.jpg"
       ];
-      var idx = localStorage.getItem("nova_bg_idx");
-      idx = idx === null ? Math.floor(Math.random() * bgList.length) : (Number(idx) + 1) % bgList.length;
-      localStorage.setItem("nova_bg_idx", idx);
-      document.documentElement.style.setProperty("--bg-img", "url(" + bgList[idx] + ")");
-      setInterval(function(){
-        idx = (idx + 1) % bgList.length;
+      var mode = localStorage.getItem("nova_bg_mode") || "auto";
+      if (mode === "manual") {
+        var midx = Number(localStorage.getItem("nova_bg_manual_idx") || 0);
+        document.documentElement.style.setProperty("--bg-img", "url(" + bgList[midx] + ")");
+      } else {
+        var idx = localStorage.getItem("nova_bg_idx");
+        idx = idx === null ? Math.floor(Math.random() * bgList.length) : (Number(idx) + 1) % bgList.length;
         localStorage.setItem("nova_bg_idx", idx);
         document.documentElement.style.setProperty("--bg-img", "url(" + bgList[idx] + ")");
-      }, 7200000);
+        var intervalMs = (Number(localStorage.getItem("nova_bg_interval")) || 120) * 60 * 1000;
+        setInterval(function(){
+          idx = (idx + 1) % bgList.length;
+          localStorage.setItem("nova_bg_idx", idx);
+          document.documentElement.style.setProperty("--bg-img", "url(" + bgList[idx] + ")");
+        }, Math.max(intervalMs, 300000));
+      }
     })();
   </script>
   <script src="https://unpkg.com/lucide@latest"></script>

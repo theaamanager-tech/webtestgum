@@ -47,7 +47,7 @@ $("#logoutBtn").addEventListener("click", () => { sessionStorage.removeItem("nov
 if (ADMIN_KEY) { $("#loginGate").classList.add("hidden"); boot(); }
 
 /* ===================== NAV ===================== */
-const TITLES = { insights: "Insights & Finansial", rekap: "Rekap Penjualan", products: "Produk", stock: "Stok & SNK", coupons: "Kupon", settings: "Pakasir API", store: "Pengaturan Toko" };
+const TITLES = { insights: "Insights & Finansial", rekap: "Rekap Penjualan", products: "Produk", stock: "Stok & SNK", coupons: "Kupon", settings: "Pakasir API", store: "Pengaturan Toko", tampilan: "Tampilan" };
 $$(".nav-item").forEach((b) => b.addEventListener("click", () => {
   $$(".nav-item").forEach(x => x.classList.remove("bg-jadebright/10","text-white"));
   b.classList.add("bg-jadebright/10","text-white");
@@ -59,6 +59,7 @@ $$(".nav-item").forEach((b) => b.addEventListener("click", () => {
   if (panel === "coupons") loadCoupons();
   if (panel === "settings") loadConfig();
   if (panel === "store") loadStoreConfig();
+  if (panel === "tampilan") loadTampilan();
   $("#sidebar").classList.add("-translate-x-full");
 }));
 $("#menuToggle").addEventListener("click", () => $("#sidebar").classList.toggle("-translate-x-full"));
@@ -412,6 +413,70 @@ $("#saveAnnonBtn").addEventListener("click", async () => {
     if (!r.ok) throw new Error(d.error);
     toast("Announcement disimpan");
   } catch(e) { toast(e.message, false); }
+});
+
+/* ===================== TAMPILAN ===================== */
+const BG_LIST = [
+  { file: "bg/moon-sky-night-background-asset-game-2d-futuristic-generative-ai.jpg", label: "Moon Sky" },
+  { file: "bg/halloween-scene-illustration-anime-style.jpg", label: "Halloween" },
+  { file: "bg/anime-style-mythical-dragon-creature.jpg", label: "Dragon" },
+  { file: "bg/mythical-dragon-beast-anime-style.jpg", label: "Dragon Beast" },
+  { file: "bg/illustration-anime-character-rain.jpg", label: "Rain" },
+];
+
+function loadTampilan() {
+  const mode = localStorage.getItem("nova_bg_mode") || "auto";
+  const idx = localStorage.getItem("nova_bg_manual_idx") || 0;
+  const interval = localStorage.getItem("nova_bg_interval") || "120";
+  $("#bgMode").value = mode;
+  $("#bgInterval").value = interval;
+  renderBgPicker(Number(idx));
+  toggleBgMode();
+  $("#bgMode").addEventListener("change", toggleBgMode);
+}
+
+function toggleBgMode() {
+  const mode = $("#bgMode").value;
+  $("#bgManualPicker").classList.toggle("hidden", mode !== "manual");
+  $("#bgAutoSettings").classList.toggle("hidden", mode !== "auto");
+}
+
+function renderBgPicker(activeIdx) {
+  $("#bgList").innerHTML = BG_LIST.map((b, i) => `
+    <button class="bg-opt text-left rounded-xl p-2 border text-sm ${i === activeIdx ? 'border-jadebright bg-jadebright/10' : 'border-mint/10 glass hover:border-jadebright/40'}" data-idx="${i}">
+      <div class="w-full h-16 rounded-lg mb-1 overflow-hidden" style="background:url(${b.file}) center/cover"></div>
+      <span class="text-xs ${i === activeIdx ? 'text-white' : 'text-mint/70'}">${b.label}</span>
+    </button>
+  `).join("");
+  lucide.createIcons();
+  $$(".bg-opt").forEach(btn => btn.addEventListener("click", () => {
+    const idx = Number(btn.dataset.idx);
+    localStorage.setItem("nova_bg_manual_idx", idx);
+    localStorage.setItem("nova_bg_mode", "manual");
+    applyBgManually(BG_LIST[idx].file);
+    loadTampilan();
+    toast("Background berubah");
+  }));
+}
+
+function applyBgManually(file) {
+  document.documentElement.style.setProperty("--bg-img", `url(${file})`);
+}
+
+$("#saveTampilanBtn").addEventListener("click", () => {
+  const mode = $("#bgMode").value;
+  const interval = Number($("#bgInterval").value) || 120;
+  localStorage.setItem("nova_bg_mode", mode);
+  localStorage.setItem("nova_bg_interval", String(interval));
+
+  if (mode === "auto") {
+    // Reset rotator with new interval
+    localStorage.removeItem("nova_bg_idx");
+    document.documentElement.style.setProperty("--bg-img", "");
+    toast(`Mode auto dengan interval ${interval} menit. Refresh halaman untuk mengaktifkan.`);
+  } else {
+    toast("Pilih gambar manual di atas");
+  }
 });
 
 /* ===================== INIT ===================== */

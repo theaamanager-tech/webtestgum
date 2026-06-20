@@ -24,15 +24,22 @@
         "bg/mythical-dragon-beast-anime-style.jpg",
         "bg/illustration-anime-character-rain.jpg"
       ];
-      var idx = localStorage.getItem("nova_bg_idx");
-      idx = idx === null ? Math.floor(Math.random() * bgList.length) : (Number(idx) + 1) % bgList.length;
-      localStorage.setItem("nova_bg_idx", idx);
-      document.documentElement.style.setProperty("--bg-img", "url(" + bgList[idx] + ")");
-      setInterval(function(){
-        idx = (idx + 1) % bgList.length;
+      var mode = localStorage.getItem("nova_bg_mode") || "auto";
+      if (mode === "manual") {
+        var midx = Number(localStorage.getItem("nova_bg_manual_idx") || 0);
+        document.documentElement.style.setProperty("--bg-img", "url(" + bgList[midx] + ")");
+      } else {
+        var idx = localStorage.getItem("nova_bg_idx");
+        idx = idx === null ? Math.floor(Math.random() * bgList.length) : (Number(idx) + 1) % bgList.length;
         localStorage.setItem("nova_bg_idx", idx);
         document.documentElement.style.setProperty("--bg-img", "url(" + bgList[idx] + ")");
-      }, 7200000);
+        var intervalMs = (Number(localStorage.getItem("nova_bg_interval")) || 120) * 60 * 1000;
+        setInterval(function(){
+          idx = (idx + 1) % bgList.length;
+          localStorage.setItem("nova_bg_idx", idx);
+          document.documentElement.style.setProperty("--bg-img", "url(" + bgList[idx] + ")");
+        }, Math.max(intervalMs, 300000));
+      }
     })();
   </script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -72,6 +79,8 @@
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="stock"><i data-lucide="package-check" class="w-[18px]"></i> Stok &amp; SNK</button>
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="coupons"><i data-lucide="ticket-percent" class="w-[18px]"></i> Kupon</button>
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="settings"><i data-lucide="key-round" class="w-[18px]"></i> Pakasir API</button>
+        <span class="text-[11px] uppercase tracking-widest text-mint/40 mb-1 mt-3">Tampilan</span>
+        <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="tampilan"><i data-lucide="palette" class="w-[18px]"></i> Tampilan</button>
         <span class="text-[11px] uppercase tracking-widest text-mint/40 mb-1 mt-3">Toko</span>
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="store"><i data-lucide="store" class="w-[18px]"></i> Pengaturan</button>
       </nav>
@@ -188,6 +197,31 @@
             <button id="saveCouponBtn" class="w-full bg-jadebright text-ink font-semibold rounded-xl py-2.5 text-sm hover:brightness-110 transition">Simpan Kupon</button>
           </div>
           <div id="couponList" class="flex flex-col gap-3"></div>
+        </div>
+      </section>
+
+      <!-- ===== TAMPILAN ===== -->
+      <section id="panel-tampilan" class="panel">
+        <div class="glass border border-mint/10 rounded-2xl p-6 max-w-xl">
+          <h3 class="text-white font-semibold mb-4"><i data-lucide="palette" class="w-5 text-jadebright inline"></i> Pengaturan Tampilan</h3>
+          <label class="block text-sm mb-3">Mode Background
+            <select id="bgMode" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright">
+              <option value="auto">🔄 Auto — Ganti otomatis</option>
+              <option value="manual">🎯 Manual — Pilih satu gambar</option>
+            </select>
+          </label>
+          <div id="bgManualPicker" class="hidden mb-4">
+            <label class="block text-sm mb-2">Pilih Gambar</label>
+            <div id="bgList" class="grid grid-cols-2 gap-3 max-h-64 overflow-auto pr-1"></div>
+          </div>
+          <div id="bgAutoSettings" class="mb-4">
+            <label class="block text-sm mb-3">Interval Ganti (menit)
+              <input id="bgInterval" type="number" min="5" max="1440" value="120" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" />
+              <span class="text-[11px] text-mint/40">Min 5 menit, max 1440 menit (24 jam). Default 120 menit (2 jam).</span>
+            </label>
+          </div>
+          <button id="saveTampilanBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan Tampilan</button>
+          <p class="text-xs text-mint/40 mt-3">Perubahan tampilan akan langsung terlihat setelah disimpan.</p>
         </div>
       </section>
 
