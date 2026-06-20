@@ -255,11 +255,16 @@
             <p class="text-xs text-mint/40 mt-3">Perubahan akan langsung terlihat di halaman toko setelah disimpan.</p>
           </div>
 
-          <div class="flex flex-col gap-4">
-            <!-- SOCIAL MEDIA CARD -->
-            <div class="glass border border-mint/10 rounded-2xl p-6">
-              <h3 class="text-white font-semibold mb-4"><i data-lucide="share-2" class="w-5 text-jadebright inline"></i> Sosial Media &amp; Kontak</h3>
-              <p class="text-xs text-mint/50 mb-4">Tombol sosial media akan muncul di halaman toko (floating pojok kanan bawah & drawer Bantuan).</p>
+          <div class="flex flex-col gap-3">
+            <!-- SOCIAL MEDIA (accordion) -->
+            <div class="glass border border-mint/10 rounded-xl overflow-hidden">
+              <button class="accord-btn w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-mint/5 transition" data-target="socBody">
+                <i data-lucide="share-2" class="w-5 text-jadebright shrink-0"></i>
+                <span class="font-semibold text-white text-sm">Sosial Media &amp; Kontak</span>
+                <i data-lucide="chevron-down" class="w-4 text-mint/40 ml-auto accord-icon transition-transform"></i>
+              </button>
+              <div id="socBody" class="accord-body px-5 pb-5 hidden">
+                <p class="text-xs text-mint/50 mb-4">Tombol sosial media akan muncul di halaman toko (floating pojok kanan bawah & drawer Bantuan).</p>
 
               <div class="glass border border-mint/10 rounded-xl p-3 mb-3">
                 <label class="flex items-center gap-2 text-sm mb-2"><input id="sWaActive" type="checkbox" class="accent-jadebright" /> <i data-lucide="message-circle" class="w-4 text-jadebright"></i> Tampilkan WhatsApp</label>
@@ -292,19 +297,32 @@
               </div>
 
               <button id="saveSocBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan Sosial Media</button>
+              </div>
             </div>
 
-            <!-- KONTAK ADMIN & FAQ CARD -->
-            <div class="glass border border-mint/10 rounded-2xl p-6">
-              <h3 class="text-white font-semibold mb-4"><i data-lucide="life-buoy" class="w-5 text-jadebright inline"></i> Kontak Admin &amp; FAQ</h3>
+            <!-- KONTAK ADMIN & FAQ (accordion) -->
+            <div class="glass border border-mint/10 rounded-xl overflow-hidden">
+              <button class="accord-btn w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-mint/5 transition" data-target="kontakBody">
+                <i data-lucide="life-buoy" class="w-5 text-jadebright shrink-0"></i>
+                <span class="font-semibold text-white text-sm">Kontak Admin &amp; FAQ</span>
+                <i data-lucide="chevron-down" class="w-4 text-mint/40 ml-auto accord-icon transition-transform"></i>
+              </button>
+              <div id="kontakBody" class="accord-body px-5 pb-5 hidden">
               <label class="block text-sm mb-3">Kontak Admin (boleh pakai link WhatsApp)<textarea id="sBantuanContact" rows="3" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Contoh:&#10;WhatsApp: 0812xxxx&#10;Email: support@novaciy.com"></textarea></label>
               <label class="block text-sm mb-3">Pertanyaan Umum (FAQ)<span class="block text-[11px] text-mint/40">Tiap baris: Judul | Jawaban. Pakai tanda pipa (|) sebagai pemisah.</span><textarea id="sBantuanFaq" rows="5" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Cara pakai akun? | Login dengan email & password yang dikirim.&#10;Kenapa akun error? | Hubungi admin melalui kontak yang tersedia."></textarea></label>
               <button id="saveBantuanBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan Bantuan</button>
               <p class="text-xs text-mint/40 mt-3">Kontak & FAQ akan tampil di halaman toko bagian Bantuan.</p>
+              </div>
             </div>
 
-            <div class="glass border border-mint/10 rounded-2xl p-6">
-              <h3 class="text-white font-semibold mb-4"><i data-lucide="megaphone" class="w-5 text-jadebright inline"></i> Announcement Bar</h3>
+            <!-- ANNOUNCEMENT BAR (accordion) -->
+            <div class="glass border border-mint/10 rounded-xl overflow-hidden">
+              <button class="accord-btn w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-mint/5 transition" data-target="annonBody">
+                <i data-lucide="megaphone" class="w-5 text-jadebright shrink-0"></i>
+                <span class="font-semibold text-white text-sm">Announcement Bar</span>
+                <i data-lucide="chevron-down" class="w-4 text-mint/40 ml-auto accord-icon transition-transform"></i>
+              </button>
+              <div id="annonBody" class="accord-body px-5 pb-5 hidden">
               <label class="flex items-center gap-2 text-sm mb-4"><input id="sAnnonActive" type="checkbox" class="accent-jadebright" /> Tampilkan announcement</label>
               <label class="block text-sm mb-3">Badge Text<input id="sAnnonBadge" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Version 7.8" /></label>
               <label class="block text-sm mb-3">Text Announcement<input id="sAnnonText" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="New feature is ready to use, let's try" /></label>
@@ -318,6 +336,7 @@
               </div>
               <button id="saveAnnonBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan Announcement</button>
               <p class="text-xs text-mint/40 mt-3">Pengaturan ini untuk bar pengumuman di halaman depan.</p>
+              </div>
             </div>
           </div>
         </div>

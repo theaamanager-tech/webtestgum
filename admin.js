@@ -64,6 +64,21 @@ $$(".nav-item").forEach((b) => b.addEventListener("click", () => {
 }));
 $("#menuToggle").addEventListener("click", () => $("#sidebar").classList.toggle("-translate-x-full"));
 
+/* ===================== ACCORDION ===================== */
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".accord-btn");
+  if (!btn) return;
+  const targetId = btn.dataset.target;
+  const body = document.getElementById(targetId);
+  if (!body) return;
+  const icon = btn.querySelector(".accord-icon");
+  const isOpen = !body.classList.contains("hidden");
+  body.classList.toggle("hidden");
+  if (icon) {
+    icon.style.transform = isOpen ? "rotate(0deg)" : "rotate(180deg)";
+  }
+});
+
 async function loadInsights() {
   try {
     const { insights: i } = await api("insights");
