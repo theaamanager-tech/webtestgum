@@ -358,7 +358,6 @@ async function loadStoreConfig() {
     $("#sHeroTitle").value = d.hero_title || "";
     $("#sHeroSub").value = d.hero_subtitle || "";
     $("#sFooter").value = d.footer_text || "";
-    $("#sBantuanContact").value = d.bantuan_contact || "";
     $("#sBantuanFaq").value = d.bantuan_faq || "";
     if (d.annon) {
       $("#sAnnonActive").checked = d.annon.active;
@@ -385,22 +384,6 @@ $("#saveStoreBtn").addEventListener("click", async () => {
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
     toast("Pengaturan toko disimpan");
-  } catch(e) { toast(e.message, false); }
-});
-$("#saveBantuanBtn").addEventListener("click", async () => {
-  const body = {
-    bantuan_contact: $("#sBantuanContact").value.trim(),
-    bantuan_faq: $("#sBantuanFaq").value.trim(),
-  };
-  try {
-    const r = await fetch("/api/store-save", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
-      body: JSON.stringify(body),
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error);
-    toast("Pengaturan bantuan disimpan");
   } catch(e) { toast(e.message, false); }
 });
 $("#saveAnnonBtn").addEventListener("click", async () => {
