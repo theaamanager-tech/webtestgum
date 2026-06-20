@@ -22,16 +22,37 @@ export default async function handler(req, res) {
 
       /* ---------- catalog (with stock counts) ---------- */
       case "catalog": {
-        const { data: products } = await admin.from("products").select("*").order("sort_order");
-        const { data: variants } = await admin.from("variants").select("*").order("sort_order");
-        const { data: stock } = await admin.from("variant_stock").select("*");
-        const map = {}; (stock || []).forEach((s) => (map[s.variant_id] = s.available));
-        const out = (products || []).map((p) => ({
-          ...p,
-          variants: (variants || []).filter((v) => v.product_id === p.id)
-            .map((v) => ({ ...v, available: map[v.id] ?? 0 })),
+        const [productsRes, variantsRes, stockRes] = await Promise.all([
+          admin.from("products").select("*").order("sort_order", { ascending: true }),
+          admin.from("variants").select("*").order("sort_order", { ascending: true }),
+          admin.from("variant_stock").select("id, variant_id, status, payload, created_at"),
+        ]);
+        if (productsRes.error) throw productsRes.error;
+        if (variantsRes.error) throw variantsRes.error;
+        if (stockRes.error) throw stockRes.error;
+
+        const stockMap = {};
+        (stockRes.data || []).forEach((s) => {
+          const key = s.variant_id;
+          if (!stockMap[key]) stockMap[key] = { total: 0, available: 0, sold: 0, rows: [] };
+          stockMap[key].total += 1;
+          stockMap[key].rows.push(s);
+          if (s.status === "sold") stockMap[key].sold += 1;
+          else stockMap[key].available += 1;
+        });
+
+        const out = (productsRes.data || []).map((product) => ({
+          ...product,
+          variants: (variantsRes.data || [])
+            .filter((variant) => variant.product_id === product.id)
+            .map((variant) => ({
+              ...variant,
+              available: stockMap[variant.id]?.available ?? 0,
+              sold: stockMap[variant.id]?.sold ?? 0,
+              stock_total: stockMap[variant.id]?.total ?? 0,
+            })),
         }));
-        return res.json({ products: out });
+        return res.json({ products: out, synced_at: new Date().toISOString() });
       }
 
       /* ---------- products ---------- */
@@ -57,19 +78,16 @@ export default async function handler(req, res) {
 
       /* ---------- stock ---------- */
       case "list_stock": {
-        const { data, error } = await admin.from("stock_items")
-          .select("*").eq("variant_id", body.variant_id).order("created_at");
+        const { data, error } = await admin.from("variant_stock").select("*").eq("variant_id", body.variant_id).order("created_at", { ascending: false });
         if (error) throw error; return res.json({ stock: data });
       }
       case "add_stock": {
-        const rows = (body.lines || []).map((l) => String(l).trim()).filter(Boolean)
-          .map((payload) => ({ variant_id: body.variant_id, payload }));
-        if (!rows.length) return res.json({ added: 0 });
-        const { error } = await admin.from("stock_items").insert(rows);
+        const rows = (body.payloads || []).map((payload) => ({ variant_id: body.variant_id, payload, status: "available" }));
+        const { error } = await admin.from("variant_stock").insert(rows);
         if (error) throw error; return res.json({ added: rows.length });
       }
       case "delete_stock": {
-        const { error } = await admin.from("stock_items").delete().eq("id", body.id);
+        const { error } = await admin.from("variant_stock").delete().eq("id", body.id).neq("status", "sold");
         if (error) throw error; return res.json({ ok: true });
       }
 
@@ -122,8 +140,12 @@ export default async function handler(req, res) {
         });
         const top = Object.values(byProduct).sort((a, b) => b.qty - a.qty).slice(0, 5);
         const { count: prodCount } = await admin.from("products").select("*", { count: "exact", head: true });
-        const { data: stock } = await admin.from("variant_stock").select("available");
-        const available = (stock || []).reduce((a, s) => a + Number(s.available), 0);
+        const { count: availableCount, error: stockError } = await admin
+          .from("variant_stock")
+          .select("id", { count: "exact", head: true })
+          .neq("status", "sold");
+        if (stockError) throw stockError;
+        const available = availableCount ?? 0;
         return res.json({ insights: {
           revenue, orders: paid.length, prodCount: prodCount ?? 0, available, top,
         }});
