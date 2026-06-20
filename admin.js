@@ -480,7 +480,6 @@ $("#testTelegramBtn").addEventListener("click", async () => {
     btn.disabled = false; btn.innerHTML = `<i data-lucide="send" class="w-4"></i> Test Notifikasi`; lucide.createIcons();
   }
 });
-});
 
 /* ===================== STORE SETTINGS ===================== */
 async function loadStoreConfig() {
