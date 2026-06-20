@@ -14,9 +14,30 @@
       fontFamily: { serif:['"Playfair Display"',"serif"], sans:["Inter","system-ui","sans-serif"] },
     }}};
   </script>
+  <script>
+    // Background rotator
+    (function(){
+      var bgList = [
+        "bg/moon-sky-night-background-asset-game-2d-futuristic-generative-ai.jpg",
+        "bg/halloween-scene-illustration-anime-style.jpg",
+        "bg/anime-style-mythical-dragon-creature.jpg",
+        "bg/mythical-dragon-beast-anime-style.jpg",
+        "bg/illustration-anime-character-rain.jpg"
+      ];
+      var idx = localStorage.getItem("nova_bg_idx");
+      idx = idx === null ? Math.floor(Math.random() * bgList.length) : (Number(idx) + 1) % bgList.length;
+      localStorage.setItem("nova_bg_idx", idx);
+      document.documentElement.style.setProperty("--bg-img", "url(" + bgList[idx] + ")");
+      setInterval(function(){
+        idx = (idx + 1) % bgList.length;
+        localStorage.setItem("nova_bg_idx", idx);
+        document.documentElement.style.setProperty("--bg-img", "url(" + bgList[idx] + ")");
+      }, 7200000);
+    })();
+  </script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    body{background:radial-gradient(1200px 800px at 20% -10%,rgba(15,122,98,.35) 0%,transparent 60%),radial-gradient(900px 600px at 80% 20%,rgba(40,195,157,.15) 0%,transparent 55%),radial-gradient(600px 500px at 50% 70%,rgba(12,59,46,.5) 0%,transparent 60%),linear-gradient(170deg,#080c0a 0%,#0a1210 30%,#0d1f18 60%,#080c0a 100%);background-attachment:fixed}
+    body{background:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.72)),var(--bg-img) center/cover fixed;background-attachment:fixed;transition:background-image 1.2s ease}
     .glass{background:rgba(15,122,98,.07);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
     .panel{display:none} .panel.active{display:block;animation:fade .35s ease}
     @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
