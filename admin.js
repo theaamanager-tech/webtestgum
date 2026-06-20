@@ -373,7 +373,6 @@ $("#saveStoreBtn").addEventListener("click", async () => {
     store_hero_title: $("#sHeroTitle").value.trim(),
     store_hero_subtitle: $("#sHeroSub").value.trim(),
     store_footer_text: $("#sFooter").value.trim(),
-    bantuan_faq: $("#sBantuanFaq").value.trim(),
   };
   try {
     const r = await fetch("/api/store-save", {
@@ -386,6 +385,23 @@ $("#saveStoreBtn").addEventListener("click", async () => {
     toast("Pengaturan toko disimpan");
   } catch(e) { toast(e.message, false); }
 });
+/* ===================== FAQ ===================== */
+$("#saveBantuanBtn").addEventListener("click", async () => {
+  const body = {
+    bantuan_faq: $("#sBantuanFaq").value.trim(),
+  };
+  try {
+    const r = await fetch("/api/store-save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+      body: JSON.stringify(body),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    toast("FAQ disimpan");
+  } catch(e) { toast(e.message, false); }
+});
+
 $("#saveAnnonBtn").addEventListener("click", async () => {
   const body = {
     annon_active: $("#sAnnonActive").checked,
