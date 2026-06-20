@@ -16,8 +16,8 @@
   </script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    body{background:radial-gradient(1100px 640px at 82% -10%,rgba(40,195,157,.16) 0%,transparent 56%),linear-gradient(180deg,#0D0E10 0%,#080a09 100%);background-attachment:fixed}
-    .glass{background:rgba(207,238,230,.04);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+    body{background:linear-gradient(rgba(0,0,0,.68),rgba(0,0,0,.68)),url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8iyt5xHXFXxJB4bkwZzm5AmTmCKMprfEILRL1rDknJMqp-KZFqysMYzHD&s=10') center/cover fixed;background-attachment:fixed}
+    .glass{background:rgba(15,122,98,.07);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
     .panel{display:none} .panel.active{display:block;animation:fade .35s ease}
     @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
     .drawer{transition:transform .3s cubic-bezier(.2,.7,.2,1)}
@@ -188,22 +188,25 @@
 
       <!-- ===== STORE SETTINGS ===== -->
       <section id="panel-store" class="panel">
-        <div class="glass border border-mint/10 rounded-2xl p-6 max-w-xl">
-          <h3 class="text-white font-semibold mb-4"><i data-lucide="store" class="w-5 text-jadebright inline"></i> Pengaturan Toko</h3>
-          <label class="block text-sm mb-3">Nama Toko<input id="sName" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Novaciy°" /></label>
-          <label class="block text-sm mb-3">Tagline<textarea id="sTagline" rows="2" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Produk Digital Premium"></textarea></label>
-          <label class="block text-sm mb-3">Hero Title (HTML diizinkan)<textarea id="sHeroTitle" rows="3" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright"></textarea></label>
-          <label class="block text-sm mb-3">Hero Subtitle (HTML diizinkan)<textarea id="sHeroSub" rows="3" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright"></textarea></label>
-          <label class="block text-sm mb-3">Footer Text<textarea id="sFooter" rows="2" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright"></textarea></label>
-
-          <div class="border-t border-mint/10 my-4 pt-4">
-            <h4 class="text-white font-semibold flex items-center gap-2 mb-3"><i data-lucide="life-buoy" class="w-4 text-jadebright"></i> Bantuan</h4>
-            <label class="block text-sm mb-3">Kontak Admin (boleh pakai link WhatsApp)<textarea id="sBantuanContact" rows="3" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Contoh:&#10;WhatsApp: 0812xxxx&#10;Email: support@novaciy.com"></textarea></label>
-            <label class="block text-sm mb-3">Pertanyaan Umum (FAQ)<span class="block text-[11px] text-mint/40">Tiap baris: Judul | Jawaban. Pakai tanda pipa (|) sebagai pemisah.</span><textarea id="sBantuanFaq" rows="5" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Cara pakai akun? | Login dengan email & password yang dikirim.&#10;Kenapa akun error? | Hubungi admin melalui kontak yang tersedia."></textarea></label>
+        <div class="grid xl:grid-cols-2 gap-4">
+          <div class="glass border border-mint/10 rounded-2xl p-6">
+            <h3 class="text-white font-semibold mb-4"><i data-lucide="store" class="w-5 text-jadebright inline"></i> Pengaturan Toko</h3>
+            <label class="block text-sm mb-3">Nama Toko<input id="sName" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Novaciy°" /></label>
+            <label class="block text-sm mb-3">Tagline<textarea id="sTagline" rows="2" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Produk Digital Premium"></textarea></label>
+            <label class="block text-sm mb-3">Hero Title (HTML diizinkan)<textarea id="sHeroTitle" rows="3" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright"></textarea></label>
+            <label class="block text-sm mb-3">Hero Subtitle (HTML diizinkan)<textarea id="sHeroSub" rows="3" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright"></textarea></label>
+            <label class="block text-sm mb-3">Footer Text<textarea id="sFooter" rows="2" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright"></textarea></label>
+            <button id="saveStoreBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan Pengaturan</button>
+            <p class="text-xs text-mint/40 mt-3">Perubahan akan langsung terlihat di halaman toko setelah disimpan.</p>
           </div>
 
-          <button id="saveStoreBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan Pengaturan</button>
-          <p class="text-xs text-mint/40 mt-3">Perubahan akan langsung terlihat di halaman toko setelah disimpan.</p>
+          <div class="glass border border-mint/10 rounded-2xl p-6">
+            <h3 class="text-white font-semibold mb-4"><i data-lucide="life-buoy" class="w-5 text-jadebright inline"></i> Pengaturan Bantuan</h3>
+            <label class="block text-sm mb-3">Kontak Admin (boleh pakai link WhatsApp)<textarea id="sBantuanContact" rows="3" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Contoh:&#10;WhatsApp: 0812xxxx&#10;Email: support@novaciy.com"></textarea></label>
+            <label class="block text-sm mb-3">Pertanyaan Umum (FAQ)<span class="block text-[11px] text-mint/40">Tiap baris: Judul | Jawaban. Pakai tanda pipa (|) sebagai pemisah.</span><textarea id="sBantuanFaq" rows="5" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Cara pakai akun? | Login dengan email & password yang dikirim.&#10;Kenapa akun error? | Hubungi admin melalui kontak yang tersedia."></textarea></label>
+            <button id="saveBantuanBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan Bantuan</button>
+            <p class="text-xs text-mint/40 mt-3">Kontak & FAQ akan tampil di halaman toko bagian Bantuan.</p>
+          </div>
         </div>
       </section>
     </main>

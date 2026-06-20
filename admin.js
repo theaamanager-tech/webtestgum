@@ -367,6 +367,22 @@ $("#saveStoreBtn").addEventListener("click", async () => {
     toast("Pengaturan toko disimpan");
   } catch(e) { toast(e.message, false); }
 });
+$("#saveBantuanBtn").addEventListener("click", async () => {
+  const body = {
+    bantuan_contact: $("#sBantuanContact").value.trim(),
+    bantuan_faq: $("#sBantuanFaq").value.trim(),
+  };
+  try {
+    const r = await fetch("/api/store-save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+      body: JSON.stringify(body),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    toast("Pengaturan bantuan disimpan");
+  } catch(e) { toast(e.message, false); }
+});
 
 /* ===================== INIT ===================== */
 $("#refreshBtn").addEventListener("click", async () => { await loadCatalog({ refreshInsights: true }); toast("Data dashboard disinkronkan"); });
