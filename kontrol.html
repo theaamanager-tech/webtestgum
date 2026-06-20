@@ -42,6 +42,26 @@
       }
     })();
   </script>
+  <script>
+    // ⚡ Instant brand di admin — baca cache
+    (function(){
+      try {
+        var _c = JSON.parse(localStorage.getItem("nova_store_cache"));
+        if (_c && _c.name) {
+          document.title = _c.name + " — Admin";
+          var _els = document.querySelectorAll('#sidebar .font-serif, #loginGate .font-serif');
+          for (var _i = 0; _i < _els.length; _i++) {
+            var _prefix = _c.name.slice(0, 4);
+            var _suffix = _c.name.slice(4).replace(/[°^]/g,'');
+            var _dot = _c.name.includes('°') ? '°' : _c.name.includes('^') ? '^' : '';
+            _els[_i].innerHTML = _suffix && _dot
+              ? _prefix + '<em class="italic">' + _suffix + '</em><sup class="text-jadebright">' + _dot + '</sup>'
+              : _c.name;
+          }
+        }
+      } catch(e){}
+    })();
+  </script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body{background:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.72)),var(--bg-img) center/cover fixed;background-attachment:fixed;transition:background-image 1.2s ease}

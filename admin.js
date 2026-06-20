@@ -271,21 +271,19 @@ $("#modalSave").addEventListener("click", async () => {
   const productId = editingId || slugify(name);
   const product = { id: productId, name, cat: $("#fCat").value, subtitle: $("#fSubtitle").value.trim(), initials: $("#fInitials").value.trim() || name.slice(0,2).toUpperCase(), active: $("#fActive").checked };
 
-  // Prioritas: file upload > URL manual
+  // Upload gambar jika ada — tapi jangan block simpan produk
   const fileInput = $("#fImageUpload");
   const imageUrlManual = $("#fImageUrl").value.trim();
 
   if (fileInput.files && fileInput.files[0]) {
-    // Upload file ke Supabase Storage
     try {
       const imgUrl = await uploadImageFile(productId, fileInput.files[0]);
       product.image_url = imgUrl;
     } catch (e) {
-      toast("Gagal upload gambar: " + e.message, false);
-      return;
+      toast("Gambar gagal diupload, produk tetap disimpan tanpa gambar: " + e.message, false);
+      // Jangan return — lanjutkan simpan produk
     }
   } else if (imageUrlManual) {
-    // Simpan URL langsung apa adanya (bisa external link)
     product.image_url = imageUrlManual;
   }
 

@@ -14,12 +14,27 @@ let currentSelection = null; // { product, variant }
 
 /* ===================== STORE CONFIG ===================== */
 let STORE = {};
+function loadCachedConfig() {
+  try {
+    const cached = localStorage.getItem("nova_store_cache");
+    if (cached) {
+      STORE = JSON.parse(cached);
+      applyStoreConfig();
+    }
+  } catch (e) { /* ignore */ }
+}
 async function loadStoreConfig() {
+  // First, apply cached config instantly (biar gak flash)
+  loadCachedConfig();
+  // Then fetch fresh config from API
   try {
     const r = await fetch(`/api/store-config?t=${Date.now()}`);
     const d = await r.json();
-    if (r.ok) STORE = d;
-  } catch (e) { /* use defaults */ }
+    if (r.ok) {
+      STORE = d;
+      localStorage.setItem("nova_store_cache", JSON.stringify(d));
+    }
+  } catch (e) { /* use cached or defaults */ }
   applyStoreConfig();
 }
 function applyStoreConfig() {

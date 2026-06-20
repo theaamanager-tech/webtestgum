@@ -43,6 +43,40 @@
       }
     })();
   </script>
+  <script>
+    // ⚡ Instant brand — baca dari localStorage SEBELUM render
+    (function(){
+      try {
+        var _c = JSON.parse(localStorage.getItem("nova_store_cache"));
+        if (_c && _c.name) {
+          var _prefix = _c.name.slice(0, 4);
+          var _suffix = _c.name.slice(4).replace(/[°^]/g,'');
+          var _dot = _c.name.includes('°') ? '°' : _c.name.includes('^') ? '^' : '';
+          document.title = _c.name;
+          var _brand = document.querySelector('#sidebar .font-serif');
+          if (_brand) {
+            _brand.innerHTML = _suffix && _dot
+              ? _prefix + '<em class="italic">' + _suffix + '</em><sup class="text-jadebright text-lg">' + _dot + '</sup>'
+              : _c.name;
+          }
+          var _hero = document.getElementById('heroTitle');
+          if (_hero && _c.hero_title) {
+            var _t = _c.hero_title.replace(/<br\s*\/?>/gi, ' ');
+            if (!_t.includes('<em')) {
+              var _parts = _t.split(/,\s*/);
+              if (_parts.length > 1) {
+                var _last = _parts.pop();
+                _t = _parts.join(', ') + ', <em class="italic text-jadebright">' + _last + '</em>';
+              }
+            }
+            _hero.innerHTML = _t;
+          }
+          var _sub = document.getElementById('heroSub');
+          if (_sub && _c.hero_subtitle) _sub.innerHTML = _c.hero_subtitle;
+        }
+      } catch(e){}
+    })();
+  </script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
