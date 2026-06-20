@@ -26,7 +26,7 @@
   </style>
 </head>
 <body class="font-sans text-mint/90 antialiased overflow-x-hidden min-h-screen">
-  <div class="grid grid-cols-1 md:grid-cols-[248px_1fr] min-h-screen">
+  <div class="grid grid-cols-1 md:grid-cols-[248px_minmax(0,1fr)] min-h-screen">
 
     <!-- ============ SIDEBAR ============ -->
     <aside id="sidebar" class="drawer fixed md:sticky top-0 z-40 h-screen w-[248px] -translate-x-full md:translate-x-0 glass border-r border-mint/10 px-5 py-7 flex flex-col gap-7">
@@ -49,7 +49,8 @@
     </aside>
 
     <!-- ============ MAIN ============ -->
-    <main class="px-4 sm:px-7 py-5 max-w-[1180px] w-full">
+    <main class="px-4 sm:px-8 py-6 w-full min-w-0">
+     <div class="max-w-[1500px] mx-auto w-full">
       <!-- topbar -->
       <header class="flex items-center gap-3 mb-8">
         <button id="menuToggle" class="md:hidden grid place-items-center w-10 h-10 rounded-xl glass border border-mint/10"><i data-lucide="menu" class="w-5"></i></button>
@@ -86,9 +87,10 @@
         </div>
       </section>
 
-      <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
 
       <footer class="mt-12 py-6 border-t border-mint/10 text-center text-xs text-mint/30">© Novaciy° · Semua transaksi via QRIS aman.</footer>
+     </div>
     </main>
   </div>
 

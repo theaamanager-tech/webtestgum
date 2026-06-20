@@ -24,6 +24,17 @@ function toast(msg, ok = true) {
 }
 
 /* ===================== LOAD CATALOG ===================== */
+function showSkeleton() {
+  $("#productGrid").innerHTML = Array.from({ length: 8 }).map(() => `
+    <div class="glass border border-mint/10 rounded-2xl p-4 animate-pulse">
+      <div class="flex items-center justify-between mb-4"><div class="w-12 h-12 rounded-xl bg-mint/10"></div><div class="w-16 h-5 rounded-full bg-mint/10"></div></div>
+      <div class="h-5 w-2/3 bg-mint/10 rounded mb-2"></div>
+      <div class="h-4 w-1/3 bg-mint/10 rounded mb-4"></div>
+      <div class="h-10 w-full bg-mint/10 rounded-xl mb-3"></div>
+      <div class="h-10 w-full bg-mint/10 rounded-xl"></div>
+    </div>`).join("");
+}
+
 async function loadCatalog() {
   try {
     CATALOG = await loadPublicCatalog();
@@ -247,5 +258,6 @@ $("#billClose").addEventListener("click", closeOverlays);
 $("#overlay").addEventListener("click", closeOverlays);
 
 /* ===================== INIT ===================== */
+showSkeleton();
 loadCatalog();
 lucide.createIcons();
