@@ -5,7 +5,7 @@
  * ===================================================================== */
 const SUPABASE_URL = "https://wfaeesuxuqftmlyeizan.supabase.co";
 const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmYWVlc3V4dXFmdG1seWVpemFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5MDk5ODksImV4cCI6MjA5NzQ4NTk4OX0.O-PSeIzbUrz7aWe8G0NSq45CIVDeXzdBzScsk64pfMM";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6IndmYWVlc3V4dXFmdG1seWVpemFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5MDk5ODksImV4cCI6MjA5NzQ4NTk4OX0.O-PSeIzbUrz7aWe8G0NSq45CIVDeXzdBzScsk64pfMM";
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const CAT_LABEL = { ai: "AI Tools", editing: "Editing", account: "Akun" };
@@ -18,20 +18,32 @@ function priceRange(variants) {
   return lo === hi ? rupiah(lo) : rupiah(lo) + " – " + rupiah(hi);
 }
 
-// Public catalog loader (anon).
+// Public catalog loader.
+// Prefer the serverless endpoint so storefront data is identical to admin data.
+// Fallback keeps the catalog usable if /api/catalog is temporarily unavailable.
 async function loadPublicCatalog() {
-  const { data: products, error: pErr } = await sb
-    .from("products").select("*").eq("active", true).order("sort_order");
-  if (pErr) throw pErr;
-  const { data: variants } = await sb
-    .from("variants").select("*").eq("active", true).order("sort_order");
-  const { data: stock } = await sb.from("variant_stock").select("*");
-  const map = {}; (stock || []).forEach((s) => (map[s.variant_id] = s.available));
-  return (products || []).map((p) => ({
-    ...p,
-    variants: (variants || []).filter((v) => v.product_id === p.id)
-      .map((v) => ({ ...v, available: map[v.id] ?? 0 })),
-  }));
+  try {
+    const response = await fetch(`/api/catalog?t=${Date.now()}`, { cache: "no-store" });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Gagal memuat katalog dari server");
+    return Array.isArray(data.products) ? data.products : [];
+  } catch (apiError) {
+    console.warn("[catalog] API fallback:", apiError);
+    const { data: products, error: pErr } = await sb
+      .from("products").select("*").eq("active", true).order("sort_order");
+    if (pErr) throw pErr;
+    const { data: variants, error: vErr } = await sb
+      .from("variants").select("*").eq("active", true).order("sort_order");
+    if (vErr) throw vErr;
+    const { data: stock, error: sErr } = await sb.from("variant_stock").select("*");
+    if (sErr) throw sErr;
+    const map = {}; (stock || []).forEach((s) => (map[s.variant_id] = s.available));
+    return (products || []).map((p) => ({
+      ...p,
+      variants: (variants || []).filter((v) => v.product_id === p.id)
+        .map((v) => ({ ...v, available: map[v.id] ?? 0 })),
+    }));
+  }
 }
 
 window.NOVA = { sb, CAT_LABEL, rupiah, priceRange, loadPublicCatalog };
