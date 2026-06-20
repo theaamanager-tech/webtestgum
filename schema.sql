@@ -106,6 +106,18 @@ create table public.app_config (
   annon_badge_text_color text default '#0D0E10',
   annon_bg         text default 'rgba(40,195,157,0.12)',
   annon_text_color text default '#CFEEE6',
+  -- Social Media
+  soc_wa_active               boolean default false,
+  soc_wa_number               text default '',
+  soc_tele_active             boolean default false,
+  soc_tele_channel            text default '',
+  soc_tele_channel_active     boolean default false,
+  soc_tele_bot                text default '',
+  soc_tele_bot_active         boolean default false,
+  soc_x_active                boolean default false,
+  soc_x_link                  text default '',
+  soc_ig_active               boolean default false,
+  soc_ig_link                 text default '',
   updated_at      timestamptz not null default now()
 );
 insert into public.app_config (id) values (1) on conflict do nothing;
@@ -174,6 +186,17 @@ insert into public.products (id, name, cat, initials, tag, sort_order) values
 -- alter table public.app_config add column if not exists annon_badge_text_color text default '#0D0E10';
 -- alter table public.app_config add column if not exists annon_bg text default 'rgba(40,195,157,0.12)';
 -- alter table public.app_config add column if not exists annon_text_color text default '#CFEEE6';
+-- alter table public.app_config add column if not exists soc_wa_active boolean default false;
+-- alter table public.app_config add column if not exists soc_wa_number text default '';
+-- alter table public.app_config add column if not exists soc_tele_active boolean default false;
+-- alter table public.app_config add column if not exists soc_tele_channel text default '';
+-- alter table public.app_config add column if not exists soc_tele_channel_active boolean default false;
+-- alter table public.app_config add column if not exists soc_tele_bot text default '';
+-- alter table public.app_config add column if not exists soc_tele_bot_active boolean default false;
+-- alter table public.app_config add column if not exists soc_x_active boolean default false;
+-- alter table public.app_config add column if not exists soc_x_link text default '';
+-- alter table public.app_config add column if not exists soc_ig_active boolean default false;
+-- alter table public.app_config add column if not exists soc_ig_link text default '';
  ('capcut','CapCut Pro','editing','CC','Best Seller',1),
  ('paypal','PayPal Fresh','account','PP','Ready',2),
  ('chatgpt','ChatGPT Plus','ai','GP','Hot',3),

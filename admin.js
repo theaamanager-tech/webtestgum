@@ -58,7 +58,7 @@ $$(".nav-item").forEach((b) => b.addEventListener("click", () => {
   if (panel === "rekap") { setDefaultDates(); loadRekap($("#rekapStart").value, $("#rekapEnd").value); }
   if (panel === "coupons") loadCoupons();
   if (panel === "settings") loadConfig();
-  if (panel === "store") loadStoreConfig();
+  if (panel === "store") { loadStoreConfig(); loadSocConfig(); }
   if (panel === "tampilan") loadTampilan();
   $("#sidebar").classList.add("-translate-x-full");
 }));
@@ -412,6 +412,53 @@ $("#saveAnnonBtn").addEventListener("click", async () => {
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
     toast("Announcement disimpan");
+  } catch(e) { toast(e.message, false); }
+});
+
+/* ===================== SOSIAL MEDIA ===================== */
+async function loadSocConfig() {
+  try {
+    const r = await fetch("/api/store-config");
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    const soc = d.soc || {};
+    $("#sWaActive").checked = soc.wa_active;
+    $("#sWaNumber").value = soc.wa_number || "";
+    $("#sTeleActive").checked = soc.tele_active;
+    $("#sTeleChannelActive").checked = soc.tele_channel_active;
+    $("#sTeleChannel").value = soc.tele_channel || "";
+    $("#sTeleBotActive").checked = soc.tele_bot_active;
+    $("#sTeleBot").value = soc.tele_bot || "";
+    $("#sXActive").checked = soc.x_active;
+    $("#sXLink").value = soc.x_link || "";
+    $("#sIgActive").checked = soc.ig_active;
+    $("#sIgLink").value = soc.ig_link || "";
+  } catch(e) { toast(e.message, false); }
+}
+
+$("#saveSocBtn").addEventListener("click", async () => {
+  const body = {
+    soc_wa_active: $("#sWaActive").checked,
+    soc_wa_number: $("#sWaNumber").value.trim(),
+    soc_tele_active: $("#sTeleActive").checked,
+    soc_tele_channel_active: $("#sTeleChannelActive").checked,
+    soc_tele_channel: $("#sTeleChannel").value.trim(),
+    soc_tele_bot_active: $("#sTeleBotActive").checked,
+    soc_tele_bot: $("#sTeleBot").value.trim(),
+    soc_x_active: $("#sXActive").checked,
+    soc_x_link: $("#sXLink").value.trim(),
+    soc_ig_active: $("#sIgActive").checked,
+    soc_ig_link: $("#sIgLink").value.trim(),
+  };
+  try {
+    const r = await fetch("/api/store-save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+      body: JSON.stringify(body),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    toast("Sosial media disimpan");
   } catch(e) { toast(e.message, false); }
 });
 

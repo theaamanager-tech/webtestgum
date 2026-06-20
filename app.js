@@ -48,6 +48,8 @@ function applyStoreConfig() {
   if (heroSection && STORE.tagline) heroSection.textContent = "© " + STORE.name + " — " + STORE.tagline;
   // announcement bar
   renderAnnouncement();
+  // floating social media
+  renderSocFloat();
 }
 
 /* ===================== ANNOUNCEMENT BAR ===================== */
@@ -335,7 +337,34 @@ const closeTutorial = () => { $("#tutorialDrawer").classList.add("translate-x-fu
 function renderBantuan() {
   const contact = STORE.bantuan_contact || "Belum ada kontak bantuan.";
   const faq = STORE.bantuan_faq ? STORE.bantuan_faq.split("\n").filter(Boolean) : [];
+  const soc = STORE.soc || {};
+  // Build social media buttons
+  let socHTML = "";
+  if (soc.wa_active && soc.wa_number) {
+    socHTML += `<a href="https://wa.me/${soc.wa_number.replace(/[^0-9]/g, '')}" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-green-600/15 text-green-400 hover:bg-green-600/25 transition text-sm font-medium"><i data-lucide="message-circle" class="w-[18px]"></i> WhatsApp</a>`;
+  }
+  if (soc.tele_active) {
+    if (soc.tele_channel_active && soc.tele_channel) {
+      const chLink = soc.tele_channel.startsWith("http") ? soc.tele_channel : `https://t.me/${soc.tele_channel.replace(/^@/, '')}`;
+      socHTML += `<a href="${chLink}" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-sky-600/15 text-sky-400 hover:bg-sky-600/25 transition text-sm font-medium"><i data-lucide="send" class="w-[18px]"></i> Telegram Channel</a>`;
+    }
+    if (soc.tele_bot_active && soc.tele_bot) {
+      const botLink = soc.tele_bot.startsWith("http") ? soc.tele_bot : `https://t.me/${soc.tele_bot.replace(/^@/, '')}`;
+      socHTML += `<a href="${botLink}" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-sky-600/15 text-sky-400 hover:bg-sky-600/25 transition text-sm font-medium"><i data-lucide="message-square" class="w-[18px]"></i> Telegram Bot / Auto Order</a>`;
+    }
+  }
+  if (soc.x_active && soc.x_link) {
+    socHTML += `<a href="${soc.x_link}" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-zinc-600/15 text-zinc-300 hover:bg-zinc-600/25 transition text-sm font-medium"><i data-lucide="twitter" class="w-[18px]"></i> X (Twitter)</a>`;
+  }
+  if (soc.ig_active && soc.ig_link) {
+    socHTML += `<a href="${soc.ig_link}" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-pink-600/15 text-pink-400 hover:bg-pink-600/25 transition text-sm font-medium"><i data-lucide="camera" class="w-[18px]"></i> Instagram</a>`;
+  }
+
   $("#bantuanBody").innerHTML = `
+    ${socHTML ? `<div class="glass border border-mint/10 rounded-2xl p-5">
+      <h4 class="text-white font-semibold flex items-center gap-2 mb-3"><i data-lucide="share-2" class="w-4 text-jadebright"></i> Hubungi Kami</h4>
+      <div class="flex flex-col gap-2">${socHTML}</div>
+    </div>` : ""}
     <div class="glass border border-mint/10 rounded-2xl p-5">
       <h4 class="text-white font-semibold flex items-center gap-2 mb-3"><i data-lucide="message-circle" class="w-4 text-jadebright"></i> Kontak Admin</h4>
       <div class="text-sm text-mint/70 whitespace-pre-wrap">${contact.replace(/</g, "&lt;")}</div>
@@ -401,6 +430,96 @@ $("#tutorialOverlay").addEventListener("click", closeTutorial);
 $("#tutorialDone").addEventListener("click", closeTutorial);
 $("#bantuanClose").addEventListener("click", closeBantuan);
 $("#bantuanOverlay").addEventListener("click", closeBantuan);
+
+/* ===================== FLOATING SOCIAL MEDIA ===================== */
+function renderSocFloat() {
+  const soc = STORE.soc || {};
+  const container = $("#socFloat");
+  const popout = $("#socFloatPopout");
+  if (!container) return;
+
+  const activePlatforms = [];
+  if (soc.wa_active && soc.wa_number) {
+    activePlatforms.push({
+      icon: "message-circle",
+      label: "WhatsApp",
+      link: `https://wa.me/${soc.wa_number.replace(/[^0-9]/g, '')}`,
+      color: "bg-green-500/15 text-green-400 hover:bg-green-500/25",
+    });
+  }
+  if (soc.tele_active) {
+    if (soc.tele_channel_active && soc.tele_channel) {
+      const chLink = soc.tele_channel.startsWith("http") ? soc.tele_channel : `https://t.me/${soc.tele_channel.replace(/^@/, '')}`;
+      activePlatforms.push({
+        icon: "send",
+        label: "Telegram Channel",
+        link: chLink,
+        color: "bg-sky-500/15 text-sky-400 hover:bg-sky-500/25",
+      });
+    }
+    if (soc.tele_bot_active && soc.tele_bot) {
+      const botLink = soc.tele_bot.startsWith("http") ? soc.tele_bot : `https://t.me/${soc.tele_bot.replace(/^@/, '')}`;
+      activePlatforms.push({
+        icon: "message-square",
+        label: "Telegram Bot",
+        link: botLink,
+        color: "bg-sky-500/15 text-sky-400 hover:bg-sky-500/25",
+      });
+    }
+  }
+  if (soc.x_active && soc.x_link) {
+    activePlatforms.push({
+      icon: "twitter",
+      label: "X (Twitter)",
+      link: soc.x_link,
+      color: "bg-zinc-500/15 text-zinc-300 hover:bg-zinc-500/25",
+    });
+  }
+  if (soc.ig_active && soc.ig_link) {
+    activePlatforms.push({
+      icon: "camera",
+      label: "Instagram",
+      link: soc.ig_link,
+      color: "bg-pink-500/15 text-pink-400 hover:bg-pink-500/25",
+    });
+  }
+
+  if (!activePlatforms.length) {
+    container.classList.add("hidden");
+    return;
+  }
+  container.classList.remove("hidden");
+
+  popout.innerHTML = activePlatforms.map(p => `
+    <a href="${p.link}" target="_blank" class="flex items-center gap-3 px-4 py-3 rounded-2xl glass border border-mint/10 ${p.color} text-sm font-medium whitespace-nowrap hover:scale-105 transition">
+      <i data-lucide="${p.icon}" class="w-[18px]"></i> ${p.label}
+    </a>
+  `).join("");
+  lucide.createIcons();
+}
+
+// Floating button toggle
+$("#socFloatBtn")?.addEventListener("click", () => {
+  const popout = $("#socFloatPopout");
+  const icon = $("#socFloatIcon");
+  const isHidden = popout.classList.contains("hidden");
+  popout.classList.toggle("hidden");
+  if (icon) icon.setAttribute("data-lucide", isHidden ? "x" : "message-circle");
+  lucide.createIcons();
+});
+
+// Auto-close floating popout when clicking outside
+document.addEventListener("click", (e) => {
+  const float = $("#socFloat");
+  const popout = $("#socFloatPopout");
+  if (!float || !popout || popout.classList.contains("hidden")) return;
+  if (!float.contains(e.target)) {
+    popout.classList.add("hidden");
+    const icon = $("#socFloatIcon");
+    if (icon) icon.setAttribute("data-lucide", "message-circle");
+    lucide.createIcons();
+  }
+});
 
 /* ===================== INIT ===================== */
 showSkeleton();

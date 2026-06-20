@@ -26,6 +26,19 @@ export default async function handler(req, res) {
         bg: data.annon_bg || 'rgba(40,195,157,0.12)',
         text_color: data.annon_text_color || '#CFEEE6',
       },
+      soc: {
+        wa_active: !!data.soc_wa_active,
+        wa_number: data.soc_wa_number || '',
+        tele_active: !!data.soc_tele_active,
+        tele_channel: data.soc_tele_channel || '',
+        tele_channel_active: !!data.soc_tele_channel_active,
+        tele_bot: data.soc_tele_bot || '',
+        tele_bot_active: !!data.soc_tele_bot_active,
+        x_active: !!data.soc_x_active,
+        x_link: data.soc_x_link || '',
+        ig_active: !!data.soc_ig_active,
+        ig_link: data.soc_ig_link || '',
+      },
     });
   } catch (e) {
     return res.status(500).json({ error: e.message || "Gagal memuat konfigurasi toko" });

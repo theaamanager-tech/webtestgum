@@ -220,6 +220,16 @@
 
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-3 z-[70] glass border border-mint/10 rounded-full px-5 py-3 text-sm font-medium flex items-center gap-2 opacity-0 pointer-events-none transition"></div>
 
+  <!-- ============ FLOATING SOCIAL BUTTON ============ -->
+  <div id="socFloat" class="fixed bottom-6 right-6 z-[65] hidden flex-col items-end gap-3">
+    <div id="socFloatPopout" class="hidden flex-col gap-2 mb-2">
+      <!-- injected by JS -->
+    </div>
+    <button id="socFloatBtn" class="w-14 h-14 rounded-full bg-jadebright text-ink shadow-lg shadow-jade/30 grid place-items-center hover:brightness-110 transition active:scale-90 relative">
+      <i data-lucide="message-circle" class="w-7" id="socFloatIcon"></i>
+    </button>
+  </div>
+
   <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
