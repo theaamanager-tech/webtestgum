@@ -211,11 +211,6 @@ export default async function handler(req, res) {
         if (!cfg.bg_list || !cfg.bg_list.length) {
           // Seed default pake file lokal yang ada di repo
           const defaultBg = [
-            { id: "bg-1", file: "/bg/moon-sky-night-background-asset-game-2d-futuristic-generative-ai.jpg", label: "Moon Sky" },
-            { id: "bg-2", file: "/bg/halloween-scene-illustration-anime-style.jpg", label: "Halloween" },
-            { id: "bg-3", file: "/bg/anime-style-mythical-dragon-creature.jpg", label: "Dragon" },
-            { id: "bg-4", file: "/bg/mythical-dragon-beast-anime-style.jpg", label: "Dragon Beast" },
-            { id: "bg-5", file: "/bg/illustration-anime-character-rain.jpg", label: "Rain" },
             { id: "bg-6", file: "/dc55cb8d-aa80-4c3a-b6dd-2daa98b70dc4-1.webp", label: "Webp 1" },
             { id: "bg-7", file: "/8d7f0540-91d8-4296-9b55-5335d5bec86f-1.webp", label: "Webp 2" },
           ];
