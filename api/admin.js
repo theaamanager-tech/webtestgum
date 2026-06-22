@@ -211,13 +211,14 @@ export default async function handler(req, res) {
         return res.json({ backgrounds: cfg.bg_list || [] });
       }
       case "bg_save": {
-        const { id, file, label } = body;
+        const { id, file, label, active } = body;
         if (!file || !label) return res.status(400).json({ error: "File & label wajib" });
         const cfg = await getConfig();
         const bgList = JSON.parse(JSON.stringify(cfg.bg_list || []));
         const idx = bgList.findIndex((b) => b.id === id);
         const newItem = { id: id || `bg-${Date.now()}`, file, label };
-        if (idx >= 0) { bgList[idx] = newItem; } else { bgList.push(newItem); }
+        if (active !== undefined) newItem.active = active;
+        if (idx >= 0) { bgList[idx] = { ...bgList[idx], ...newItem }; } else { bgList.push(newItem); }
         await admin.from("app_config").update({ bg_list: bgList, updated_at: new Date().toISOString() }).eq("id", 1);
         return res.json({ ok: true, backgrounds: bgList });
       }

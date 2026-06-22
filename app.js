@@ -170,7 +170,7 @@ function productCard(p) {
 
   const hasImg = !!p.image_url;
   const topSection = hasImg
-    ? `<img src="${p.image_url}" alt="${p.name}" class="w-full h-40 object-cover" onerror="this.style.display='none'" />`
+    ? `<img src="${p.image_url}" alt="${p.name}" class="w-full aspect-[3/1] object-cover" onerror="this.style.display='none'" />`
     : `<div class="pt-4"></div>`;
 
   return `

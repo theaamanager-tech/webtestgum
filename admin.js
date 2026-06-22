@@ -680,6 +680,12 @@ function renderBgPicker(activeIdx) {
   const realIdx = BG_LIST[activeIdx] ? activeIdx : 0;
   $("#bgList").innerHTML = BG_LIST.map((b, i) => `
     <div class="relative group">
+      <div class="flex items-center gap-1 mb-1">
+        <label class="flex items-center gap-1.5 text-[11px] text-mint/50 cursor-pointer" title="Aktifkan untuk mode auto">
+          <input type="checkbox" class="bg-active-cb accent-jadebright" data-id="${b.id}" ${b.active !== false ? "checked" : ""} />
+          Aktif
+        </label>
+      </div>
       <button class="bg-opt text-left rounded-xl p-2 border text-sm w-full ${i === realIdx ? 'border-jadebright bg-jadebright/10' : 'border-mint/10 glass hover:border-jadebright/40'}" data-idx="${i}">
         <div class="w-full h-16 rounded-lg mb-1 overflow-hidden" style="background:url(${b.file}) center/cover"></div>
         <span class="text-xs ${i === realIdx ? 'text-white' : 'text-mint/70'}">${b.label}</span>
@@ -700,6 +706,18 @@ function renderBgPicker(activeIdx) {
     toast("Background berubah");
   }));
 
+  // Toggle active state — langsung simpan ke server
+  $$(".bg-active-cb").forEach(cb => cb.addEventListener("change", async (e) => {
+    const id = cb.dataset.id;
+    const bg = BG_LIST.find(b => b.id === id);
+    if (!bg) return;
+    bg.active = cb.checked;
+    try {
+      await api("bg_save", { id: bg.id, file: bg.file, label: bg.label, active: bg.active });
+      syncBgToCache();
+    } catch (err) { toast(err.message, false); cb.checked = !cb.checked; }
+  }));
+
   // Delete background
   $$(".del-bg").forEach(btn => btn.addEventListener("click", async (e) => {
     e.stopPropagation();
@@ -715,6 +733,15 @@ function renderBgPicker(activeIdx) {
   }));
 }
 
+function syncBgToCache() {
+  if (!BG_LIST.length) return;
+  try {
+    const cache = JSON.parse(localStorage.getItem("nova_store_cache") || "{}");
+    cache.bg_list = BG_LIST;
+    localStorage.setItem("nova_store_cache", JSON.stringify(cache));
+  } catch(e) {}
+}
+
 // Add new background modal
 // We'll use inline UI in the tampilan panel for adding
 function showAddBgForm() {
@@ -726,6 +753,18 @@ function showAddBgForm() {
 }
 
 $("#addBgBtn")?.addEventListener("click", showAddBgForm);
+
+// Preview pas pilih file
+$("#bgNewFile").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const prev = $("#bgNewPreview");
+  if (prev) {
+    prev.innerHTML = `<img src="${url}" class="w-full h-24 rounded-lg object-cover" />`;
+    prev.classList.remove("hidden");
+  }
+});
 
 $("#bgSaveAddBtn")?.addEventListener("click", async () => {
   const label = $("#bgNewLabel").value.trim();
@@ -753,11 +792,13 @@ $("#bgSaveAddBtn")?.addEventListener("click", async () => {
   }
 
   try {
-    await api("bg_save", { id: null, file, label });
+    await api("bg_save", { id: null, file, label, active: true });
     toast("Background ditambahkan");
     $("#bgNewLabel").value = "";
     $("#bgNewUrl").value = "";
     $("#bgNewFile").value = "";
+    const prev = $("#bgNewPreview");
+    if (prev) { prev.innerHTML = ""; prev.classList.add("hidden"); }
     $("#addBgForm").classList.add("hidden");
     await loadBgList();
     renderBgPicker(Number(localStorage.getItem("nova_bg_manual_idx") || 0));

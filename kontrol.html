@@ -30,7 +30,9 @@
           {id:"bg-5",file:"bg/illustration-anime-character-rain.jpg",label:"Rain"}
         ];
       }
-      var bgList = getBgList();
+      var bgList = getBgList().filter(function(b){ return b.active !== false; });
+      // Fallback kalau semua tidak aktif
+      if (!bgList.length) bgList = getBgList();
       var mode = localStorage.getItem("nova_bg_mode") || "auto";
       if (mode === "manual") {
         var midx = Number(localStorage.getItem("nova_bg_manual_idx") || 0);
@@ -255,6 +257,7 @@
           <div id="addBgForm" class="hidden glass border border-jadebright/20 rounded-xl p-4 mb-4 space-y-3">
             <label class="block text-sm text-mint/60">Nama / Label<input id="bgNewLabel" type="text" placeholder="Mis: Sunset" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2 outline-none focus:border-jadebright text-sm" /></label>
             <div class="flex gap-2 items-center"><span class="text-xs text-mint/50 shrink-0">Upload file</span><label class="flex-1 glass border border-mint/10 rounded-lg px-3 py-2 text-sm cursor-pointer hover:border-jadebright/40 text-mint/40 text-center">Pilih Gambar<input id="bgNewFile" type="file" accept="image/*" class="hidden" /></label></div>
+            <div id="bgNewPreview" class="hidden w-full rounded-lg overflow-hidden"></div>
             <div class="flex items-center gap-2"><span class="text-xs text-mint/50 shrink-0">atau URL</span><input id="bgNewUrl" type="text" placeholder="https://...gambar.jpg" class="flex-1 bg-ink/60 border border-mint/10 rounded-xl px-3 py-2 outline-none focus:border-jadebright text-sm" /></div>
             <div class="flex gap-2 pt-1">
               <button id="bgCancelAddBtn" class="flex-1 glass border border-mint/10 rounded-lg py-2 text-sm hover:bg-mint/5">Batal</button>
