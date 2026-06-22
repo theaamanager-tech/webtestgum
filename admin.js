@@ -9,24 +9,23 @@ const CAT_LABEL = { ai: "AI Tools", editing: "Editing", account: "Akun" };
 const rupiah = (n) => (n == null ? "—" : "Rp " + Number(n).toLocaleString("id-ID"));
 function priceRange(vs){const p=vs.map(v=>v.price).filter(v=>v!=null);if(!p.length)return"Chat Admin";const lo=Math.min(...p),hi=Math.max(...p);return lo===hi?rupiah(lo):rupiah(lo)+" – "+rupiah(hi);}
 
-let TOKEN = sessionStorage.getItem("nova_admin_token") || "";
+let ADMIN_PASSWORD = sessionStorage.getItem("nova_admin_password") || "";
 let CATALOG = [], editingId = null, selectedVariant = null;
 
 /* ===================== API ===================== */
 async function api(action, payload = {}) {
-  const headers = { "Content-Type": "application/json" };
-  // Login: kirim password di body. Yg lain: kirim token di header.
-  if (action !== "login" && TOKEN) headers["x-admin-token"] = TOKEN;
+  const body = { action, ...payload };
+  // Semua request kirim password di body (kecuali login — dia yg set password)
+  if (action !== "login" && ADMIN_PASSWORD) body.password = ADMIN_PASSWORD;
 
   const r = await fetch("/api/admin", {
     method: "POST",
-    headers,
-    body: JSON.stringify({ action, ...payload }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
   });
   const data = await r.json();
   if (!r.ok) {
-    // Kalau session expired, arahin ke login
-    if (r.status === 401) { sessionStorage.removeItem("nova_admin_token"); TOKEN = ""; showLoginGate(); }
+    if (r.status === 401) { sessionStorage.removeItem("nova_admin_password"); ADMIN_PASSWORD = ""; showLoginGate(); }
     throw new Error(data.error || "Gagal");
   }
   return data;
@@ -49,24 +48,25 @@ function toast(msg, ok = true) {
 }
 
 async function tryLogin() {
-  const password = $("#adminKey").value.trim();
-  if (!password) return toast("Masukkan password admin", false);
+  const pass = $("#adminKey").value.trim();
+  if (!pass) return toast("Masukkan password admin", false);
   try {
-    const data = await api("login", { password });
-    TOKEN = data.token;
-    sessionStorage.setItem("nova_admin_token", TOKEN);
+    await api("login", { password: pass });
+    ADMIN_PASSWORD = pass;
+    sessionStorage.setItem("nova_admin_password", ADMIN_PASSWORD);
     hideLoginGate();
     boot();
   } catch (e) { toast(e.message, false); }
 }
 $("#loginBtn")?.addEventListener("click", tryLogin);
 $("#adminKey")?.addEventListener("keydown", (e)=>{ if(e.key==="Enter") tryLogin(); });
-$("#logoutBtn")?.addEventListener("click", () => { sessionStorage.removeItem("nova_admin_token"); location.reload(); });
+$("#logoutBtn")?.addEventListener("click", () => { sessionStorage.removeItem("nova_admin_password"); location.reload(); });
 
-// Startup: kalau ada token, coba akses. Kalau gagal (expired), tampilkan login.
+// Startup: kalau ada password di session, langsung jalan.
 function startup() {
-  if (TOKEN) {
-    boot()["catch"](function(){ showLoginGate(); });
+  if (ADMIN_PASSWORD) {
+    hideLoginGate();
+    boot();
   } else {
     showLoginGate();
   }
@@ -537,8 +537,8 @@ $("#saveStoreBtn").addEventListener("click", async () => {
   try {
     const r = await fetch("/api/store-save", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-token": TOKEN },
-      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, password: ADMIN_PASSWORD }),
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
@@ -553,8 +553,8 @@ $("#saveBantuanBtn").addEventListener("click", async () => {
   try {
     const r = await fetch("/api/store-save", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-token": TOKEN },
-      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, password: ADMIN_PASSWORD }),
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
@@ -571,8 +571,8 @@ $("#saveAnnonBtn").addEventListener("click", async () => {
   try {
     const r = await fetch("/api/store-save", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-token": TOKEN },
-      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, password: ADMIN_PASSWORD }),
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
@@ -618,8 +618,8 @@ $("#saveSocBtn").addEventListener("click", async () => {
   try {
     const r = await fetch("/api/store-save", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-token": TOKEN },
-      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, password: ADMIN_PASSWORD }),
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
@@ -627,14 +627,33 @@ $("#saveSocBtn").addEventListener("click", async () => {
   } catch(e) { toast(e.message, false); }
 });
 
-/* ===================== TAMPILAN ===================== */
-const BG_LIST = [
-  { file: "bg/moon-sky-night-background-asset-game-2d-futuristic-generative-ai.jpg", label: "Moon Sky" },
-  { file: "bg/halloween-scene-illustration-anime-style.jpg", label: "Halloween" },
-  { file: "bg/anime-style-mythical-dragon-creature.jpg", label: "Dragon" },
-  { file: "bg/mythical-dragon-beast-anime-style.jpg", label: "Dragon Beast" },
-  { file: "bg/illustration-anime-character-rain.jpg", label: "Rain" },
-];
+/* ===================== TAMPILAN / BACKGROUND ===================== */
+let BG_LIST = [];
+let bgListLoaded = false;
+
+async function loadBgList() {
+  try {
+    const { backgrounds } = await api("bg_list");
+    BG_LIST = backgrounds || [];
+    bgListLoaded = true;
+    // Also update cache for storefront
+    if (BG_LIST.length) {
+      const cache = JSON.parse(localStorage.getItem("nova_store_cache") || "{}");
+      cache.bg_list = BG_LIST;
+      localStorage.setItem("nova_store_cache", JSON.stringify(cache));
+    }
+  } catch (e) {
+    console.error("bg_list load error:", e);
+    BG_LIST = [
+      { id: "bg-1", file: "bg/moon-sky-night-background-asset-game-2d-futuristic-generative-ai.jpg", label: "Moon Sky" },
+      { id: "bg-2", file: "bg/halloween-scene-illustration-anime-style.jpg", label: "Halloween" },
+      { id: "bg-3", file: "bg/anime-style-mythical-dragon-creature.jpg", label: "Dragon" },
+      { id: "bg-4", file: "bg/mythical-dragon-beast-anime-style.jpg", label: "Dragon Beast" },
+      { id: "bg-5", file: "bg/illustration-anime-character-rain.jpg", label: "Rain" },
+    ];
+    bgListLoaded = true;
+  }
+}
 
 function loadTampilan() {
   const mode = localStorage.getItem("nova_bg_mode") || "auto";
@@ -642,9 +661,13 @@ function loadTampilan() {
   const interval = localStorage.getItem("nova_bg_interval") || "120";
   $("#bgMode").value = mode;
   $("#bgInterval").value = interval;
-  renderBgPicker(Number(idx));
+  if (bgListLoaded) {
+    renderBgPicker(Number(idx));
+  } else {
+    loadBgList().then(() => renderBgPicker(Number(idx)));
+  }
   toggleBgMode();
-  $("#bgMode").addEventListener("change", toggleBgMode);
+  $("#bgMode").onchange = toggleBgMode;
 }
 
 function toggleBgMode() {
@@ -654,32 +677,111 @@ function toggleBgMode() {
 }
 
 function renderBgPicker(activeIdx) {
+  const realIdx = BG_LIST[activeIdx] ? activeIdx : 0;
   $("#bgList").innerHTML = BG_LIST.map((b, i) => `
-    <button class="bg-opt text-left rounded-xl p-2 border text-sm ${i === activeIdx ? 'border-jadebright bg-jadebright/10' : 'border-mint/10 glass hover:border-jadebright/40'}" data-idx="${i}">
-      <div class="w-full h-16 rounded-lg mb-1 overflow-hidden" style="background:url(${b.file}) center/cover"></div>
-      <span class="text-xs ${i === activeIdx ? 'text-white' : 'text-mint/70'}">${b.label}</span>
-    </button>
+    <div class="relative group">
+      <button class="bg-opt text-left rounded-xl p-2 border text-sm w-full ${i === realIdx ? 'border-jadebright bg-jadebright/10' : 'border-mint/10 glass hover:border-jadebright/40'}" data-idx="${i}">
+        <div class="w-full h-16 rounded-lg mb-1 overflow-hidden" style="background:url(${b.file}) center/cover"></div>
+        <span class="text-xs ${i === realIdx ? 'text-white' : 'text-mint/70'}">${b.label}</span>
+      </button>
+      <button class="del-bg absolute top-1 right-1 w-6 h-6 rounded-full bg-red-400/20 text-red-300 grid place-items-center text-xs opacity-0 group-hover:opacity-100 transition hover:bg-red-400/40" data-id="${b.id}" title="Hapus background ini">✕</button>
+    </div>
   `).join("");
   lucide.createIcons();
+
   $$(".bg-opt").forEach(btn => btn.addEventListener("click", () => {
     const idx = Number(btn.dataset.idx);
+    const bg = BG_LIST[idx];
+    if (!bg) return;
     localStorage.setItem("nova_bg_manual_idx", idx);
     localStorage.setItem("nova_bg_mode", "manual");
-    applyBgManually(BG_LIST[idx].file);
+    document.documentElement.style.setProperty("--bg-img", `url(${bg.file})`);
     loadTampilan();
     toast("Background berubah");
   }));
+
+  // Delete background
+  $$(".del-bg").forEach(btn => btn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    const id = btn.dataset.id;
+    const bg = BG_LIST.find(b => b.id === id);
+    if (!bg || !confirm(`Hapus background "${bg.label}"?`)) return;
+    try {
+      await api("bg_delete", { id });
+      toast("Background dihapus");
+      await loadBgList();
+      renderBgPicker(Number(localStorage.getItem("nova_bg_manual_idx") || 0));
+    } catch (err) { toast(err.message, false); }
+  }));
 }
 
-function applyBgManually(file) {
-  document.documentElement.style.setProperty("--bg-img", `url(${file})`);
+// Add new background modal
+// We'll use inline UI in the tampilan panel for adding
+function showAddBgForm() {
+  const form = $("#addBgForm");
+  if (form) {
+    form.classList.toggle("hidden");
+    lucide.createIcons();
+  }
 }
+
+$("#addBgBtn")?.addEventListener("click", showAddBgForm);
+
+$("#bgSaveAddBtn")?.addEventListener("click", async () => {
+  const label = $("#bgNewLabel").value.trim();
+  const fileUrl = $("#bgNewUrl").value.trim();
+  const fileInput = $("#bgNewFile");
+  if (!label) return toast("Nama background wajib", false);
+  if (!fileUrl && (!fileInput.files || !fileInput.files[0])) return toast("Pilih gambar atau masukkan URL", false);
+
+  let file = fileUrl;
+  if (fileInput.files && fileInput.files[0]) {
+    try {
+      const data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            const d = await api("upload_bg_image", { file_data: e.target.result, filename: fileInput.files[0].name });
+            resolve(d.image_url);
+          } catch (err) { reject(err); }
+        };
+        reader.onerror = () => reject(new Error("Gagal baca file"));
+        reader.readAsDataURL(fileInput.files[0]);
+      });
+      file = data;
+    } catch (err) { return toast("Gagal upload: " + err.message, false); }
+  }
+
+  try {
+    await api("bg_save", { id: null, file, label });
+    toast("Background ditambahkan");
+    $("#bgNewLabel").value = "";
+    $("#bgNewUrl").value = "";
+    $("#bgNewFile").value = "";
+    $("#addBgForm").classList.add("hidden");
+    await loadBgList();
+    renderBgPicker(Number(localStorage.getItem("nova_bg_manual_idx") || 0));
+  } catch (err) { toast(err.message, false); }
+});
+
+$("#bgCancelAddBtn")?.addEventListener("click", () => {
+  $("#addBgForm").classList.add("hidden");
+});
 
 $("#saveTampilanBtn").addEventListener("click", () => {
   const mode = $("#bgMode").value;
   const interval = Number($("#bgInterval").value) || 120;
   localStorage.setItem("nova_bg_mode", mode);
   localStorage.setItem("nova_bg_interval", String(interval));
+
+  // Sync bg_list to localStorage cache
+  if (BG_LIST.length) {
+    try {
+      const cache = JSON.parse(localStorage.getItem("nova_store_cache") || "{}");
+      cache.bg_list = BG_LIST;
+      localStorage.setItem("nova_store_cache", JSON.stringify(cache));
+    } catch(e) {}
+  }
 
   if (mode === "auto") {
     // Reset rotator with new interval
@@ -718,6 +820,7 @@ function boot() {
   applyAdminBrand();
   loadCatalog({ refreshInsights: true });
   startAutoSync();
+  loadBgList(); // Pre-load bg_list buat panel Tampilan
   // fetch store config → update cache + brand
   fetch("/api/store-config?t=" + Date.now()).then(function(r){return r.json();}).then(function(d){
     if (d && d.name) {

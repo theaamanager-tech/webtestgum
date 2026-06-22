@@ -16,29 +16,39 @@
     }}};
   </script>
   <script>
-    // Background rotator
+    // Background rotator — pakai bg_list dari cache
     (function(){
-      var bgList = [
-        "bg/moon-sky-night-background-asset-game-2d-futuristic-generative-ai.jpg",
-        "bg/halloween-scene-illustration-anime-style.jpg",
-        "bg/anime-style-mythical-dragon-creature.jpg",
-        "bg/mythical-dragon-beast-anime-style.jpg",
-        "bg/illustration-anime-character-rain.jpg"
-      ];
+      function getBgList() {
+        try {
+          var _c = JSON.parse(localStorage.getItem("nova_store_cache"));
+          if (_c && _c.bg_list && _c.bg_list.length) return _c.bg_list;
+        } catch(e){}
+        return [
+          {id:"bg-1",file:"bg/moon-sky-night-background-asset-game-2d-futuristic-generative-ai.jpg",label:"Moon Sky"},
+          {id:"bg-2",file:"bg/halloween-scene-illustration-anime-style.jpg",label:"Halloween"},
+          {id:"bg-3",file:"bg/anime-style-mythical-dragon-creature.jpg",label:"Dragon"},
+          {id:"bg-4",file:"bg/mythical-dragon-beast-anime-style.jpg",label:"Dragon Beast"},
+          {id:"bg-5",file:"bg/illustration-anime-character-rain.jpg",label:"Rain"}
+        ];
+      }
+      var bgList = getBgList();
       var mode = localStorage.getItem("nova_bg_mode") || "auto";
       if (mode === "manual") {
         var midx = Number(localStorage.getItem("nova_bg_manual_idx") || 0);
-        document.documentElement.style.setProperty("--bg-img", "url(" + bgList[midx] + ")");
+        var bg = bgList[midx] || bgList[0];
+        if (bg) document.documentElement.style.setProperty("--bg-img", "url(" + bg.file + ")");
       } else {
         var idx = localStorage.getItem("nova_bg_idx");
         idx = idx === null ? Math.floor(Math.random() * bgList.length) : (Number(idx) + 1) % bgList.length;
         localStorage.setItem("nova_bg_idx", idx);
-        document.documentElement.style.setProperty("--bg-img", "url(" + bgList[idx] + ")");
+        var bg = bgList[idx] || bgList[0];
+        if (bg) document.documentElement.style.setProperty("--bg-img", "url(" + bg.file + ")");
         var intervalMs = (Number(localStorage.getItem("nova_bg_interval")) || 120) * 60 * 1000;
         setInterval(function(){
           idx = (idx + 1) % bgList.length;
           localStorage.setItem("nova_bg_idx", idx);
-          document.documentElement.style.setProperty("--bg-img", "url(" + bgList[idx] + ")");
+          var bg = bgList[idx] || bgList[0];
+          if (bg) document.documentElement.style.setProperty("--bg-img", "url(" + bg.file + ")");
         }, Math.max(intervalMs, 300000));
       }
     })();

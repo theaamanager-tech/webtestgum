@@ -26,6 +26,7 @@ export default async function handler(req, res) {
         bg: 'rgba(40,195,157,0.12)',
         text_color: '#CFEEE6',
       },
+      bg_list: data.bg_list || [],
       soc: {
         wa_active: !!data.soc_wa_active,
         wa_number: data.soc_wa_number || '',

@@ -123,6 +123,14 @@ create table public.app_config (
   soc_x_link                  text default '',
   soc_ig_active               boolean default false,
   soc_ig_link                 text default '',
+  -- Background list (stored as JSONB array of {id,file,label})
+  bg_list         jsonb not null default '[
+    {"id":"bg-1","file":"bg/moon-sky-night-background-asset-game-2d-futuristic-generative-ai.jpg","label":"Moon Sky"},
+    {"id":"bg-2","file":"bg/halloween-scene-illustration-anime-style.jpg","label":"Halloween"},
+    {"id":"bg-3","file":"bg/anime-style-mythical-dragon-creature.jpg","label":"Dragon"},
+    {"id":"bg-4","file":"bg/mythical-dragon-beast-anime-style.jpg","label":"Dragon Beast"},
+    {"id":"bg-5","file":"bg/illustration-anime-character-rain.jpg","label":"Rain"}
+  ]'::jsonb,
   updated_at      timestamptz not null default now()
 );
 insert into public.app_config (id) values (1) on conflict do nothing;
@@ -174,5 +182,12 @@ end;
 $$;
 -- Only service role calls this (no grant to anon).
 
--- ========================== SEED DATA ===========================
+-- =========================== SEED DATA ===========================
 -- Kosong — tidak ada default. Admin akan tambah produk via panel.
+
+-- ======================== STORAGE BUCKETS =======================
+-- Buat storage bucket "bg-images" lewat Supabase Dashboard:
+--   Storage → New bucket → name: "bg-images", public: true
+--   (atau via SQL: insert into storage.buckets ...)
+--   Policy: Allow public SELECT on storage.objects where bucket_id = 'bg-images'
+--   supabase.storage.buckets sudah ada "product-images" — tambah "bg-images" manual.

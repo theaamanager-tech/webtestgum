@@ -15,29 +15,39 @@
     }}};
   </script>
   <script>
-    // Background rotator
+    // Background rotator — pakai bg_list dari cache atau fallback hardcoded
     (function(){
-      var bgList = [
-        "bg/moon-sky-night-background-asset-game-2d-futuristic-generative-ai.jpg",
-        "bg/halloween-scene-illustration-anime-style.jpg",
-        "bg/anime-style-mythical-dragon-creature.jpg",
-        "bg/mythical-dragon-beast-anime-style.jpg",
-        "bg/illustration-anime-character-rain.jpg"
-      ];
+      function getBgList() {
+        try {
+          var _c = JSON.parse(localStorage.getItem("nova_store_cache"));
+          if (_c && _c.bg_list && _c.bg_list.length) return _c.bg_list;
+        } catch(e){}
+        return [
+          {id:"bg-1",file:"bg/moon-sky-night-background-asset-game-2d-futuristic-generative-ai.jpg",label:"Moon Sky"},
+          {id:"bg-2",file:"bg/halloween-scene-illustration-anime-style.jpg",label:"Halloween"},
+          {id:"bg-3",file:"bg/anime-style-mythical-dragon-creature.jpg",label:"Dragon"},
+          {id:"bg-4",file:"bg/mythical-dragon-beast-anime-style.jpg",label:"Dragon Beast"},
+          {id:"bg-5",file:"bg/illustration-anime-character-rain.jpg",label:"Rain"}
+        ];
+      }
+      var bgList = getBgList();
       var mode = localStorage.getItem("nova_bg_mode") || "auto";
       if (mode === "manual") {
         var midx = Number(localStorage.getItem("nova_bg_manual_idx") || 0);
-        document.documentElement.style.setProperty("--bg-img", "url(" + bgList[midx] + ")");
+        var bg = bgList[midx] || bgList[0];
+        if (bg) document.documentElement.style.setProperty("--bg-img", "url(" + bg.file + ")");
       } else {
         var idx = localStorage.getItem("nova_bg_idx");
         idx = idx === null ? Math.floor(Math.random() * bgList.length) : (Number(idx) + 1) % bgList.length;
         localStorage.setItem("nova_bg_idx", idx);
-        document.documentElement.style.setProperty("--bg-img", "url(" + bgList[idx] + ")");
+        var bg = bgList[idx] || bgList[0];
+        if (bg) document.documentElement.style.setProperty("--bg-img", "url(" + bg.file + ")");
         var intervalMs = (Number(localStorage.getItem("nova_bg_interval")) || 120) * 60 * 1000;
         setInterval(function(){
           idx = (idx + 1) % bgList.length;
           localStorage.setItem("nova_bg_idx", idx);
-          document.documentElement.style.setProperty("--bg-img", "url(" + bgList[idx] + ")");
+          var bg = bgList[idx] || bgList[0];
+          if (bg) document.documentElement.style.setProperty("--bg-img", "url(" + bg.file + ")");
         }, Math.max(intervalMs, 300000));
       }
     })();
@@ -240,6 +250,18 @@
               <span class="text-[11px] text-mint/40">Min 5 menit, max 1440 menit (24 jam). Default 120 menit (2 jam).</span>
             </label>
           </div>
+          <!-- Add background -->
+          <button id="addBgBtn" class="glass border border-dashed border-jadebright/40 text-jadebright rounded-xl px-4 py-2.5 text-sm hover:bg-jadebright/10 mb-4 w-full flex items-center justify-center gap-2"><i data-lucide="plus" class="w-4"></i> Tambah Background Baru</button>
+          <div id="addBgForm" class="hidden glass border border-jadebright/20 rounded-xl p-4 mb-4 space-y-3">
+            <label class="block text-sm text-mint/60">Nama / Label<input id="bgNewLabel" type="text" placeholder="Mis: Sunset" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2 outline-none focus:border-jadebright text-sm" /></label>
+            <div class="flex gap-2 items-center"><span class="text-xs text-mint/50 shrink-0">Upload file</span><label class="flex-1 glass border border-mint/10 rounded-lg px-3 py-2 text-sm cursor-pointer hover:border-jadebright/40 text-mint/40 text-center">Pilih Gambar<input id="bgNewFile" type="file" accept="image/*" class="hidden" /></label></div>
+            <div class="flex items-center gap-2"><span class="text-xs text-mint/50 shrink-0">atau URL</span><input id="bgNewUrl" type="text" placeholder="https://...gambar.jpg" class="flex-1 bg-ink/60 border border-mint/10 rounded-xl px-3 py-2 outline-none focus:border-jadebright text-sm" /></div>
+            <div class="flex gap-2 pt-1">
+              <button id="bgCancelAddBtn" class="flex-1 glass border border-mint/10 rounded-lg py-2 text-sm hover:bg-mint/5">Batal</button>
+              <button id="bgSaveAddBtn" class="flex-1 bg-jadebright text-ink font-semibold rounded-lg py-2 text-sm hover:brightness-110 transition"><i data-lucide="check" class="w-4 inline"></i> Simpan</button>
+            </div>
+            <p class="text-[11px] text-mint/40">Gambar akan diupload ke storage & tersedia untuk dipilih.</p>
+          </div>
           <button id="saveTampilanBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan Tampilan</button>
           <p class="text-xs text-mint/40 mt-3">Perubahan tampilan akan langsung terlihat setelah disimpan.</p>
         </div>
@@ -416,6 +438,6 @@
 
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-3 z-[70] glass border border-mint/10 rounded-full px-5 py-3 text-sm font-medium flex items-center gap-2 opacity-0 pointer-events-none transition"></div>
 
-  <script src="admin.js"></script>
+  <script>(function(){var s=document.createElement('script');s.src='admin.js?v='+Date.now();document.body.appendChild(s)})();</script>
 </body>
 </html>

@@ -1,51 +1,13 @@
-// POST /api/admin   { action, ...payload }   header: x-admin-token
+// POST /api/admin   { action, ...payload, password }
 // One key-gated endpoint for ALL admin operations (service role).
-// Security:
-//   - Login: verifikasi password, return HMAC session token (24h)
-//   - Semua action lain: validasi token, bukan password mentah
-//   - Rate limit: 5 gagal → block 15 menit per IP
-import crypto from "crypto";
+// Password dikirim di body tiap request (disimpan di sessionStorage frontend).
 import { admin, getConfig, readJson, cors } from "../lib/supabaseAdmin.js";
 
 const ADMIN_KEY = process.env.ADMIN_KEY || "";
-const PEPPER = process.env.ADMIN_PEPPER || "verdent-admin-secret-2024";
 
-// Rate limiter in-memory
-const failMap = {};
-function checkRateLimit(ip) {
-  const now = Date.now();
-  const entry = failMap[ip];
-  if (entry) {
-    if (entry.count >= 5 && now - entry.last < 15 * 60 * 1000) return false;
-    if (now - entry.last > 15 * 60 * 1000) delete failMap[ip];
-  }
-  return true;
-}
-function recordFail(ip) {
-  if (!failMap[ip]) failMap[ip] = { count: 0, last: Date.now() };
-  failMap[ip].count += 1;
-  failMap[ip].last = Date.now();
-}
-
-// Session token: base64url(JSON{key,exp,nonce}.HMAC)
-function signToken(key) {
-  const payload = { key, exp: Date.now() + 24 * 60 * 60 * 1000, nonce: crypto.randomUUID() };
-  const data = JSON.stringify(payload);
-  const sig = crypto.createHmac("sha256", PEPPER).update(data).digest("hex");
-  return Buffer.from(data + "." + sig).toString("base64url");
-}
-function verifyToken(token) {
-  try {
-    const raw = Buffer.from(token, "base64url").toString();
-    const dot = raw.lastIndexOf(".");
-    if (dot === -1) return null;
-    const data = raw.slice(0, dot), sig = raw.slice(dot + 1);
-    const exp = crypto.createHmac("sha256", PEPPER).update(data).digest("hex");
-    if (sig !== exp) return null;
-    const p = JSON.parse(data);
-    if (p.exp < Date.now() || !p.key) return null;
-    return p;
-  } catch { return null; }
+function checkPassword(body) {
+  const pw = String(body.password || "");
+  return pw.length > 0 && pw === ADMIN_KEY;
 }
 
 export default async function handler(req, res) {
@@ -55,34 +17,20 @@ export default async function handler(req, res) {
 
   const body = await readJson(req);
   const { action } = body;
-  const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+
+  // Semua action perlu password valid, kecuali login (dia yg nerima password)
+  if (action !== "login" && !checkPassword(body)) {
+    return res.status(401).json({ error: "Password salah." });
+  }
 
   try {
-    // === LOGIN (tanpa token) ===
+    // === LOGIN ===
     if (action === "login") {
       if (!ADMIN_KEY) return res.status(500).json({ error: "ADMIN_KEY belum diset di Vercel" });
-      if (!checkRateLimit(ip)) return res.status(429).json({ error: "Terlalu banyak percobaan. Coba 15 menit lagi." });
-
-      const { password } = body;
-      if (!password) return res.status(400).json({ error: "Password wajib" });
-
-      // Timing-safe compare
-      const pk = String(password);
-      if (pk.length === ADMIN_KEY.length && crypto.timingSafeEqual(Buffer.from(pk), Buffer.from(ADMIN_KEY))) {
-        delete failMap[ip];
-        return res.json({ ok: true, token: signToken(ADMIN_KEY) });
-      }
-
-      recordFail(ip);
-      return res.status(401).json({ error: "Password salah" });
+      if (!body.password) return res.status(400).json({ error: "Password wajib" });
+      if (!checkPassword(body)) return res.status(401).json({ error: "Password salah" });
+      return res.json({ ok: true });
     }
-
-    // === SEMUA ACTION LAIN: validasi session token ===
-    const token = req.headers["x-admin-token"];
-    if (!token) return res.status(401).json({ error: "Belum login. Kirim x-admin-token." });
-
-    const session = verifyToken(token);
-    if (!session || session.key !== ADMIN_KEY) return res.status(401).json({ error: "Session tidak valid. Login ulang." });
 
     switch (action) {
       case "catalog": {
@@ -245,6 +193,61 @@ export default async function handler(req, res) {
           total_orders: orders.length, paid_orders: lunas.length,
           revenue, avg_order: lunas.length ? Math.round(revenue / lunas.length) : 0,
         }});
+      }
+
+      /* ---------- background management ---------- */
+      case "bg_list": {
+        const cfg = await getConfig();
+        return res.json({ backgrounds: cfg.bg_list || [] });
+      }
+      case "bg_save": {
+        const { id, file, label } = body;
+        if (!file || !label) return res.status(400).json({ error: "File & label wajib" });
+        const cfg = await getConfig();
+        const bgList = JSON.parse(JSON.stringify(cfg.bg_list || []));
+        const idx = bgList.findIndex((b) => b.id === id);
+        const newItem = { id: id || `bg-${Date.now()}`, file, label };
+        if (idx >= 0) { bgList[idx] = newItem; } else { bgList.push(newItem); }
+        await admin.from("app_config").update({ bg_list: bgList, updated_at: new Date().toISOString() }).eq("id", 1);
+        return res.json({ ok: true, backgrounds: bgList });
+      }
+      case "bg_delete": {
+        const { id } = body;
+        if (!id) return res.status(400).json({ error: "id wajib" });
+        const cfg = await getConfig();
+        const bgList = (cfg.bg_list || []).filter((b) => b.id !== id);
+        await admin.from("app_config").update({ bg_list: bgList, updated_at: new Date().toISOString() }).eq("id", 1);
+        return res.json({ ok: true, backgrounds: bgList });
+      }
+      case "upload_bg_image": {
+        const { file_data, url, filename } = body;
+        let buffer, contentType, ext;
+
+        if (url) {
+          const imgRes = await fetch(url);
+          if (!imgRes.ok) return res.status(400).json({ error: "Gagal download gambar dari URL" });
+          buffer = Buffer.from(await imgRes.arrayBuffer());
+          contentType = imgRes.headers.get("content-type") || "image/jpeg";
+          ext = url.split(".").pop()?.split("?")[0]?.toLowerCase() || "jpg";
+        } else if (file_data) {
+          const raw = file_data.replace(/^data:image\/\w+;base64,/, "");
+          buffer = Buffer.from(raw, "base64");
+          contentType = file_data.startsWith("data:") ? file_data.split(";")[0].split(":")[1] : "image/jpeg";
+          ext = (filename || "bg.jpg").split(".").pop()?.toLowerCase() || "jpg";
+          if (buffer.length > 3 * 1024 * 1024) return res.status(400).json({ error: "Maks 3MB" });
+        } else {
+          return res.status(400).json({ error: "Kirim file_data (base64) atau url" });
+        }
+
+        const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
+        if (!allowed.includes(contentType)) return res.status(400).json({ error: "Tipe harus JPG/PNG/WEBP/GIF/AVIF" });
+        if (buffer.length > 5 * 1024 * 1024) return res.status(400).json({ error: "Maks 5MB" });
+
+        const fileName = `bg-${Date.now()}.${ext}`;
+        const { error: uploadErr } = await admin.storage.from("bg-images").upload(fileName, buffer, { contentType, upsert: true });
+        if (uploadErr) throw uploadErr;
+        const { data: { publicUrl } } = admin.storage.from("bg-images").getPublicUrl(fileName);
+        return res.json({ image_url: publicUrl, ok: true });
       }
 
       /* ---------- upload image ---------- */
