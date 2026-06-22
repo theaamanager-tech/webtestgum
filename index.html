@@ -12,7 +12,7 @@
   <script>
     tailwind.config = { theme: { extend: {
       colors: { ink:"#0D0E10", surface:"#121614", jade:"#0F7A62", jadebright:"#28C39D", deep:"#0C3B2E", mint:"#CFEEE6" },
-      fontFamily: { serif:['"Playfair Display"',"serif"], sans:['"Space Grotesk"',"sans-serif"], weghorst:['"Weghorst"',"sans-serif"] },
+      fontFamily: { serif:['"Playfair Display"',"serif"], sans:['"Space Grotesk"',"sans-serif"], weghorst:['"BrightRustic"','"Weghorst"',"sans-serif"] },
     }}};
   </script>
   <script>
@@ -70,6 +70,7 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <style>
     @font-face{font-family:'Weghorst';src:url('/weghorst.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
+    @font-face{font-family:'BrightRustic';src:url('/brightrustic.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
     body{background:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.72)),var(--bg-img,#000) center/cover fixed #0D0E10;background-attachment:fixed;transition:background-image 1.2s ease}
     .glass{background:rgba(15,122,98,.07);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
     .card-in{opacity:0;transform:translateY(14px);transition:.5s cubic-bezier(.2,.7,.2,1)} .card-in.in{opacity:1;transform:none}
@@ -118,7 +119,7 @@
       <!-- hero -->
       <section class="mb-8">
         <span class="text-xs text-mint/50">© Toko Produk Digital — garansi &amp; terpercaya · Pembayaran QRIS</span>
-        <h1 id="heroTitle" class="text-4xl sm:text-5xl font-medium leading-[1.05] mt-2 text-white" style="font-family:'Weghorst',sans-serif">Beli sekali klik, <em class="italic text-jadebright">akun langsung jadi.</em></h1>
+        <h1 id="heroTitle" class="text-4xl sm:text-5xl font-medium leading-[1.05] mt-2 text-white" style="font-family:'BrightRustic','Weghorst',sans-serif">Beli sekali klik, <em class="italic text-jadebright">akun langsung jadi.</em></h1>
         <p id="heroSub" class="text-mint/60 mt-3 max-w-lg">Pilih produk, bayar via QRIS, akun langsung terkirim otomatis.</p>
       </section>
 
@@ -132,7 +133,7 @@
 
       <!-- filters -->
       <section id="products" class="flex flex-wrap items-center justify-between gap-3 mb-5">
-        <h2 class="text-2xl text-white" style="font-family:'Weghorst',sans-serif">Katalog <em class="italic text-jadebright">Produk</em></h2>
+        <h2 class="text-2xl text-white" style="font-family:'BrightRustic','Weghorst',sans-serif">Katalog <em class="italic text-jadebright">Produk</em></h2>
         <div id="filters" class="flex flex-wrap gap-2">
           <button class="chip px-4 py-1.5 rounded-full text-sm bg-jadebright text-ink font-semibold" data-filter="all">Semua</button>
           <button class="chip px-4 py-1.5 rounded-full text-sm glass border border-mint/10" data-filter="editing">Editing</button>

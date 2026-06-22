@@ -52,6 +52,7 @@ function applyStoreConfig() {
       }
     }
     heroTitle.innerHTML = t;
+    heroTitle.style.fontFamily = "'BrightRustic','Weghorst',sans-serif";
   }
   const heroSub = $("#heroSub");
   if (heroSub) heroSub.innerHTML = STORE.hero_subtitle || heroSub.innerHTML;
