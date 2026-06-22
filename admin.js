@@ -676,38 +676,41 @@ function renderBgPicker(activeIdx) {
     </div>
   `).join("");
   lucide.createIcons();
+}
 
-  // Klik background → langsung terapkan + simpan ke cache
-  $$(".bg-opt").forEach(btn => btn.addEventListener("click", () => {
+// Event delegation — satu listener buat semua klik di bgList
+$("#bgList").addEventListener("click", (e) => {
+  // Klik background option
+  const btn = e.target.closest(".bg-opt");
+  if (btn) {
+    e.preventDefault();
     const idx = Number(btn.dataset.idx);
     const bg = BG_LIST[idx];
     if (!bg) return;
     applyBg(bg, idx);
-  }));
-
-  // Delete background
-  $$(".del-bg").forEach(btn => btn.addEventListener("click", async (e) => {
-    e.stopPropagation();
-    const id = btn.dataset.id;
+    return;
+  }
+  // Klik delete
+  const del = e.target.closest(".del-bg");
+  if (del) {
+    const id = del.dataset.id;
     const bg = BG_LIST.find(b => b.id === id);
     if (!bg || !confirm(`Hapus background "${bg.label}"?`)) return;
-    try {
-      await api("bg_delete", { id });
+    api("bg_delete", { id }).then(() => {
       toast("Background dihapus");
-      await loadBgList();
+      return loadBgList();
+    }).then(() => {
       renderBgPicker(Number(localStorage.getItem("nova_bg_manual_idx") || 0));
-    } catch (err) { toast(err.message, false); }
-  }));
-}
+    }).catch(err => toast(err.message, false));
+  }
+});
 
-// Langsung terapkan background + sync ke cache + halaman toko
 function applyBg(bg, idx) {
   localStorage.setItem("nova_bg_manual_idx", String(idx ?? 0));
   localStorage.setItem("nova_bg_mode", "manual");
   document.documentElement.style.setProperty("--bg-img", `url(${bg.file})`);
-  // Sync bg_list ke localStorage cache untuk storefront
   syncBgToCache();
-  loadTampilan();
+  renderBgPicker(Number(idx ?? 0));
   toast(`Background: ${bg.label}`);
 }
 
@@ -770,37 +773,15 @@ $("#bgSaveAddBtn")?.addEventListener("click", async () => {
     if (prev) { prev.innerHTML = ""; prev.classList.add("hidden"); }
     $("#addBgForm").classList.add("hidden");
     await loadBgList();
-    renderBgPicker(Number(localStorage.getItem("nova_bg_manual_idx") || 0));
+    // Langsung terapkan background baru ini
+    const newIdx = BG_LIST.findIndex(b => b.file === file);
+    if (newIdx >= 0) applyBg(BG_LIST[newIdx], newIdx);
+    else renderBgPicker(Number(localStorage.getItem("nova_bg_manual_idx") || 0));
   } catch (err) { toast(err.message, false); }
 });
 
 $("#bgCancelAddBtn")?.addEventListener("click", () => {
   $("#addBgForm").classList.add("hidden");
-});
-
-$("#saveTampilanBtn").addEventListener("click", () => {
-  const mode = $("#bgMode").value;
-  const interval = Number($("#bgInterval").value) || 120;
-  localStorage.setItem("nova_bg_mode", mode);
-  localStorage.setItem("nova_bg_interval", String(interval));
-
-  // Sync bg_list to localStorage cache
-  if (BG_LIST.length) {
-    try {
-      const cache = JSON.parse(localStorage.getItem("nova_store_cache") || "{}");
-      cache.bg_list = BG_LIST;
-      localStorage.setItem("nova_store_cache", JSON.stringify(cache));
-    } catch(e) {}
-  }
-
-  if (mode === "auto") {
-    // Reset rotator with new interval
-    localStorage.removeItem("nova_bg_idx");
-    document.documentElement.style.setProperty("--bg-img", "");
-    toast(`Mode auto dengan interval ${interval} menit. Refresh halaman untuk mengaktifkan.`);
-  } else {
-    toast("Pilih gambar manual di atas");
-  }
 });
 
 /* ===================== INIT ===================== */
