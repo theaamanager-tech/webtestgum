@@ -22,10 +22,7 @@
           var _c = JSON.parse(localStorage.getItem("nova_store_cache"));
           if (_c && _c.bg_list && _c.bg_list.length) return _c.bg_list;
         } catch(e){}
-        return [
-          {id:"bg-d1",file:"https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80",label:"Night Sky"},
-          {id:"bg-d2",file:"https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=800&q=80",label:"Forest"}
-        ];
+        return [];
       }
       var bgList = getBgList().filter(function(b){ return b.active !== false; });
       if (!bgList.length) bgList = getBgList();

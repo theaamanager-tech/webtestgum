@@ -208,7 +208,16 @@ export default async function handler(req, res) {
       /* ---------- background management ---------- */
       case "bg_list": {
         const cfg = await getConfig();
-        return res.json({ backgrounds: cfg.bg_list || [] });
+        if (!cfg.bg_list || !cfg.bg_list.length) {
+          // Seed default kalau database kosong
+          const defaultBg = [
+            { id: "bg-d1", file: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80", label: "Night Sky" },
+            { id: "bg-d2", file: "https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=800&q=80", label: "Forest" },
+          ];
+          await admin.from("app_config").update({ bg_list: defaultBg, updated_at: new Date().toISOString() }).eq("id", 1);
+          return res.json({ backgrounds: defaultBg });
+        }
+        return res.json({ backgrounds: cfg.bg_list });
       }
       case "bg_save": {
         const { id, file, label, active } = body;

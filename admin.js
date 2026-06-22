@@ -635,33 +635,15 @@ async function loadBgList() {
   try {
     const { backgrounds } = await api("bg_list");
     BG_LIST = backgrounds || [];
-    bgListLoaded = true;
-    // Also update cache for storefront
-    if (BG_LIST.length) {
-      const cache = JSON.parse(localStorage.getItem("nova_store_cache") || "{}");
-      cache.bg_list = BG_LIST;
-      localStorage.setItem("nova_store_cache", JSON.stringify(cache));
-    }
   } catch (e) {
     console.error("bg_list load error:", e);
-    BG_LIST = [
-      { id: "bg-d1", file: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80", label: "Night Sky" },
-      { id: "bg-d2", file: "https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=800&q=80", label: "Forest" },
-    ];
-    bgListLoaded = true;
+    BG_LIST = [];
   }
-  // Fallback kalau dari API kosong (biar grid tetap muncul)
-  if (!BG_LIST.length) {
-    BG_LIST = [
-      { id: "bg-d1", file: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80", label: "Night Sky" },
-      { id: "bg-d2", file: "https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=800&q=80", label: "Forest" },
-    ];
-    // Simpan fallback ke cache biar storefront bisa akses
-    try {
-      const cache = JSON.parse(localStorage.getItem("nova_store_cache") || "{}");
-      cache.bg_list = BG_LIST;
-      localStorage.setItem("nova_store_cache", JSON.stringify(cache));
-    } catch(e) {}
+  bgListLoaded = true;
+  if (BG_LIST.length) {
+    const cache = JSON.parse(localStorage.getItem("nova_store_cache") || "{}");
+    cache.bg_list = BG_LIST;
+    localStorage.setItem("nova_store_cache", JSON.stringify(cache));
   }
 }
 
