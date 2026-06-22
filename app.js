@@ -176,7 +176,7 @@ function productCard(p) {
   return `
   <article class="card-in glass border border-mint/10 rounded-2xl flex flex-col gap-3 hover:border-jadebright/30 transition overflow-hidden" data-cat="${p.cat}" data-name="${p.name.toLowerCase()}" data-id="${p.id}">
     ${topSection}
-    <div class="px-4 ${hasImg ? '' : ''}"><h3 class="font-serif text-lg text-white leading-tight">${p.name}</h3><span class="text-xs text-mint/40">${CAT_LABEL[p.cat] || p.cat}</span></div>
+    <div class="px-4 ${hasImg ? '' : ''}"><h3 class="font-serif text-lg text-white leading-tight">${p.name}</h3><span class="text-xs text-mint/40">${CAT_LABEL[p.cat] || p.cat}</span>${p.subtitle ? `<p class="text-xs text-mint/50 mt-1 line-clamp-2 leading-relaxed">${p.subtitle}</p>` : ""}</div>
     <div class="font-serif text-xl text-jadebright px-4">${priceRange(p.variants)}</div>
     <div class="px-4 pb-4">
       <select class="variant-select bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright w-full mb-3">${opts}</select>
