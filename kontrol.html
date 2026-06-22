@@ -26,8 +26,7 @@
       }
       var bgList = getBgList().filter(function(b){ return b.active !== false; });
       if (!bgList.length) bgList = getBgList();
-      var idx = Number(localStorage.getItem("nova_bg_manual_idx") || 0);
-      var bg = bgList[idx] || bgList[0];
+      var bg = bgList[0] || null;
       if (bg) document.documentElement.style.setProperty("--bg-img", "url(" + bg.file + ")");
     })();
   </script>
