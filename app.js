@@ -172,11 +172,7 @@ function productCard(p) {
   // Tanpa gambar: layout klasik (initials + tag sejajar)
   const hasImg = !!p.image_url;
   const topSection = hasImg
-    ? `<img src="${p.image_url}" alt="${p.name}" class="w-full h-36 object-cover" onerror="this.style.display='none'" />
-<div class="flex items-center justify-between px-4 -mt-5">
-  <div class="w-10 h-10 rounded-xl grid place-items-center font-bold text-white text-sm border-2 border-ink shadow-lg" style="background:${logoGradient(p.cat)}">${p.initials}</div>
-  ${p.tag ? `<span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-jadebright/10 text-jadebright border border-jadebright/30">${p.tag}</span>` : ""}
-</div>`
+    ? `<img src="${p.image_url}" alt="${p.name}" class="w-full h-48 object-contain" onerror="this.style.display='none'" />`
     : `<div class="flex items-center justify-between px-4 pt-4">
   <div class="w-12 h-12 rounded-xl grid place-items-center font-bold text-white text-sm" style="background:${logoGradient(p.cat)}">${p.initials}</div>
   ${p.tag ? `<span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-jadebright/10 text-jadebright border border-jadebright/30">${p.tag}</span>` : ""}
