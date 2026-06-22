@@ -645,13 +645,23 @@ async function loadBgList() {
   } catch (e) {
     console.error("bg_list load error:", e);
     BG_LIST = [
-      { id: "bg-1", file: "bg/moon-sky-night-background-asset-game-2d-futuristic-generative-ai.jpg", label: "Moon Sky" },
-      { id: "bg-2", file: "bg/halloween-scene-illustration-anime-style.jpg", label: "Halloween" },
-      { id: "bg-3", file: "bg/anime-style-mythical-dragon-creature.jpg", label: "Dragon" },
-      { id: "bg-4", file: "bg/mythical-dragon-beast-anime-style.jpg", label: "Dragon Beast" },
-      { id: "bg-5", file: "bg/illustration-anime-character-rain.jpg", label: "Rain" },
+      { id: "bg-d1", file: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80", label: "Night Sky" },
+      { id: "bg-d2", file: "https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=800&q=80", label: "Forest" },
     ];
     bgListLoaded = true;
+  }
+  // Fallback kalau dari API kosong (biar grid tetap muncul)
+  if (!BG_LIST.length) {
+    BG_LIST = [
+      { id: "bg-d1", file: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80", label: "Night Sky" },
+      { id: "bg-d2", file: "https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=800&q=80", label: "Forest" },
+    ];
+    // Simpan fallback ke cache biar storefront bisa akses
+    try {
+      const cache = JSON.parse(localStorage.getItem("nova_store_cache") || "{}");
+      cache.bg_list = BG_LIST;
+      localStorage.setItem("nova_store_cache", JSON.stringify(cache));
+    } catch(e) {}
   }
 }
 
