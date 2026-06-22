@@ -211,8 +211,8 @@ export default async function handler(req, res) {
         if (!cfg.bg_list || !cfg.bg_list.length) {
           // Seed default pake file lokal yang ada di repo
           const defaultBg = [
-            { id: "bg-6", file: "/dc55cb8d-aa80-4c3a-b6dd-2daa98b70dc4-1.webp", label: "Webp 1" },
-            { id: "bg-7", file: "/8d7f0540-91d8-4296-9b55-5335d5bec86f-1.webp", label: "Webp 2" },
+            { id: "bg-8", file: "/bg/b793c9d5-f879-4368-b76b-db31829d324e-1.webp", label: "Bg 1" },
+            { id: "bg-9", file: "/bg/14e0665c-be4b-4b47-9fe6-5c965cb7bd2c-1.webp", label: "Bg 2" },
           ];
           await admin.from("app_config").update({ bg_list: defaultBg, updated_at: new Date().toISOString() }).eq("id", 1);
           return res.json({ backgrounds: defaultBg });
