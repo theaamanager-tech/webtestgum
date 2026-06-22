@@ -716,6 +716,15 @@ function showAddBgForm() {
   }
 }
 
+// Sync BG_LIST ke localStorage cache biar storefront ikut kebaca
+function syncBgToCache() {
+  try {
+    const cache = JSON.parse(localStorage.getItem("nova_store_cache") || "{}");
+    cache.bg_list = BG_LIST;
+    localStorage.setItem("nova_store_cache", JSON.stringify(cache));
+  } catch(e) {}
+}
+
 $("#addBgBtn")?.addEventListener("click", showAddBgForm);
 
 // Preview pas pilih file
