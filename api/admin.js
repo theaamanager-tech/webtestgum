@@ -4,6 +4,16 @@
 import { admin, getConfig, readJson, cors } from "../lib/supabaseAdmin.js";
 
 const ADMIN_KEY = process.env.ADMIN_KEY || "";
+const BUCKET_CACHE = new Set();
+
+async function ensureBucket(name) {
+  if (BUCKET_CACHE.has(name)) return;
+  const { data: buckets } = await admin.storage.listBuckets();
+  if (!buckets?.find((b) => b.id === name)) {
+    await admin.storage.createBucket(name, { public: true });
+  }
+  BUCKET_CACHE.add(name);
+}
 
 function checkPassword(body) {
   const pw = String(body.password || "");
@@ -243,6 +253,7 @@ export default async function handler(req, res) {
         if (!allowed.includes(contentType)) return res.status(400).json({ error: "Tipe harus JPG/PNG/WEBP/GIF/AVIF" });
         if (buffer.length > 5 * 1024 * 1024) return res.status(400).json({ error: "Maks 5MB" });
 
+        await ensureBucket("bg-images");
         const fileName = `bg-${Date.now()}.${ext}`;
         const { error: uploadErr } = await admin.storage.from("bg-images").upload(fileName, buffer, { contentType, upsert: true });
         if (uploadErr) throw uploadErr;
@@ -278,6 +289,7 @@ export default async function handler(req, res) {
         if (!allowed.includes(contentType)) return res.status(400).json({ error: "Tipe harus JPG/PNG/WEBP/GIF/AVIF" });
         if (buffer.length > 5 * 1024 * 1024) return res.status(400).json({ error: "Maks 5MB" });
 
+        await ensureBucket("product-images");
         const fileName = `${product_id}-${Date.now()}.${ext}`;
         const { error: uploadErr } = await admin.storage.from("product-images").upload(fileName, buffer, { contentType, upsert: true });
         if (uploadErr) throw uploadErr;
