@@ -656,36 +656,18 @@ async function loadBgList() {
 }
 
 function loadTampilan() {
-  const mode = localStorage.getItem("nova_bg_mode") || "auto";
   const idx = localStorage.getItem("nova_bg_manual_idx") || 0;
-  const interval = localStorage.getItem("nova_bg_interval") || "120";
-  $("#bgMode").value = mode;
-  $("#bgInterval").value = interval;
   if (bgListLoaded) {
     renderBgPicker(Number(idx));
   } else {
     loadBgList().then(() => renderBgPicker(Number(idx)));
   }
-  toggleBgMode();
-  $("#bgMode").onchange = toggleBgMode;
-}
-
-function toggleBgMode() {
-  const mode = $("#bgMode").value;
-  $("#bgManualPicker").classList.toggle("hidden", mode !== "manual");
-  $("#bgAutoSettings").classList.toggle("hidden", mode !== "auto");
 }
 
 function renderBgPicker(activeIdx) {
   const realIdx = BG_LIST[activeIdx] ? activeIdx : 0;
   $("#bgList").innerHTML = BG_LIST.map((b, i) => `
     <div class="relative group">
-      <div class="flex items-center gap-1 mb-1">
-        <label class="flex items-center gap-1.5 text-[11px] text-mint/50 cursor-pointer" title="Aktifkan untuk mode auto">
-          <input type="checkbox" class="bg-active-cb accent-jadebright" data-id="${b.id}" ${b.active !== false ? "checked" : ""} />
-          Aktif
-        </label>
-      </div>
       <button class="bg-opt text-left rounded-xl p-2 border text-sm w-full ${i === realIdx ? 'border-jadebright bg-jadebright/10' : 'border-mint/10 glass hover:border-jadebright/40'}" data-idx="${i}">
         <div class="w-full h-16 rounded-lg mb-1 overflow-hidden" style="background:url(${b.file}) center/cover"></div>
         <span class="text-xs ${i === realIdx ? 'text-white' : 'text-mint/70'}">${b.label}</span>
@@ -695,27 +677,12 @@ function renderBgPicker(activeIdx) {
   `).join("");
   lucide.createIcons();
 
+  // Klik background → langsung terapkan + simpan ke cache
   $$(".bg-opt").forEach(btn => btn.addEventListener("click", () => {
     const idx = Number(btn.dataset.idx);
     const bg = BG_LIST[idx];
     if (!bg) return;
-    localStorage.setItem("nova_bg_manual_idx", idx);
-    localStorage.setItem("nova_bg_mode", "manual");
-    document.documentElement.style.setProperty("--bg-img", `url(${bg.file})`);
-    loadTampilan();
-    toast("Background berubah");
-  }));
-
-  // Toggle active state — langsung simpan ke server
-  $$(".bg-active-cb").forEach(cb => cb.addEventListener("change", async (e) => {
-    const id = cb.dataset.id;
-    const bg = BG_LIST.find(b => b.id === id);
-    if (!bg) return;
-    bg.active = cb.checked;
-    try {
-      await api("bg_save", { id: bg.id, file: bg.file, label: bg.label, active: bg.active });
-      syncBgToCache();
-    } catch (err) { toast(err.message, false); cb.checked = !cb.checked; }
+    applyBg(bg, idx);
   }));
 
   // Delete background
@@ -733,13 +700,15 @@ function renderBgPicker(activeIdx) {
   }));
 }
 
-function syncBgToCache() {
-  if (!BG_LIST.length) return;
-  try {
-    const cache = JSON.parse(localStorage.getItem("nova_store_cache") || "{}");
-    cache.bg_list = BG_LIST;
-    localStorage.setItem("nova_store_cache", JSON.stringify(cache));
-  } catch(e) {}
+// Langsung terapkan background + sync ke cache + halaman toko
+function applyBg(bg, idx) {
+  localStorage.setItem("nova_bg_manual_idx", String(idx ?? 0));
+  localStorage.setItem("nova_bg_mode", "manual");
+  document.documentElement.style.setProperty("--bg-img", `url(${bg.file})`);
+  // Sync bg_list ke localStorage cache untuk storefront
+  syncBgToCache();
+  loadTampilan();
+  toast(`Background: ${bg.label}`);
 }
 
 // Add new background modal
