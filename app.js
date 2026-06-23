@@ -301,8 +301,8 @@ function renderBillSummary() {
     <div class="flex gap-2 mb-4">
       <input id="couponInput" type="text" placeholder="cth: HEMAT10" class="flex-1 bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright uppercase" />
     </div>
-    <label class="block text-sm mb-1">Kontak (opsional, untuk notifikasi)</label>
-    <input id="contactInput" type="text" placeholder="WhatsApp / email" class="w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright mb-5" />
+    <label class="block text-sm mb-1">Kontak (wajib, untuk notifikasi & kirim akun)</label>
+    <input id="contactInput" type="text" placeholder="Email / WhatsApp" required class="w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-jadebright mb-5" />
 
     <button id="payBtn" class="w-full bg-jadebright text-ink font-semibold rounded-xl py-3 flex items-center justify-center gap-2 hover:brightness-110 transition">
       <i data-lucide="qr-code" class="w-[18px]"></i> Bayar dengan QRIS
@@ -322,6 +322,7 @@ async function createPayment() {
   const { variant, qty } = currentSelection;
   const coupon = $("#couponInput").value.trim();
   const contact = $("#contactInput").value.trim();
+  if (!contact) { toast("Isi kontak kamu dulu (email/WA)", false); return; }
   const btn = $("#payBtn");
   btn.disabled = true; btn.innerHTML = `<i data-lucide="loader" class="w-[18px] animate-spin"></i> Membuat QRIS…`; lucide.createIcons();
   try {

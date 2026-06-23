@@ -146,6 +146,8 @@ export default async function handler(req, res) {
           api_key_preview: cfg.pakasir_api_key ? cfg.pakasir_api_key.slice(0, 4) + "••••" : "",
           telegram_bot_token: cfg.telegram_bot_token || '',
           telegram_chat_id: cfg.telegram_chat_id || '',
+          mailersend_api_key: cfg.mailersend_api_key || '',
+          mailersend_sender_email: cfg.mailersend_sender_email || '',
         }});
       }
       case "save_config": {
@@ -156,6 +158,8 @@ export default async function handler(req, res) {
         if (body.pakasir_api_key) patch.pakasir_api_key = body.pakasir_api_key;
         if (body.telegram_bot_token !== undefined) patch.telegram_bot_token = body.telegram_bot_token;
         if (body.telegram_chat_id !== undefined) patch.telegram_chat_id = body.telegram_chat_id;
+        if (body.mailersend_api_key !== undefined) patch.mailersend_api_key = body.mailersend_api_key;
+        if (body.mailersend_sender_email !== undefined) patch.mailersend_sender_email = body.mailersend_sender_email;
         const { error } = await admin.from("app_config").update(patch).eq("id", 1);
         if (error) throw error; return res.json({ ok: true });
       }

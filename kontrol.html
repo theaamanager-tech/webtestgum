@@ -210,6 +210,14 @@
             <p class="text-[11px] text-mint/40 mt-3">Set <code>Webhook URL</code> ini juga di dashboard Pakasir (Edit Proyek).</p>
           </div>
 
+          <!-- MailerSend Config -->
+          <div class="glass border border-mint/10 rounded-2xl p-6">
+            <h3 class="text-white font-semibold mb-4 flex items-center gap-2"><i data-lucide="mail" class="w-5 text-jadebright"></i> Email (MailerSend)</h3>
+            <p class="text-xs text-mint/50 mb-4">Kirim akun otomatis ke email pembeli setelah pembayaran sukses. Pembeli wajib mengisi email saat checkout.</p>
+            <label class="block text-sm mb-3">API Key<code class="text-[11px] text-mint/40 block">Dari dashboard MailerSend</code><input id="msApiKey" type="password" placeholder="mlsn.xxxxxxxx" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
+            <label class="block text-sm mb-4">Sender Email<code class="text-[11px] text-mint/40 block">Email terverifikasi di MailerSend, mis: noreply@verdantstore.id</code><input id="msSenderEmail" type="text" placeholder="noreply@verdantstore.id" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
+          </div>
+
           <!-- Telegram Notification Config -->
           <div class="glass border border-mint/10 rounded-2xl p-6">
             <h3 class="text-white font-semibold mb-4 flex items-center gap-2"><i data-lucide="send" class="w-5 text-jadebright"></i> Notifikasi Telegram</h3>

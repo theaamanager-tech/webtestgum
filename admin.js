@@ -465,6 +465,9 @@ async function loadConfig() {
     // Telegram config
     $("#pkTelegramToken").value = config.telegram_bot_token || "";
     $("#pkTelegramChatId").value = config.telegram_chat_id || "";
+    // Mailersend config
+    $("#msApiKey").value = config.mailersend_api_key || "";
+    $("#msSenderEmail").value = config.mailersend_sender_email || "";
   } catch(e){ toast(e.message, false); }
 }
 $("#saveConfigBtn").addEventListener("click", async () => {
@@ -475,6 +478,8 @@ $("#saveConfigBtn").addEventListener("click", async () => {
     pakasir_api_key: $("#pkApiKey").value.trim(),
     telegram_bot_token: $("#pkTelegramToken").value.trim(),
     telegram_chat_id: $("#pkTelegramChatId").value.trim(),
+    mailersend_api_key: $("#msApiKey").value.trim(),
+    mailersend_sender_email: $("#msSenderEmail").value.trim(),
   });
     $("#pkApiKey").value = ""; toast("Konfigurasi disimpan"); loadConfig();
   } catch(e){ toast(e.message, false); }
