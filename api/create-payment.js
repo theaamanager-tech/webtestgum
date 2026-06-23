@@ -17,7 +17,7 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
-    const { variant_id, quantity, coupon, contact } = await readJson(req);
+    const { variant_id, quantity, coupon, contact, note } = await readJson(req);
     if (!variant_id) return res.status(400).json({ error: "variant_id wajib" });
     const qty = Math.max(1, Math.min(Number(quantity) || 1, 999)); // max 999
 
