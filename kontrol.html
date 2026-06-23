@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>·</title>
+  <title>Ã‚Â·</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&family=Outfit:wght@500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,34 +14,27 @@
       fontFamily: { serif:['"Playfair Display"',"serif"], sans:['"Space Grotesk"',"sans-serif"], weghorst:['"BrightRustic"','"Weghorst"',"sans-serif"] },
     }}};
   </script>
+  <style>
+    @font-face{font-family:'Weghorst';src:url('/weghorst.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
+    @font-face{font-family:'BrightRustic';src:url('/brightrustic.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
+    body{background:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.72)),url('https://wfaeesuxuqftmlyeizan.supabase.co/storage/v1/object/public/bg-images/b793c9d5-f879-4368-b76b-db31829d324e-1.webp') center/cover fixed #0D0E10}
+    .glass{background:rgba(15,122,98,.07);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+    .panel{display:none} .panel.active{display:block;animation:fade .35s ease}
+    @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    .drawer{transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+  </style>
   <script>
-    // Background rotator — pakai bg_list dari cache atau fallback hardcoded
-    (function(){
-      function getBgList() {
-        try {
-          var _c = JSON.parse(localStorage.getItem("nova_store_cache"));
-          if (_c && _c.bg_list && _c.bg_list.length) return _c.bg_list;
-        } catch(e){}
-        return [];
-      }
-      var bgList = getBgList().filter(function(b){ return b.active !== false; });
-      if (!bgList.length) bgList = getBgList();
-      var bg = bgList[0] || null;
-      if (bg) document.documentElement.style.setProperty("--bg-img", "url(" + bg.file + ")");
-    })();
-  </script>
-  <script>
-    // ⚡ Instant brand di admin — baca cache
+    // Ã¢Å¡Â¡ Instant brand di admin Ã¢â‚¬â€ baca cache
     (function(){
       try {
         var _c = JSON.parse(localStorage.getItem("nova_store_cache"));
         if (_c && _c.name) {
-          document.title = _c.name + " — Admin";
+          document.title = _c.name + " Ã¢â‚¬â€ Admin";
           var _els = document.querySelectorAll('#sidebar .font-serif, #gateBrand');
           for (var _i = 0; _i < _els.length; _i++) {
             var _prefix = _c.name.slice(0, 4);
-            var _suffix = _c.name.slice(4).replace(/[°^]/g,'');
-            var _dot = _c.name.includes('°') ? '°' : _c.name.includes('^') ? '^' : '';
+            var _suffix = _c.name.slice(4).replace(/[Ã‚Â°^]/g,'');
+            var _dot = _c.name.includes('Ã‚Â°') ? 'Ã‚Â°' : _c.name.includes('^') ? '^' : '';
             _els[_i].innerHTML = _suffix && _dot
               ? _prefix + '<em class="italic">' + _suffix + '</em><sup class="text-jadebright">' + _dot + '</sup>'
               : _c.name;
@@ -51,15 +44,6 @@
     })();
   </script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    @font-face{font-family:'Weghorst';src:url('/weghorst.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
-    @font-face{font-family:'BrightRustic';src:url('/brightrustic.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
-    body{background:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.72)),var(--bg-img,#000) center/cover fixed #0D0E10;background-attachment:fixed;transition:background-image 1.2s ease}
-    .glass{background:rgba(15,122,98,.07);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-    .panel{display:none} .panel.active{display:block;animation:fade .35s ease}
-    @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-    .drawer{transition:transform .3s cubic-bezier(.2,.7,.2,1)}
-  </style>
 </head>
 <body class="font-sans text-mint/90 antialiased overflow-x-hidden min-h-screen">
 
@@ -67,7 +51,7 @@
   <div id="loginGate" class="fixed inset-0 z-[80] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-ink"></div>
     <div class="relative glass border border-mint/10 rounded-2xl w-full max-w-sm p-7 text-center">
-      <span class="font-serif text-3xl text-white" id="gateBrand">Verdent°</span>
+      <span class="font-serif text-3xl text-white" id="gateBrand">VerdentÃ‚Â°</span>
       <p class="text-sm text-mint/50 mt-2 mb-6">Admin Control Center</p>
       <input id="adminKey" type="password" placeholder="Password Admin" class="w-full bg-ink/60 border border-mint/10 rounded-xl px-4 py-3 outline-none focus:border-jadebright text-center" autocomplete="off" />
       <button id="loginBtn" class="mt-3 w-full bg-jadebright text-ink font-semibold rounded-xl py-3 hover:brightness-110 transition">Masuk</button>
@@ -78,7 +62,7 @@
     <!-- SIDEBAR -->
     <aside id="sidebar" class="drawer fixed md:sticky top-0 z-40 h-screen w-[240px] -translate-x-full md:translate-x-0 glass border-r border-mint/10 px-5 py-7 flex flex-col gap-7">
       <div class="flex items-center gap-2">
-        <span class="font-serif text-2xl font-semibold tracking-tight">nova<em class="italic">ciy</em><sup class="text-jadebright">°</sup></span>
+        <span class="font-serif text-2xl font-semibold tracking-tight">nova<em class="italic">ciy</em><sup class="text-jadebright">Ã‚Â°</sup></span>
         <span class="text-[10px] font-semibold uppercase tracking-widest text-jadebright bg-jadebright/10 border border-jadebright/30 px-2 py-0.5 rounded-full">Admin</span>
       </div>
       <nav class="flex flex-col flex-1 gap-1 text-sm">
@@ -89,8 +73,6 @@
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="stock"><i data-lucide="package-check" class="w-[18px]"></i> Stok &amp; SNK</button>
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="coupons"><i data-lucide="ticket-percent" class="w-[18px]"></i> Kupon</button>
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="settings"><i data-lucide="key-round" class="w-[18px]"></i> Pakasir API</button>
-        <span class="text-[11px] uppercase tracking-widest text-mint/40 mb-1 mt-3">Tampilan</span>
-        <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="tampilan"><i data-lucide="palette" class="w-[18px]"></i> Tampilan</button>
         <span class="text-[11px] uppercase tracking-widest text-mint/40 mb-1 mt-3">Toko</span>
         <button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-mint/5" data-panel="store"><i data-lucide="store" class="w-[18px]"></i> Pengaturan</button>
       </nav>
@@ -110,10 +92,10 @@
       <!-- ===== INSIGHTS / FINANCIAL ===== -->
       <section id="panel-insights" class="panel active">
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
-          <article class="glass border border-jadebright/20 rounded-2xl p-5"><i data-lucide="wallet" class="w-5 text-jadebright mb-3"></i><span id="ovRevenue" class="block font-serif text-2xl text-white">—</span><span class="text-xs text-mint/50">Pendapatan (lunas)</span></article>
-          <article class="glass border border-mint/10 rounded-2xl p-5"><i data-lucide="receipt-text" class="w-5 text-jadebright mb-3"></i><span id="ovOrders" class="block font-serif text-2xl text-white">—</span><span class="text-xs text-mint/50">Transaksi Sukses</span></article>
-          <article class="glass border border-mint/10 rounded-2xl p-5"><i data-lucide="box" class="w-5 text-jadebright mb-3"></i><span id="ovProducts" class="block font-serif text-2xl text-white">—</span><span class="text-xs text-mint/50">Produk Aktif</span></article>
-          <article class="glass border border-mint/10 rounded-2xl p-5"><i data-lucide="package" class="w-5 text-jadebright mb-3"></i><span id="ovStock" class="block font-serif text-2xl text-white">—</span><span class="text-xs text-mint/50">Stok Tersedia</span></article>
+          <article class="glass border border-jadebright/20 rounded-2xl p-5"><i data-lucide="wallet" class="w-5 text-jadebright mb-3"></i><span id="ovRevenue" class="block font-serif text-2xl text-white">Ã¢â‚¬â€</span><span class="text-xs text-mint/50">Pendapatan (lunas)</span></article>
+          <article class="glass border border-mint/10 rounded-2xl p-5"><i data-lucide="receipt-text" class="w-5 text-jadebright mb-3"></i><span id="ovOrders" class="block font-serif text-2xl text-white">Ã¢â‚¬â€</span><span class="text-xs text-mint/50">Transaksi Sukses</span></article>
+          <article class="glass border border-mint/10 rounded-2xl p-5"><i data-lucide="box" class="w-5 text-jadebright mb-3"></i><span id="ovProducts" class="block font-serif text-2xl text-white">Ã¢â‚¬â€</span><span class="text-xs text-mint/50">Produk Aktif</span></article>
+          <article class="glass border border-mint/10 rounded-2xl p-5"><i data-lucide="package" class="w-5 text-jadebright mb-3"></i><span id="ovStock" class="block font-serif text-2xl text-white">Ã¢â‚¬â€</span><span class="text-xs text-mint/50">Stok Tersedia</span></article>
         </div>
         <div class="glass border border-mint/10 rounded-2xl p-5">
           <h3 class="text-white font-semibold mb-4 flex items-center gap-2"><i data-lucide="award" class="w-5 text-jadebright"></i> Produk Terlaris</h3>
@@ -126,29 +108,29 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div class="flex items-center gap-3 flex-wrap">
             <input id="rekapStart" type="date" class="bg-ink/60 border border-mint/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-jadebright" />
-            <span class="text-mint/40 text-sm">—</span>
+            <span class="text-mint/40 text-sm">Ã¢â‚¬â€</span>
             <input id="rekapEnd" type="date" class="bg-ink/60 border border-mint/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-jadebright" />
             <button id="rekapFilterBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-4 py-2 text-sm hover:brightness-110 transition flex items-center gap-2"><i data-lucide="search" class="w-4"></i> Filter</button>
             <button id="rekapResetBtn" class="glass border border-mint/10 rounded-xl px-4 py-2 text-sm hover:bg-mint/5">Hari Ini</button>
           </div>
-          <span id="rekapCount" class="text-xs text-mint/50">—</span>
+          <span id="rekapCount" class="text-xs text-mint/50">Ã¢â‚¬â€</span>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
           <div class="glass border border-jadebright/20 rounded-2xl p-4">
             <span class="text-xs text-mint/50">Total Pesanan</span>
-            <span id="rkTotalOrders" class="block font-serif text-2xl text-white mt-1">—</span>
+            <span id="rkTotalOrders" class="block font-serif text-2xl text-white mt-1">Ã¢â‚¬â€</span>
           </div>
           <div class="glass border border-jadebright/20 rounded-2xl p-4">
             <span class="text-xs text-mint/50">Lunas</span>
-            <span id="rkPaidOrders" class="block font-serif text-2xl text-jadebright mt-1">—</span>
+            <span id="rkPaidOrders" class="block font-serif text-2xl text-jadebright mt-1">Ã¢â‚¬â€</span>
           </div>
           <div class="glass border border-jadebright/20 rounded-2xl p-4">
             <span class="text-xs text-mint/50">Pendapatan</span>
-            <span id="rkRevenue" class="block font-serif text-2xl text-white mt-1">—</span>
+            <span id="rkRevenue" class="block font-serif text-2xl text-white mt-1">Ã¢â‚¬â€</span>
           </div>
           <div class="glass border border-jadebright/20 rounded-2xl p-4">
             <span class="text-xs text-mint/50">Rata-rata Pesanan</span>
-            <span id="rkAvg" class="block font-serif text-2xl text-white mt-1">—</span>
+            <span id="rkAvg" class="block font-serif text-2xl text-white mt-1">Ã¢â‚¬â€</span>
           </div>
         </div>
         <div class="glass border border-mint/10 rounded-2xl overflow-x-auto">
@@ -171,7 +153,7 @@
         <div class="flex items-center gap-3 mb-4">
           <div class="flex-1 flex items-center gap-2 glass border border-mint/10 rounded-xl px-3 h-11 max-w-md">
             <i data-lucide="search" class="w-[18px] text-mint/40"></i>
-            <input id="prodSearch" type="text" placeholder="Cari produk…" class="bg-transparent outline-none w-full text-sm placeholder:text-mint/30" />
+            <input id="prodSearch" type="text" placeholder="Cari produkÃ¢â‚¬Â¦" class="bg-transparent outline-none w-full text-sm placeholder:text-mint/30" />
           </div>
           <button id="addProductBtn" class="flex items-center gap-2 bg-jadebright text-ink font-semibold rounded-xl px-4 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="plus" class="w-4"></i> Produk</button>
         </div>
@@ -210,30 +192,7 @@
         </div>
       </section>
 
-      <!-- ===== TAMPILAN ===== -->
-      <section id="panel-tampilan" class="panel">
-        <div class="glass border border-mint/10 rounded-2xl p-6 max-w-xl">
-          <h3 class="text-white font-semibold mb-4"><i data-lucide="palette" class="w-5 text-jadebright inline"></i> Background</h3>
-          <div class="mb-4">
-            <label class="block text-sm mb-2">Pilih Background</label>
-            <div id="bgList" class="grid grid-cols-2 gap-3 max-h-64 overflow-auto pr-1"></div>
-          </div>
-          <!-- Add background -->
-          <button id="addBgBtn" class="glass border border-dashed border-jadebright/40 text-jadebright rounded-xl px-4 py-2.5 text-sm hover:bg-jadebright/10 mb-4 w-full flex items-center justify-center gap-2"><i data-lucide="plus" class="w-4"></i> Tambah Background Baru</button>
-          <div id="addBgForm" class="hidden glass border border-jadebright/20 rounded-xl p-4 mb-4 space-y-3">
-            <label class="block text-sm text-mint/60">Nama / Label<input id="bgNewLabel" type="text" placeholder="Mis: Sunset" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2 outline-none focus:border-jadebright text-sm" /></label>
-            <div class="flex gap-2 items-center"><span class="text-xs text-mint/50 shrink-0">Upload file</span><label class="flex-1 glass border border-mint/10 rounded-lg px-3 py-2 text-sm cursor-pointer hover:border-jadebright/40 text-mint/40 text-center">Pilih Gambar<input id="bgNewFile" type="file" accept="image/*" class="hidden" /></label></div>
-            <div id="bgNewPreview" class="hidden w-full rounded-lg overflow-hidden"></div>
-            <div class="flex items-center gap-2"><span class="text-xs text-mint/50 shrink-0">atau URL</span><input id="bgNewUrl" type="text" placeholder="https://...gambar.jpg" class="flex-1 bg-ink/60 border border-mint/10 rounded-xl px-3 py-2 outline-none focus:border-jadebright text-sm" /></div>
-            <div class="flex gap-2 pt-1">
-              <button id="bgCancelAddBtn" class="flex-1 glass border border-mint/10 rounded-lg py-2 text-sm hover:bg-mint/5">Batal</button>
-              <button id="bgSaveAddBtn" class="flex-1 bg-jadebright text-ink font-semibold rounded-lg py-2 text-sm hover:brightness-110 transition"><i data-lucide="check" class="w-4 inline"></i> Simpan</button>
-            </div>
-            <p class="text-[11px] text-mint/40">Gambar akan diupload ke storage & tersedia untuk dipilih.</p>
-          </div>
-          <p class="text-xs text-mint/40 mt-1">Klik background untuk langsung menerapkan perubahan.</p>
-        </div>
-      </section>
+
 
       <!-- ===== SETTINGS ===== -->
       <section id="panel-settings" class="panel">
@@ -246,7 +205,7 @@
             </select></label>
             <label class="block text-sm mb-3">Webhook URL<input id="pkWebhook" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
             <label class="block text-sm mb-3">API Key Baru<input id="pkApiKey" type="password" placeholder="Kosongkan jika tidak ingin mengubah" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" /></label>
-            <p id="keyStatus" class="text-xs text-mint/40 mb-4">—</p>
+            <p id="keyStatus" class="text-xs text-mint/40 mb-4">Ã¢â‚¬â€</p>
             <button id="saveConfigBtn" class="bg-jadebright text-ink font-semibold rounded-xl px-5 py-2.5 text-sm hover:brightness-110 transition"><i data-lucide="save" class="w-4 inline"></i> Simpan</button>
             <p class="text-[11px] text-mint/40 mt-3">Set <code>Webhook URL</code> ini juga di dashboard Pakasir (Edit Proyek).</p>
           </div>
@@ -273,7 +232,7 @@
               <i data-lucide="chevron-down" class="w-4 text-mint/40 ml-auto accord-icon transition-transform"></i>
             </button>
             <div id="tokoBody" class="accord-body px-5 pb-5 hidden">
-            <label class="block text-sm mb-3">Nama Toko<input id="sName" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Novaciy°" /></label>
+            <label class="block text-sm mb-3">Nama Toko<input id="sName" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="NovaciyÃ‚Â°" /></label>
             <label class="block text-sm mb-3">Tagline<textarea id="sTagline" rows="2" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright" placeholder="Produk Digital Premium"></textarea></label>
             <label class="block text-sm mb-3">Hero Title (HTML diizinkan)<textarea id="sHeroTitle" rows="3" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright"></textarea></label>
             <label class="block text-sm mb-3">Hero Subtitle (HTML diizinkan)<textarea id="sHeroSub" rows="3" class="mt-1 w-full bg-ink/60 border border-mint/10 rounded-xl px-3 py-2.5 outline-none focus:border-jadebright"></textarea></label>

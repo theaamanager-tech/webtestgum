@@ -74,7 +74,7 @@ function startup() {
 startup();
 
 /* ===================== NAV ===================== */
-const TITLES = { insights: "Insights & Finansial", rekap: "Rekap Penjualan", products: "Produk", stock: "Stok & SNK", coupons: "Kupon", settings: "Pakasir API", store: "Pengaturan Toko", tampilan: "Tampilan" };
+const TITLES = { insights: "Insights & Finansial", rekap: "Rekap Penjualan", products: "Produk", stock: "Stok & SNK", coupons: "Kupon", settings: "Pakasir API", store: "Pengaturan Toko" };
 $$(".nav-item").forEach((b) => b.addEventListener("click", () => {
   try {
     $$(".nav-item").forEach(x => x.classList.remove("bg-jadebright/10","text-white"));
@@ -89,7 +89,6 @@ $$(".nav-item").forEach((b) => b.addEventListener("click", () => {
     if (panel === "coupons") loadCoupons();
     if (panel === "settings") loadConfig();
     if (panel === "store") { loadStoreConfig(); loadSocConfig(); }
-    if (panel === "tampilan") loadTampilan();
     $("#sidebar")?.classList.add("-translate-x-full");
   } catch (e) { console.error("nav error:", e); toast(e.message, false); }
 }));
@@ -627,164 +626,6 @@ $("#saveSocBtn").addEventListener("click", async () => {
   } catch(e) { toast(e.message, false); }
 });
 
-/* ===================== TAMPILAN / BACKGROUND ===================== */
-let BG_LIST = [];
-let bgListLoaded = false;
-
-async function loadBgList() {
-  try {
-    const { backgrounds } = await api("bg_list");
-    BG_LIST = backgrounds || [];
-  } catch (e) {
-    console.error("bg_list load error:", e);
-    BG_LIST = [];
-  }
-  bgListLoaded = true;
-  if (BG_LIST.length) {
-    const cache = JSON.parse(localStorage.getItem("nova_store_cache") || "{}");
-    cache.bg_list = BG_LIST;
-    localStorage.setItem("nova_store_cache", JSON.stringify(cache));
-  }
-}
-
-function loadTampilan() {
-  const idx = localStorage.getItem("nova_bg_manual_idx") || 0;
-  if (bgListLoaded) {
-    renderBgPicker(Number(idx));
-  } else {
-    loadBgList().then(() => renderBgPicker(Number(idx)));
-  }
-}
-
-function renderBgPicker(activeIdx) {
-  const realIdx = BG_LIST[activeIdx] ? activeIdx : 0;
-  $("#bgList").innerHTML = BG_LIST.map((b, i) => `
-    <div class="relative group">
-      <button class="bg-opt text-left rounded-xl p-2 border text-sm w-full ${i === realIdx ? 'border-jadebright bg-jadebright/10' : 'border-mint/10 glass hover:border-jadebright/40'}" data-idx="${i}">
-        <div class="w-full h-16 rounded-lg mb-1 overflow-hidden" style="background:url(${b.file}) center/cover"></div>
-        <span class="text-xs ${i === realIdx ? 'text-white' : 'text-mint/70'}">${b.label}</span>
-      </button>
-      <button class="del-bg absolute top-1 right-1 w-6 h-6 rounded-full bg-red-400/20 text-red-300 grid place-items-center text-xs opacity-0 group-hover:opacity-100 transition hover:bg-red-400/40" data-id="${b.id}" title="Hapus background ini">✕</button>
-    </div>
-  `).join("");
-  lucide.createIcons();
-}
-
-// Event delegation — satu listener buat semua klik di bgList
-$("#bgList").addEventListener("click", (e) => {
-  // Klik background option
-  const btn = e.target.closest(".bg-opt");
-  if (btn) {
-    e.preventDefault();
-    const idx = Number(btn.dataset.idx);
-    const bg = BG_LIST[idx];
-    if (!bg) return;
-    applyBg(bg, idx);
-    return;
-  }
-  // Klik delete
-  const del = e.target.closest(".del-bg");
-  if (del) {
-    const id = del.dataset.id;
-    const bg = BG_LIST.find(b => b.id === id);
-    if (!bg || !confirm(`Hapus background "${bg.label}"?`)) return;
-    api("bg_delete", { id }).then(() => {
-      toast("Background dihapus");
-      return loadBgList();
-    }).then(() => {
-      renderBgPicker(Number(localStorage.getItem("nova_bg_manual_idx") || 0));
-    }).catch(err => toast(err.message, false));
-  }
-});
-
-function applyBg(bg, idx) {
-  localStorage.setItem("nova_bg_manual_idx", String(idx ?? 0));
-  localStorage.setItem("nova_bg_mode", "manual");
-  document.documentElement.style.setProperty("--bg-img", `url(${bg.file})`);
-  syncBgToCache();
-  renderBgPicker(Number(idx ?? 0));
-  toast(`Background: ${bg.label}`);
-}
-
-// Add new background modal
-// We'll use inline UI in the tampilan panel for adding
-function showAddBgForm() {
-  const form = $("#addBgForm");
-  if (form) {
-    form.classList.toggle("hidden");
-    lucide.createIcons();
-  }
-}
-
-// Sync BG_LIST ke localStorage cache biar storefront ikut kebaca
-function syncBgToCache() {
-  try {
-    const cache = JSON.parse(localStorage.getItem("nova_store_cache") || "{}");
-    cache.bg_list = BG_LIST;
-    localStorage.setItem("nova_store_cache", JSON.stringify(cache));
-  } catch(e) {}
-}
-
-$("#addBgBtn")?.addEventListener("click", showAddBgForm);
-
-// Preview pas pilih file
-$("#bgNewFile").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const url = URL.createObjectURL(file);
-  const prev = $("#bgNewPreview");
-  if (prev) {
-    prev.innerHTML = `<img src="${url}" class="w-full h-24 rounded-lg object-cover" />`;
-    prev.classList.remove("hidden");
-  }
-});
-
-$("#bgSaveAddBtn")?.addEventListener("click", async () => {
-  const label = $("#bgNewLabel").value.trim();
-  const fileUrl = $("#bgNewUrl").value.trim();
-  const fileInput = $("#bgNewFile");
-  if (!label) return toast("Nama background wajib", false);
-  if (!fileUrl && (!fileInput.files || !fileInput.files[0])) return toast("Pilih gambar atau masukkan URL", false);
-
-  let file = fileUrl;
-  if (fileInput.files && fileInput.files[0]) {
-    try {
-      const data = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          try {
-            const d = await api("upload_bg_image", { file_data: e.target.result, filename: fileInput.files[0].name });
-            resolve(d.image_url);
-          } catch (err) { reject(err); }
-        };
-        reader.onerror = () => reject(new Error("Gagal baca file"));
-        reader.readAsDataURL(fileInput.files[0]);
-      });
-      file = data;
-    } catch (err) { return toast("Gagal upload: " + err.message, false); }
-  }
-
-  try {
-    await api("bg_save", { id: null, file, label, active: true });
-    toast("Background ditambahkan");
-    $("#bgNewLabel").value = "";
-    $("#bgNewUrl").value = "";
-    $("#bgNewFile").value = "";
-    const prev = $("#bgNewPreview");
-    if (prev) { prev.innerHTML = ""; prev.classList.add("hidden"); }
-    $("#addBgForm").classList.add("hidden");
-    await loadBgList();
-    // Langsung terapkan background baru ini
-    const newIdx = BG_LIST.findIndex(b => b.file === file);
-    if (newIdx >= 0) applyBg(BG_LIST[newIdx], newIdx);
-    else renderBgPicker(Number(localStorage.getItem("nova_bg_manual_idx") || 0));
-  } catch (err) { toast(err.message, false); }
-});
-
-$("#bgCancelAddBtn")?.addEventListener("click", () => {
-  $("#addBgForm").classList.add("hidden");
-});
-
 /* ===================== INIT ===================== */
 $("#refreshBtn").addEventListener("click", async () => { await loadCatalog({ refreshInsights: true }); toast("Data dashboard disinkronkan"); });
 
@@ -812,7 +653,6 @@ function boot() {
   applyAdminBrand();
   loadCatalog({ refreshInsights: true });
   startAutoSync();
-  loadBgList(); // Pre-load bg_list buat panel Tampilan
   // fetch store config → update cache + brand
   fetch("/api/store-config?t=" + Date.now()).then(function(r){return r.json();}).then(function(d){
     if (d && d.name) {

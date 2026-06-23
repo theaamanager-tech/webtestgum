@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id" class="dark" style="background-color:#0D0E10">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Novaciy° — Produk Digital Premium</title>
+  <title>Verdant° — Produk Digital Premium</title>
   <meta name="description" content="Beli produk digital premium dengan QRIS. Pengiriman akun otomatis & instan." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,73 +15,28 @@
       fontFamily: { serif:['"Playfair Display"',"serif"], sans:['"Space Grotesk"',"sans-serif"], weghorst:['"BrightRustic"','"Weghorst"',"sans-serif"] },
     }}};
   </script>
-  <script>
-    // Background rotator — pakai bg_list dari cache
-    (function(){
-      function getBgList() {
-        try {
-          var _c = JSON.parse(localStorage.getItem("nova_store_cache"));
-          if (_c && _c.bg_list && _c.bg_list.length) return _c.bg_list;
-        } catch(e){}
-        return [];
-      }
-      var bgList = getBgList();
-      var bg = bgList[0] || null;
-      if (bg) document.documentElement.style.setProperty("--bg-img", "url(" + bg.file + ")");
-    })();
-  </script>
-  <script>
-    // ⚡ Instant brand — baca dari localStorage SEBELUM render
-    (function(){
-      try {
-        var _c = JSON.parse(localStorage.getItem("nova_store_cache"));
-        if (_c && _c.name) {
-          var _prefix = _c.name.slice(0, 4);
-          var _suffix = _c.name.slice(4).replace(/[°^]/g,'');
-          var _dot = _c.name.includes('°') ? '°' : _c.name.includes('^') ? '^' : '';
-          document.title = _c.name;
-          var _brand = document.querySelector('#sidebar .font-serif');
-          if (_brand) {
-            _brand.innerHTML = _suffix && _dot
-              ? _prefix + '<em class="italic">' + _suffix + '</em><sup class="text-jadebright text-lg">' + _dot + '</sup>'
-              : _c.name;
-          }
-          var _hero = document.getElementById('heroTitle');
-          if (_hero && _c.hero_title) {
-            var _t = _c.hero_title.replace(/<br\s*\/?>/gi, ' ');
-            if (!_t.includes('<em')) {
-              var _parts = _t.split(/,\s*/);
-              if (_parts.length > 1) {
-                var _last = _parts.pop();
-                _t = _parts.join(', ') + ', <em class="italic text-jadebright">' + _last + '</em>';
-              }
-            }
-            _hero.innerHTML = _t;
-          }
-          var _sub = document.getElementById('heroSub');
-          if (_sub && _c.hero_subtitle) _sub.innerHTML = _c.hero_subtitle;
-        }
-      } catch(e){}
-    })();
-  </script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <!-- Background: statis BG1 langsung di body -->
   <style>
     @font-face{font-family:'Weghorst';src:url('/weghorst.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
     @font-face{font-family:'BrightRustic';src:url('/brightrustic.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
-    body{background:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.72)),var(--bg-img,#000) center/cover fixed #0D0E10;background-attachment:fixed;transition:background-image 1.2s ease}
     .glass{background:rgba(15,122,98,.07);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
     .card-in{opacity:0;transform:translateY(14px);transition:.5s cubic-bezier(.2,.7,.2,1)} .card-in.in{opacity:1;transform:none}
     .drawer{transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+    body{background:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.72)),url('https://wfaeesuxuqftmlyeizan.supabase.co/storage/v1/object/public/bg-images/b793c9d5-f879-4368-b76b-db31829d324e-1.webp') center/cover fixed #0D0E10 !important}
+    html{background:#0D0E10 !important}
   </style>
+  <!-- Instant brand dihapus — pakai HTML default (tanpa flash localStorage usang) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
 </head>
 <body class="font-sans text-mint/90 antialiased overflow-x-hidden min-h-screen">
   <div class="grid grid-cols-1 md:grid-cols-[248px_minmax(0,1fr)] min-h-screen">
 
     <!-- ============ SIDEBAR ============ -->
     <aside id="sidebar" class="drawer fixed md:sticky top-0 z-40 h-screen w-[248px] -translate-x-full md:translate-x-0 glass border-r border-mint/10 px-5 py-7 flex flex-col gap-7">
-      <div class="font-serif text-3xl font-semibold tracking-tight">nova<em class="italic">ciy</em><sup class="text-jadebright text-lg">°</sup></div>
+      <div class="font-serif text-3xl font-semibold tracking-tight">Verdant°</div>
       <nav class="flex flex-col gap-1">
         <span class="text-[12px] uppercase tracking-widest text-mint/40 mt-2 mb-1">Menu</span>
         <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-jadebright/10 text-white" href="#"><i data-lucide="layout-dashboard" class="w-[20px]"></i> <span class="text-base">Dashboard</span></a>
@@ -141,9 +96,9 @@
         </div>
       </section>
 
-      <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+      <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"></div>
 
-      <footer class="mt-12 py-6 border-t border-mint/10 text-center text-xs text-mint/30">© Novaciy° · Semua transaksi via QRIS aman.</footer>
+      <footer class="mt-12 py-6 border-t border-mint/10 text-center text-xs text-mint/30">© Verdant° · Semua transaksi via QRIS aman.</footer>
      </div>
     </main>
   </div>
