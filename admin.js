@@ -1,13 +1,13 @@
 /* =====================================================================
- *  NOVACIY° — Admin logic (serverless, key-gated)
+ *  NOVACIYÂ° â€” Admin logic (serverless, key-gated)
  *  All operations go through POST /api/admin with header x-admin-key.
- *  Products • variant stock (bulk) • per-variant SNK • coupons • Pakasir cfg • insights
+ *  Products â€¢ variant stock (bulk) â€¢ per-variant SNK â€¢ coupons â€¢ Pakasir cfg â€¢ insights
  * ===================================================================== */
 const $ = (s, c = document) => c.querySelector(s);
 const $$ = (s, c = document) => [...c.querySelectorAll(s)];
 const CAT_LABEL = { ai: "AI Tools", editing: "Editing", account: "Akun" };
-const rupiah = (n) => (n == null ? "—" : "Rp " + Number(n).toLocaleString("id-ID"));
-function priceRange(vs){const p=vs.map(v=>v.price).filter(v=>v!=null);if(!p.length)return"Chat Admin";const lo=Math.min(...p),hi=Math.max(...p);return lo===hi?rupiah(lo):rupiah(lo)+" – "+rupiah(hi);}
+const rupiah = (n) => (n == null ? "â€”" : "Rp " + Number(n).toLocaleString("id-ID"));
+function priceRange(vs){const p=vs.map(v=>v.price).filter(v=>v!=null);if(!p.length)return"Chat Admin";const lo=Math.min(...p),hi=Math.max(...p);return lo===hi?rupiah(lo):rupiah(lo)+" â€“ "+rupiah(hi);}
 
 let ADMIN_PASSWORD = sessionStorage.getItem("nova_admin_password") || "";
 let CATALOG = [], editingId = null, selectedVariant = null;
@@ -15,7 +15,7 @@ let CATALOG = [], editingId = null, selectedVariant = null;
 /* ===================== API ===================== */
 async function api(action, payload = {}) {
   const body = { action, ...payload };
-  // Semua request kirim password di body (kecuali login — dia yg set password)
+  // Semua request kirim password di body (kecuali login â€” dia yg set password)
   if (action !== "login" && ADMIN_PASSWORD) body.password = ADMIN_PASSWORD;
 
   const r = await fetch("/api/admin", {
@@ -121,7 +121,7 @@ async function loadInsights() {
       <div>
         <div class="flex items-center justify-between text-sm mb-1">
           <span class="text-white">${idx + 1}. ${t.label}</span>
-          <span class="text-mint/50">${t.qty}x · ${rupiah(t.revenue)}</span>
+          <span class="text-mint/50">${t.qty}x Â· ${rupiah(t.revenue)}</span>
         </div>
         <div class="h-2 rounded-full bg-mint/10 overflow-hidden"><div class="h-full bg-jadebright" style="width:${(t.qty / max) * 100}%"></div></div>
       </div>`).join("") : `<p class="text-mint/40 text-sm">Belum ada penjualan.</p>`;
@@ -141,14 +141,14 @@ async function loadRekap(startDate, endDate) {
     $("#rekapTable").innerHTML = (orders || []).length
       ? orders.map(o => `
         <tr class="border-b border-mint/5 hover:bg-mint/[.03]">
-          <td class="p-3 text-xs font-mono text-mint/60">${o.order_id ? o.order_id.slice(0, 12) : '—'}</td>
-          <td class="p-3 text-white">${o.product_name || '—'}</td>
-          <td class="p-3 text-mint/60">${o.variant_name || '—'}</td>
+          <td class="p-3 text-xs font-mono text-mint/60">${o.order_id ? o.order_id.slice(0, 12) : 'â€”'}</td>
+          <td class="p-3 text-white">${o.product_name || 'â€”'}</td>
+          \1<td class="p-3 text-mint/60 text-xs">${o.buyer_contact ? o.buyer_contact.slice(0,25) : "â€”"}</td>
           <td class="p-3">${statusBadge(o.status)}</td>
           <td class="p-3 text-right font-mono text-white">${rupiah(o.amount)}</td>
-          <td class="p-3 text-right text-mint/40 text-xs">${o.created_at ? new Date(o.created_at).toLocaleDateString('id-ID') : '—'}</td>
+          <td class="p-3 text-right text-mint/40 text-xs">${o.created_at ? new Date(o.created_at).toLocaleDateString('id-ID') : 'â€”'}</td>
         </tr>`).join("")
-      : `<tr><td colspan="6" class="p-8 text-center text-mint/40">Belum ada pesanan.</td></tr>`;
+      : `<tr><td colspan="7" class="p-8 text-center text-mint/40">Belum ada pesanan.</td></tr>`;
     lucide.createIcons();
   } catch (e) { toast(e.message, false); }
 }
@@ -301,7 +301,7 @@ $("#modalSave").addEventListener("click", async () => {
   const productId = editingId || slugify(name);
   const product = { id: productId, name, cat: $("#fCat").value, subtitle: $("#fSubtitle").value.trim(), initials: $("#fInitials").value.trim() || name.slice(0,2).toUpperCase(), active: $("#fActive").checked };
 
-  // Upload gambar jika ada — tapi jangan block simpan produk
+  // Upload gambar jika ada â€” tapi jangan block simpan produk
   const fileInput = $("#fImageUpload");
   const imageUrlManual = $("#fImageUrl").value.trim();
 
@@ -311,7 +311,7 @@ $("#modalSave").addEventListener("click", async () => {
       product.image_url = imgUrl;
     } catch (e) {
       toast("Gambar gagal diupload, produk tetap disimpan tanpa gambar: " + e.message, false);
-      // Jangan return — lanjutkan simpan produk
+      // Jangan return â€” lanjutkan simpan produk
     }
   } else if (imageUrlManual) {
     product.image_url = imageUrlManual;
@@ -353,7 +353,7 @@ function renderVariantPicker() {
             <i data-lucide="${open ? 'chevron-down' : 'chevron-right'}" class="w-4 text-mint/40 transition"></i>
           </button>
           <div class="flex flex-col gap-1 px-2 pb-2 ${open ? '' : 'hidden'}">
-            ${g.variants.map(v => `<button class="vpick text-left rounded-xl px-3 py-2 border ${selectedVariant===v.id?'border-jadebright bg-jadebright/10 text-white':'border-transparent text-mint/70 hover:bg-mint/5'}" data-vid="${v.id}"><span class="text-sm">${v.name}</span> <span class="text-xs opacity-70">· stok ${v.available}</span></button>`).join('')}
+            ${g.variants.map(v => `<button class="vpick text-left rounded-xl px-3 py-2 border ${selectedVariant===v.id?'border-jadebright bg-jadebright/10 text-white':'border-transparent text-mint/70 hover:bg-mint/5'}" data-vid="${v.id}"><span class="text-sm">${v.name}</span> <span class="text-xs opacity-70">Â· stok ${v.available}</span></button>`).join('')}
           </div>
         </div>`;
       }).join('')
@@ -385,7 +385,7 @@ async function renderStockManager() {
     box.innerHTML = `
       <div class="glass border border-mint/10 rounded-2xl p-5 mb-4">
         <div class="flex items-center justify-between gap-3 mb-4">
-          <div><h3 class="text-white font-semibold">${variant.product_name} — ${variant.name}</h3></div>
+          <div><h3 class="text-white font-semibold">${variant.product_name} â€” ${variant.name}</h3></div>
           <span class="text-xs bg-jadebright/10 text-jadebright border border-jadebright/30 rounded-full px-3 py-1">${variant.available} tersedia</span>
         </div>
         <label class="text-sm font-semibold text-white flex items-center gap-2 mb-2"><i data-lucide="upload" class="w-4 text-jadebright"></i> Tambah Stok (1 baris = 1 unit)</label>
@@ -442,7 +442,7 @@ async function loadCoupons() {
   try {
     const { coupons } = await api("list_coupons");
     $("#couponList").innerHTML = coupons.map(c => `<div class="glass border border-mint/10 rounded-xl p-3 flex items-center gap-3">
-      <div class="flex-1"><b class="text-white">${c.code}</b><p class="text-xs text-mint/45">${c.type} · ${c.value}${c.type==='percent'?'%':' rupiah'} · ${c.active?'aktif':'nonaktif'}</p></div>
+      <div class="flex-1"><b class="text-white">${c.code}</b><p class="text-xs text-mint/45">${c.type} Â· ${c.value}${c.type==='percent'?'%':' rupiah'} Â· ${c.active?'aktif':'nonaktif'}</p></div>
       <button class="del-coupon text-red-300 p-2 hover:bg-red-400/10 rounded-lg" data-id="${c.id}"><i data-lucide="trash" class="w-4"></i></button>
     </div>`).join("") || `<p class="text-sm text-mint/40">Belum ada kupon.</p>`;
     lucide.createIcons();
@@ -497,7 +497,7 @@ $("#testTelegramBtn").addEventListener("click", async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         chat_id: chatId,
-        text: "✅ <b>Novaciy° — Test Notifikasi</b>\nBot Telegram berfungsi dengan baik!",
+        text: "âœ… <b>NovaciyÂ° â€” Test Notifikasi</b>\nBot Telegram berfungsi dengan baik!",
         parse_mode: "HTML",
       }),
     });
@@ -639,12 +639,12 @@ function applyAdminBrand() {
     var c = JSON.parse(localStorage.getItem("nova_store_cache"));
     if (!c || !c.name) return;
     var prefix = c.name.slice(0, 4);
-    var suffix = c.name.slice(4).replace(/[°^]/g, '');
-    var dot = c.name.includes('°') ? '°' : c.name.includes('^') ? '^' : '';
+    var suffix = c.name.slice(4).replace(/[Â°^]/g, '');
+    var dot = c.name.includes('Â°') ? 'Â°' : c.name.includes('^') ? '^' : '';
     var html = suffix && dot
       ? prefix + '<em class="italic">' + suffix + '</em><sup class="text-jadebright">' + dot + '</sup>'
       : c.name;
-    document.title = c.name + " — Admin";
+    document.title = c.name + " â€” Admin";
     var els = document.querySelectorAll('#sidebar .font-serif, #gateBrand');
     for (var i = 0; i < els.length; i++) els[i].innerHTML = html;
   } catch(e){}
@@ -658,7 +658,7 @@ function boot() {
   applyAdminBrand();
   loadCatalog({ refreshInsights: true });
   startAutoSync();
-  // fetch store config → update cache + brand
+  // fetch store config â†’ update cache + brand
   fetch("/api/store-config?t=" + Date.now()).then(function(r){return r.json();}).then(function(d){
     if (d && d.name) {
       localStorage.setItem("nova_store_cache", JSON.stringify(d));

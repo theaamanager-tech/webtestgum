@@ -67,7 +67,7 @@ export default async function handler(req, res) {
       order_id: orderId, variant_id, product_name: variant.products?.name || "",
       variant_name: variant.name, unit_price: variant.price, discount, amount,
       quantity: qty, coupon_code: couponCode, status: "pending", payment_method: "qris",
-      qr_string: payment.payment_number, buyer_contact: contact || "",
+      qr_string: payment.payment_number, buyer_contact: contact || "", buyer_note: note || "",
     });
 
     return res.status(200).json({
